@@ -4,7 +4,6 @@
       <div v-if="plate" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60" @click="$emit('close')" />
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
-          <!-- Botón cerrar -->
           <button
             @click="$emit('close')"
             class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl"
@@ -12,13 +11,11 @@
             ✕
           </button>
 
-          <!-- Canvas para mostrar recorte -->
           <canvas
             ref="cropCanvas"
             class="w-full rounded-lg mb-4 bg-gray-100 dark:bg-gray-700"
           />
 
-          <!-- Texto de matrícula -->
           <div class="text-center mb-4">
             <p class="text-4xl font-mono font-bold text-gray-800 dark:text-white mb-2">
               {{ plate.plateText.text }}
@@ -28,7 +25,6 @@
             </p>
           </div>
 
-          <!-- Barras de confianza por carácter -->
           <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
             <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-3">Confianza por carácter</p>
             <div class="flex gap-2 justify-center">
@@ -55,13 +51,11 @@
             </div>
           </div>
 
-          <!-- Metadatos -->
           <div class="text-xs text-gray-500 dark:text-gray-400 mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <p><strong>ID:</strong> {{ plate.id }}</p>
             <p><strong>Detectado:</strong> {{ new Date(plate.timestamp).toLocaleString() }}</p>
           </div>
 
-          <!-- Botón cerrar -->
           <button
             @click="$emit('close')"
             class="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors"
@@ -74,32 +68,31 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watchEffect } from 'vue'
+import type { PlateRecord } from '@/types/detection'
 
-const props = defineProps({
-  plate: {
-    type: Object,
-    default: null
-  }
-})
+const props = defineProps<{
+  plate: PlateRecord | null
+}>()
 
-const emit = defineEmits(['close'])
-const cropCanvas = ref(null)
+defineEmits<{
+  close: []
+}>()
+
+const cropCanvas = ref<HTMLCanvasElement | null>(null)
 
 watchEffect(() => {
   if (props.plate?.croppedImage && cropCanvas.value) {
     const canvas = cropCanvas.value
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d')!
 
-    // Obtener dimensiones del ImageBitmap
     const width = props.plate.croppedImage.width
     const height = props.plate.croppedImage.height
 
     canvas.width = width
     canvas.height = height
 
-    // Dibujar el recorte en el canvas
     ctx.drawImage(props.plate.croppedImage, 0, 0)
   }
 })

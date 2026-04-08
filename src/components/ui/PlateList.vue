@@ -2,7 +2,7 @@
   <div class="w-full max-w-2xl mx-auto mt-6">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Matrículas Detectadas</h2>
-      <button 
+      <button
         @click="plateStore.clearPlates()"
         class="text-sm text-red-500 hover:text-red-700 transition-colors"
       >
@@ -14,9 +14,9 @@
       <p class="text-gray-500 dark:text-gray-400">No hay detecciones recientes</p>
     </div>
 
-    <transition-group 
-      tag="div" 
-      name="list" 
+    <transition-group
+      tag="div"
+      name="list"
       class="space-y-2"
     >
       <div
@@ -37,8 +37,8 @@
             </span>
           </div>
         </div>
-        
-        <button 
+
+        <button
           class="p-2 text-gray-400 hover:text-blue-500 transition-colors"
           @click="viewDetails(plate)"
         >
@@ -54,15 +54,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
+import type { PlateRecord } from '@/types/detection'
 import PlateModal from './PlateModal.vue'
 
 const plateStore = usePlateStore()
-const selectedPlate = ref(null)
+const selectedPlate = ref<PlateRecord | null>(null)
 
-const viewDetails = (plate) => {
+const viewDetails = (plate: PlateRecord) => {
   selectedPlate.value = plate
 }
 </script>

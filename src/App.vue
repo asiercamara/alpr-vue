@@ -53,7 +53,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import CameraPreview from '@/components/ui/CameraPreview.vue'
 import PlateList from '@/components/ui/PlateList.vue'
 </script>

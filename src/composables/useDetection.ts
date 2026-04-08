@@ -1,33 +1,35 @@
-import { ref } from 'vue'
+import { ref, markRaw } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
-import { evaluatePlateQuality } from '@/composables/useValidation'
-import { addPlateDetection } from '@/utils/plateStorage'
+import { useAppStore } from '@/stores/appStore'
+import { evaluatePlateQuality } from '@/utils/validation'
+import type { DetectionBox } from '@/types/detection'
 
-// Singleton: un solo worker por módulo JS, compartido entre useCamera y useImage
-let _worker = null
+let _worker: Worker | null = null
 const _modelReady = ref(false)
 const _modelFailed = ref(false)
 const _isProcessing = ref(false)
-let _onBoxesCallback = null
+let _onBoxesCallbacks: Array<(data: DetectionBox[]) => void> = []
 
-function getWorker() {
+function getWorker(): Worker {
   if (_worker) return _worker
 
   _worker = new Worker(
     new URL('../workers/mainWorker.js', import.meta.url),
-    { type: 'module' }
+    { type: 'module' },
   )
 
-  _worker.onmessage = (event) => {
+  _worker.onmessage = (event: MessageEvent) => {
     const data = event.data
 
     if (data?.status === 'model_ready') {
       _modelReady.value = true
+      try { useAppStore().setModelReady() } catch {}
       return
     }
 
     if (data?.status === 'model_failed') {
       _modelFailed.value = true
+      try { useAppStore().setModelError('No se pudo cargar el modelo de detección') } catch {}
       return
     }
 
@@ -39,7 +41,7 @@ function getWorker() {
 
     if (Array.isArray(data)) {
       _isProcessing.value = false
-      _onBoxesCallback?.(data)
+      _onBoxesCallbacks.forEach(cb => cb(data))
     }
   }
 
@@ -50,7 +52,7 @@ export function useDetection() {
   const plateStore = usePlateStore()
   const worker = getWorker()
 
-  const processFrame = async (imageBitmap) => {
+  const processFrame = async (imageBitmap: ImageBitmap): Promise<void> => {
     if (!_modelReady.value || _isProcessing.value) {
       imageBitmap.close()
       return
@@ -59,14 +61,19 @@ export function useDetection() {
     worker.postMessage({ imageBitmap }, [imageBitmap])
   }
 
-  const onBoxes = (callback) => {
-    _onBoxesCallback = callback
+  const onBoxes = (callback: (data: DetectionBox[]) => void): () => void => {
+    _onBoxesCallbacks.push(callback)
+    return () => { _onBoxesCallbacks = _onBoxesCallbacks.filter(cb => cb !== callback) }
   }
 
-  const drawBoxesAndUpdate = (canvas, boxes, mode, stopCallback) => {
+  const drawBoxesAndUpdate = (
+    canvas: HTMLCanvasElement,
+    boxes: DetectionBox[],
+    stopCallback?: () => void,
+  ): void => {
     if (!boxes?.length) return
 
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d')!
     ctx.strokeStyle = '#00FF00'
     ctx.lineWidth = 3
     ctx.font = '18px monospace'
@@ -92,27 +99,19 @@ export function useDetection() {
       const quality = evaluatePlateQuality({ ...box, confidenceMean: confMean })
       if (!quality.isValid) continue
 
-      const result = addPlateDetection({
+      const shouldStop = plateStore.addPlate({
+        id: `plate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         text: box.plateText.text,
         confidence: confMean,
-        croppedImage: box.croppedImage,
+        croppedImage: box.croppedImage ? markRaw(box.croppedImage) : null,
         boundingBox: { x1, y1, x2, y2 },
-        plateText: box.plateText
+        plateText: box.plateText,
+        timestamp: new Date(),
       })
 
-      if (result === true) {
+      if (shouldStop === true) {
         stopCallback?.()
         return
-      }
-
-      if (result?.id) {
-        plateStore.addPlate({
-          id: result.id,
-          plateText: box.plateText,
-          confidence: confMean,
-          croppedImage: box.croppedImage,
-          timestamp: result.timestamp
-        })
       }
     }
   }
@@ -123,6 +122,6 @@ export function useDetection() {
     isProcessing: _isProcessing,
     processFrame,
     onBoxes,
-    drawBoxesAndUpdate
+    drawBoxesAndUpdate,
   }
 }
