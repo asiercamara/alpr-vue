@@ -199,6 +199,8 @@ export const usePlateStore = defineStore('plateStore', () => {
 
   return {
     plates,
+    plateGroups,
+    consecutiveDetections,
     currentMode,
     bestDetections,
     addPlate,
