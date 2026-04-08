@@ -10,7 +10,7 @@
 import * as ort from "onnxruntime-web";
 import yoloModelUrl from '/models/yolo-v9-t-384-license-plates-end2end.onnx?url';
 import ocrModelUrl from '/models/european_mobile_vit_v2_ocr.onnx?url';
-import ocrConfig from '../models/european_mobile_vit_v2_ocr_config.json' assert { type: 'json' };
+import ocrConfig from '../models/european_mobile_vit_v2_ocr_config.json' with { type: 'json' };
 
 /**
  * @constant {number} MODEL_SIZE - Tamaño de entrada del modelo (ancho y alto en píxeles).

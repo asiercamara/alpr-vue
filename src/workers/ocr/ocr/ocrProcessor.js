@@ -5,10 +5,10 @@
  */
 
 import * as ort from "onnxruntime-web";
-import { ocrModel } from '../modelsLoader.js';
+import { ocrModel } from '../../modelsLoader.js';
 import { preprocessImage, createInputTensor } from './imageProcessor.js';
 import { postprocessOutput } from './textProcessor.js';
-import ocrConfig from '../../models/european_mobile_vit_v2_ocr_config.json' assert { type: 'json' };
+import ocrConfig from '../../../models/european_mobile_vit_v2_ocr_config.json' with { type: 'json' };
 
 /**
  * Reconoce el texto de una placa de matrícula usando OCR.

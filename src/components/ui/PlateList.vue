@@ -19,10 +19,10 @@
       name="list" 
       class="space-y-2"
     >
-      <div 
-        v-for="plate in plateStore.plates" 
+      <div
+        v-for="plate in plateStore.plates"
         :key="plate.id"
-        class="flex items-center justify-between p-4 bg-white dark:bg-gray_800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+        class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
       >
         <div class="flex items-center gap-4">
           <div class="text-lg font-mono font-bold text-blue-600 dark:text-blue-400">
@@ -49,16 +49,21 @@
         </button>
       </div>
     </transition-group>
+
+    <PlateModal :plate="selectedPlate" @close="selectedPlate = null" />
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
+import PlateModal from './PlateModal.vue'
 
 const plateStore = usePlateStore()
+const selectedPlate = ref(null)
 
 const viewDetails = (plate) => {
-  console.log('Detalles de la matrícula:', plate)
+  selectedPlate.value = plate
 }
 </script>
 

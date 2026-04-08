@@ -52,8 +52,5 @@ const IconStop = { template: '<svg viewBox="0 0 24 24" fill="currentColor"><path
 </script>
 
 <style scoped>
-/* Using class-based selectors as per project conventions */
-.video-container {
-  @apply relative overflow-hidden rounded-lg bg-black transition-all duration-300;
-}
+/* Tailwind v4 handles all styling via class directives */
 </style>

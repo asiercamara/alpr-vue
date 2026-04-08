@@ -1,33 +1,32 @@
 import { ref, onUnmounted } from 'vue'
-import { usePlateStore } from '@/stores/plateStore'
+import { useDetection } from './useDetection'
+import { appState } from '@/utils/config'
 
 export function useCamera() {
   const videoRef = ref(null)
   const canvasRef = ref(null)
   const isCameraActive = ref(false)
-  const isProcessing = ref(false)
-  const plateStore = usePlateStore()
-  
+
   let stream = null
   let intervalId = null
-  let worker = null
+  let lastBoxes = []
 
-  // Initialize worker access (assuming worker is globally available or we can import it)
-  // For now, we'll assume the worker is initialized in the main application setup
-  
+  const { modelReady, processFrame, onBoxes, drawBoxesAndUpdate } = useDetection()
+
+  onBoxes((boxes) => {
+    lastBoxes = boxes
+  })
+
   const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop())
-      stream = null
-    }
-    if (intervalId) {
-      clearInterval(intervalId)
-      intervalId = null
-    }
+    clearInterval(intervalId)
+    intervalId = null
+    stream?.getTracks().forEach(t => t.stop())
+    stream = null
     isCameraActive.value = false
-    isProcessing.value = false
     const ctx = canvasRef.value?.getContext('2d')
-    ctx?.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
+    if (ctx && canvasRef.value) {
+      ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
+    }
   }
 
   const startCamera = async () => {
@@ -39,41 +38,38 @@ export function useCamera() {
       stream = await navigator.mediaDevices.getUserMedia(constraints)
       if (videoRef.value) {
         videoRef.value.srcObject = stream
+        await videoRef.value.play()
         isCameraActive.value = true
-        isProcessing.value = true
-        
-        videoRef.value.onloadedmetadata = () => {
-          videoRef.value.play()
-          setupProcessingLoop()
-        }
+        appState.currentMode = 'camera'
+
+        intervalId = setInterval(async () => {
+          const video = videoRef.value
+          const canvas = canvasRef.value
+          if (!video || !canvas || video.readyState < 2) return
+
+          canvas.width = video.videoWidth
+          canvas.height = video.videoHeight
+          const ctx = canvas.getContext('2d')
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+          if (lastBoxes.length) {
+            drawBoxesAndUpdate(canvas, lastBoxes, 'camera', stopCamera)
+          }
+
+          if (modelReady.value) {
+            try {
+              const bitmap = await createImageBitmap(video)
+              await processFrame(bitmap)
+            } catch (err) {
+              console.error('Error in processFrame:', err)
+            }
+          }
+        }, 20)
       }
     } catch (err) {
       console.error('Error accessing camera:', err)
       throw err
     }
-  }
-
-  const setupProcessingLoop = () => {
-    if (!videoRef.value || !canvasRef.value) return
-    
-    intervalId = setInterval(async () => {
-      if (!isProcessing.value || !videoRef.value) return
-
-      const video = videoRef.value
-      const canvas = canvasRef.value
-      const ctx = canvas.getContext('2d')
-
-      if (video.readyState >= 2) {
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-        // In a real implementation, we'd call the worker here
-        // For now, we placeholder the logic to keep the loop running
-        // const imageBitmap = await createImageBitmap(canvas)
-        // worker.postMessage({ imageBitmap }, [imageBitmap])
-      }
-    }, 100)
   }
 
   onUnmounted(() => {
@@ -84,7 +80,7 @@ export function useCamera() {
     videoRef,
     canvasRef,
     isCameraActive,
-    isProcessing,
+    modelReady,
     startCamera,
     stopCamera
   }

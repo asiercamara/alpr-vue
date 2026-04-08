@@ -11,9 +11,9 @@
  * @module ocrProcessor - Realiza el reconocimiento óptico de caracteres en las matrículas detectadas.
  */
 import { initializeModels } from './modelsLoader.js';
-import { prepare_input } from './detector/imageProcessor.js';
-import { run_model, process_output_boxes } from './detector/detectionProcessor.js';
-import { recognizePlateText } from './ocr/ocrProcessor.js';
+import { prepare_input } from './detector/detector/imageProcessor.js';
+import { run_model, process_output_boxes } from './detector/detector/detectionProcessor.js';
+import { recognizePlateText } from './ocr/ocr/ocrProcessor.js';
 
 /**
  * Inicia el proceso de carga y warmup de los modelos de IA inmediatamente.

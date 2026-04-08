@@ -4,7 +4,7 @@
  * por el modelo de detección yolo-v9.
  */
 
-import { MODEL_SIZE } from '../modelsLoader.js';
+import { MODEL_SIZE } from '../../modelsLoader.js';
 
 /**
  * Prepara una imagen para ser procesada por la red neuronal del sistema ALPR.

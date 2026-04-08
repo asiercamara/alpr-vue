@@ -5,7 +5,7 @@
  */
 
 import * as ort from "onnxruntime-web";
-import { modelYolov9, modelInputShape, yolo_classes } from '../modelsLoader.js';
+import { modelYolov9, modelInputShape, yolo_classes } from '../../modelsLoader.js';
 import { nonMaxSuppression } from './boundingBoxUtils.js';
 import { cropImage } from './imageProcessor.js';
 
