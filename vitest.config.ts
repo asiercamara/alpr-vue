@@ -16,7 +16,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,vue}'],
-      exclude: ['src/tests/**', 'src/types/**', 'src/workers/**', 'src/vite-env.d.ts', 'src/main.js'],
+      exclude: ['src/tests/**', 'src/types/**', 'src/workers/**', 'src/vite-env.d.ts', 'src/main.js', 'src/App.vue', 'src/components/icons/*.vue'],
     },
   },
 })

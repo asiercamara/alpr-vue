@@ -1,15 +1,16 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 const mockStartCamera = vi.fn()
 const mockStopCamera = vi.fn()
+const mockIsCameraActive = ref(false)
 
 vi.mock('@/composables/useCamera', () => ({
   useCamera: () => ({
     videoRef: ref(null),
     canvasRef: ref(null),
-    isCameraActive: ref(false),
+    isCameraActive: mockIsCameraActive,
     isProcessing: ref(false),
     modelReady: ref(true),
     startCamera: mockStartCamera,
@@ -41,6 +42,7 @@ describe('CameraPreview', () => {
     mockAppState.cameraError = null
     mockAppState.modelError = null
     mockAppState.isModelLoading = false
+    mockIsCameraActive.value = false
     mockStartCamera.mockClear()
     mockStopCamera.mockClear()
   })
@@ -48,12 +50,7 @@ describe('CameraPreview', () => {
   it('shows camera error overlay', () => {
     mockAppState.cameraError = 'Permiso denegado'
     const wrapper = mount(CameraPreview, {
-      global: {
-        stubs: {
-          IconPlay: { template: '<svg/>' },
-          IconStop: { template: '<svg/>' },
-        },
-      },
+      global: { stubs: { IconPlay: { template: '<svg/>' }, IconStop: { template: '<svg/>' } } },
     })
     expect(wrapper.text()).toContain('Error de cámara')
     expect(wrapper.text()).toContain('Permiso denegado')
@@ -62,25 +59,24 @@ describe('CameraPreview', () => {
   it('shows model loading spinner', () => {
     mockAppState.isModelLoading = true
     const wrapper = mount(CameraPreview, {
-      global: {
-        stubs: {
-          IconPlay: { template: '<svg/>' },
-          IconStop: { template: '<svg/>' },
-        },
-      },
+      global: { stubs: { IconPlay: { template: '<svg/>' }, IconStop: { template: '<svg/>' } } },
     })
     expect(wrapper.text()).toContain('Cargando modelo')
+  })
+
+  it('shows camera off overlay when inactive and no errors', () => {
+    mockAppState.cameraError = null
+    mockAppState.isModelLoading = false
+    const wrapper = mount(CameraPreview, {
+      global: { stubs: { IconPlay: { template: '<svg/>' }, IconStop: { template: '<svg/>' } } },
+    })
+    expect(wrapper.text()).toContain('Cámara desactivada')
   })
 
   it('shows retry button on error', () => {
     mockAppState.cameraError = 'Permiso denegado'
     const wrapper = mount(CameraPreview, {
-      global: {
-        stubs: {
-          IconPlay: { template: '<svg/>' },
-          IconStop: { template: '<svg/>' },
-        },
-      },
+      global: { stubs: { IconPlay: { template: '<svg/>' }, IconStop: { template: '<svg/>' } } },
     })
     expect(wrapper.text()).toContain('Reintentar')
   })
@@ -88,17 +84,22 @@ describe('CameraPreview', () => {
   it('calls startCamera when retry button is clicked', async () => {
     mockAppState.cameraError = 'Permiso denegado'
     const wrapper = mount(CameraPreview, {
-      global: {
-        stubs: {
-          IconPlay: { template: '<svg/>' },
-          IconStop: { template: '<svg/>' },
-        },
-      },
+      global: { stubs: { IconPlay: { template: '<svg/>' }, IconStop: { template: '<svg/>' } } },
     })
-    const buttons = wrapper.findAll('button')
-    const retryBtn = buttons.find(b => b.text().includes('Reintentar'))
+    const retryBtn = wrapper.findAll('button').find(b => b.text().includes('Reintentar'))
     if (retryBtn) {
       await retryBtn.trigger('click')
+      expect(mockStartCamera).toHaveBeenCalled()
+    }
+  })
+
+  it('calls startCamera when toggle button is clicked (camera inactive)', async () => {
+    const wrapper = mount(CameraPreview, {
+      global: { stubs: { IconPlay: { template: '<svg/>' }, IconStop: { template: '<svg/>' } } },
+    })
+    const toggleBtn = wrapper.findAll('button').find(b => !b.text().includes('Reintentar'))
+    if (toggleBtn) {
+      await toggleBtn.trigger('click')
       expect(mockStartCamera).toHaveBeenCalled()
     }
   })

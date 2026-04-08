@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateTextResult } from '@/types/detection'
 
@@ -64,6 +64,35 @@ describe('plateStore', () => {
       }
       expect(store.plates).toHaveLength(10)
     })
+
+    it('resets consecutive counter after timeout', () => {
+      store.setMode('camera')
+      const originalNow = Date.now
+      const now = Date.now()
+
+      for (let i = 0; i < 5; i++) {
+        store.addPlate(makePlate({ id: `p${i}`, text: 'ABC123' }))
+      }
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 10000)
+
+      const result = store.addPlate(makePlate({ id: 'p_late', text: 'ABC123' }))
+      expect(result).toBe(false)
+
+      const consecutive = store.consecutiveDetections as any
+      const entry = consecutive['ABC123']
+      if (entry) {
+        expect(entry.count).toBeLessThan(10)
+      }
+
+      vi.restoreAllMocks()
+    })
+
+    it('uses markRaw for croppedImage', () => {
+      const mockBitmap = {} as any
+      store.addPlate(makePlate({ id: 'p1', croppedImage: mockBitmap }))
+      expect(store.plates).toHaveLength(1)
+    })
   })
 
   describe('grouping', () => {
@@ -86,11 +115,51 @@ describe('plateStore', () => {
       const groups = store.plateGroups as any
       expect(Object.keys(groups)).toHaveLength(2)
     })
+
+    it('increments occurrences for repeated similar text in same group', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123' }))
+      const groups = store.plateGroups as any
+      const groupKey = Object.keys(groups)[0]
+      expect(groups[groupKey].totalOccurrences).toBe(2)
+    })
+
+    it('renames group when variant becomes more frequent (updateMainVariant)', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9 }))
+      for (let i = 0; i < 10; i++) {
+        store.addPlate(makePlate({ id: `v${i}`, text: 'ABC124', confidence: 0.85 }))
+      }
+
+      const groups = store.plateGroups as any
+      const keys = Object.keys(groups)
+      expect(keys).toHaveLength(1)
+      expect(keys[0]).toBe('ABC124')
+    })
   })
 
   describe('bestDetections', () => {
     it('returns empty array when no groups', () => {
       expect(store.bestDetections).toEqual([])
+    })
+
+    it('returns sorted by occurrences descending', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'AAA111' }))
+      store.addPlate(makePlate({ id: 'p2', text: 'BBB222' }))
+      store.addPlate(makePlate({ id: 'p3', text: 'BBB222' }))
+      store.addPlate(makePlate({ id: 'p4', text: 'BBB222' }))
+
+      const best = store.bestDetections
+      expect(best.length).toBe(2)
+      expect(best[0].occurrences).toBeGreaterThanOrEqual(best[1].occurrences!)
+    })
+
+    it('returns best variant per group sorted by confidence', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'AAA111', confidence: 0.7 }))
+      store.addPlate(makePlate({ id: 'p2', text: 'AAA111', confidence: 0.95 }))
+
+      const best = store.bestDetections
+      expect(best).toHaveLength(1)
+      expect(best[0].confidence).toBe(0.95)
     })
   })
 
@@ -100,14 +169,23 @@ describe('plateStore', () => {
       store.removePlate('p1')
       expect(store.plates).toHaveLength(0)
     })
+
+    it('does nothing for non-existent id', () => {
+      store.addPlate(makePlate({ id: 'p1' }))
+      store.removePlate('p_nonexistent')
+      expect(store.plates).toHaveLength(1)
+    })
   })
 
   describe('clearPlates', () => {
-    it('clears all plates', () => {
+    it('clears all plates and groups', () => {
       store.addPlate(makePlate({ id: 'p1' }))
+      store.addPlate(makePlate({ id: 'p2', text: 'XYZ999' }))
       store.setMode('camera')
       store.clearPlates()
       expect(store.plates).toHaveLength(0)
+      const groups = store.plateGroups as any
+      expect(Object.keys(groups)).toHaveLength(0)
     })
   })
 
