@@ -73,7 +73,7 @@ export const usePlateStore = defineStore('plateStore', () => {
   }): boolean {
     if (plates.value.find(p => p.id === plate.id)) return false
 
-    const id = plate.id || `plate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const id = plate.id || `plate_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
     const detectionObj: PlateRecord = {
       id,
       text: plate.text,

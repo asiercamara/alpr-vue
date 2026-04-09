@@ -85,7 +85,8 @@ const cropCanvas = ref<HTMLCanvasElement | null>(null)
 watchEffect(() => {
   if (props.plate?.croppedImage && cropCanvas.value) {
     const canvas = cropCanvas.value
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
     const width = props.plate.croppedImage.width
     const height = props.plate.croppedImage.height

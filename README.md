@@ -85,7 +85,7 @@ alpr_vue/
 │       ├── european_mobile_vit_v2_ocr_config.yaml
 │       └── yolo-v9-t-384-license-plates-end2end.onnx
 └── src/
-    ├── main.js                         # App entry (creates Vue + Pinia)
+    ├── main.ts                         # App entry (creates Vue + Pinia)
     ├── App.vue                         # Root component (responsive grid layout)
     ├── assets/
     │   └── main.css                    # Tailwind CSS v4 import
@@ -108,7 +108,8 @@ alpr_vue/
     ├── types/
     │   └── detection.ts               # TypeScript interfaces & types
     ├── utils/
-    │   └── validation.ts              # Levenshtein similarity & plate quality evaluation
+    │   ├── validation.ts              # Levenshtein similarity & plate quality evaluation
+    │   └── feedback.ts                # Audio beep & vibration feedback on plate confirmation
     └── workers/
         ├── mainWorker.js              # Worker entry: loads models & processes frames
         ├── modelsLoader.js            # ONNX model loader with warmup
@@ -132,7 +133,7 @@ alpr_vue/
 4. **Region Extraction**: Detected plate regions are cropped from the frame
 5. **OCR**: MobileViT v2 recognizes text from cropped regions
 6. **Result Display**: Bounding boxes drawn on canvas; valid plates stored in Pinia store
-7. **Auto-stop**: Camera stops after 10 consecutive stable detections
+7. **Auto-stop**: Camera stops after a plate is confirmed — 3 seconds of continuous detection (or 1 second for high-confidence detections with mean ≥ 0.8)
 
 ### Main Components
 
@@ -141,7 +142,7 @@ alpr_vue/
 The UI is built with **Vue 3** using `<script setup>` and TypeScript. State management uses **Pinia** with two stores:
 
 - **`appStore`**: Tracks camera errors, model loading state, and model errors.
-- **`plateStore`**: Manages detected plates, groups similar plates using Levenshtein distance (threshold 0.8), and tracks consecutive detections for auto-stop logic.
+- **`plateStore`**: Manages detected plates, groups similar plates using Levenshtein distance (threshold 0.8), and implements time-based confirmation logic: a plate is confirmed after 3 seconds of continuous detection, or 1 second if mean character confidence ≥ 0.8.
 
 #### Composables
 

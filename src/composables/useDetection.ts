@@ -102,7 +102,8 @@ export function useDetection() {
   ): void => {
     if (!boxes?.length) return
 
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
     ctx.strokeStyle = '#00FF00'
     ctx.lineWidth = 3
     ctx.font = '18px monospace'
@@ -136,7 +137,7 @@ export function useDetection() {
     if (!quality.isValid) return
 
     const shouldStop = plateStore.addPlate({
-      id: `plate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `plate_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       text: longestBox.plateText.text,
       confidence: confMean,
       croppedImage: longestBox.croppedImage ? markRaw(longestBox.croppedImage) : null,

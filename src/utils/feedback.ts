@@ -1,6 +1,10 @@
+declare global {
+  interface Window { webkitAudioContext?: typeof AudioContext }
+}
+
 export function playBeep(): void {
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    const AudioCtx = window.AudioContext ?? window.webkitAudioContext
     if (!AudioCtx) return
 
     const ctx = new AudioCtx()

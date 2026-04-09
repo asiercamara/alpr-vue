@@ -85,7 +85,7 @@ alpr_vue/
 │       ├── european_mobile_vit_v2_ocr_config.yaml
 │       └── yolo-v9-t-384-license-plates-end2end.onnx
 └── src/
-    ├── main.js                         # Entrada de la app (crea Vue + Pinia)
+    ├── main.ts                         # Entrada de la app (crea Vue + Pinia)
     ├── App.vue                         # Componente raíz (layout grid responsive)
     ├── assets/
     │   └── main.css                    # Import de Tailwind CSS v4
@@ -108,7 +108,8 @@ alpr_vue/
     ├── types/
     │   └── detection.ts               # Interfaces y tipos TypeScript
     ├── utils/
-    │   └── validation.ts              # Similitud Levenshtein y evaluación de calidad
+    │   ├── validation.ts              # Similitud Levenshtein y evaluación de calidad
+    │   └── feedback.ts                # Pitido de audio y vibración al confirmar una matrícula
     └── workers/
         ├── mainWorker.js              # Entrada del Worker: carga modelos y procesa frames
         ├── modelsLoader.js            # Cargador de modelos ONNX con calentamiento
@@ -132,7 +133,7 @@ alpr_vue/
 4. **Extracción de Regiones**: Se recortan las áreas detectadas del frame
 5. **OCR**: MobileViT v2 reconoce el texto de las regiones recortadas
 6. **Visualización de Resultados**: Se dibujan cajas delimitadoras en el canvas; las matrículas válidas se almacenan en el store de Pinia
-7. **Parada automática**: La cámara se detiene tras 10 detecciones consecutivas estables
+7. **Parada automática**: La cámara se detiene al confirmar una matrícula — tras 3 segundos de detección continua (o 1 segundo si la confianza media ≥ 0.8)
 
 ### Componentes Principales
 
@@ -141,7 +142,7 @@ alpr_vue/
 La interfaz está construida con **Vue 3** usando `<script setup>` y TypeScript. La gestión de estado usa **Pinia** con dos stores:
 
 - **`appStore`**: Registra errores de cámara, estado de carga de modelos y errores de los mismos.
-- **`plateStore`**: Gestiona las matrículas detectadas, agrupa matrículas similares usando distancia Levenshtein (umbral 0.8) y realiza seguimiento de detecciones consecutivas para la lógica de parada automática.
+- **`plateStore`**: Gestiona las matrículas detectadas, agrupa matrículas similares usando distancia Levenshtein (umbral 0.8) e implementa confirmación basada en tiempo: una matrícula se confirma tras 3 segundos de detección continua, o 1 segundo si la confianza media por carácter ≥ 0.8.
 
 #### Composables
 

@@ -2,6 +2,7 @@ import { ref, onUnmounted, type Ref } from 'vue'
 import { useDetection } from './useDetection'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
+import type { DetectionBox } from '@/types/detection'
 
 export function useCamera(): {
   videoRef: Ref<HTMLVideoElement | null>
@@ -18,7 +19,7 @@ export function useCamera(): {
 
   let stream: MediaStream | null = null
   let intervalId: ReturnType<typeof setInterval> | null = null
-  let lastBoxes: unknown[] = []
+  let lastBoxes: DetectionBox[] = []
 
   const plateStore = usePlateStore()
   const appStore = useAppStore()
@@ -73,7 +74,7 @@ export function useCamera(): {
           if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
 
           if (lastBoxes.length) {
-            drawBoxesAndUpdate(canvas, lastBoxes as any[], stopCamera)
+            drawBoxesAndUpdate(canvas, lastBoxes, stopCamera)
           }
 
           if (modelReady.value) {

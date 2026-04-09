@@ -2,6 +2,7 @@
  * Módulo para validación y comparación de matrículas detectadas
  * Implementa algoritmos para calcular similitud textual y evaluar calidad de detecciones
  */
+import type { PlateTextResult } from '@/types/detection'
 
 export function calculateTextSimilarity(text1: string, text2: string): number {
   if (text1 === text2) return 1.0
@@ -34,11 +35,6 @@ function levenshteinDistance(s1: string, s2: string): number {
   }
 
   return d[s1.length][s2.length]
-}
-
-interface PlateTextResult {
-  text: string
-  confidence: number[]
 }
 
 interface QualityResult {
