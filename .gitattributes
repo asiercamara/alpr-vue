@@ -1,0 +1,7 @@
+# Forzar LF en hooks de Husky — evita errores en Windows con core.autocrlf=true
+.husky/* text eol=lf
+
+# Normalización general
+* text=auto
+*.ts linguist-language=TypeScript
+*.vue linguist-language=Vue
