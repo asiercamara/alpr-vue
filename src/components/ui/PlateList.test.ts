@@ -10,7 +10,10 @@ function makePlateData(id: string, text: string, confidence: number = 0.95) {
     id,
     text,
     confidence,
-    plateText: { text, confidence: [confidence, confidence, confidence, confidence, confidence, confidence] } as PlateTextResult,
+    plateText: {
+      text,
+      confidence: [confidence, confidence, confidence, confidence, confidence, confidence],
+    } as PlateTextResult,
     timestamp: new Date(),
     croppedImage: null,
     boundingBox: null,
@@ -33,7 +36,7 @@ describe('PlateList', () => {
         },
       },
     })
-    expect(wrapper.text()).toContain('No hay detecciones recientes')
+    expect(wrapper.text()).toContain('Sin detecciones')
   })
 
   it('renders best detections (deduplicated)', () => {
@@ -51,7 +54,7 @@ describe('PlateList', () => {
 
     const textContent = wrapper.text()
     expect(textContent).toContain('ABC123')
-    expect(textContent).toContain('95.0%')
+    expect(textContent).toContain('×3')
   })
 
   it('shows different plates as separate entries', () => {
@@ -89,7 +92,7 @@ describe('PlateList', () => {
       },
     })
 
-    const clearBtn = wrapper.findAll('button').find(b => b.text().includes('Limpiar lista'))
+    const clearBtn = wrapper.findAll('button').find((b) => b.text().includes('Limpiar'))
     if (clearBtn) {
       await clearBtn.trigger('click')
       expect(plateStore.plates).toHaveLength(0)
@@ -107,7 +110,9 @@ describe('PlateList', () => {
       },
     })
 
-    const detailBtn = wrapper.findAll('button').find(b => b.text().includes('Ver detalles') || b.find('svg').exists())
+    const detailBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Ver detalles') || b.find('svg').exists())
     if (detailBtn) {
       await detailBtn.trigger('click')
       expect(wrapper.vm.$data).toBeDefined()

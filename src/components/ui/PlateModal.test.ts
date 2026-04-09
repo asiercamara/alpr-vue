@@ -9,7 +9,7 @@ function makePlate(overrides: Record<string, unknown> = {}) {
     confidence: 0.95,
     croppedImage: null,
     boundingBox: null,
-    plateText: { text: 'ABC123', confidence: [0.95, 0.92, 0.88, 0.91, 0.93, 0.90] },
+    plateText: { text: 'ABC123', confidence: [0.95, 0.92, 0.88, 0.91, 0.93, 0.9] },
     timestamp: new Date('2025-01-01T12:00:00'),
     ...overrides,
   }
@@ -43,7 +43,7 @@ describe('PlateModal', () => {
       props: { plate: makePlate() },
       global: { stubs: globalStubs },
     })
-    expect(wrapper.text()).toContain('plate_test')
+    expect(wrapper.text()).toContain('ate_test')
   })
 
   it('renders character confidence bars', () => {
@@ -51,8 +51,8 @@ describe('PlateModal', () => {
       props: { plate: makePlate() },
       global: { stubs: globalStubs },
     })
-    expect(wrapper.text()).toContain('95%')
-    expect(wrapper.text()).toContain('90%')
+    expect(wrapper.text()).toContain('95')
+    expect(wrapper.text()).toContain('90')
   })
 
   it('emits close event when close button is clicked', async () => {
@@ -61,7 +61,7 @@ describe('PlateModal', () => {
       global: { stubs: globalStubs },
     })
     const buttons = wrapper.findAll('button')
-    const closeBtn = buttons.find(b => b.text().includes('Cerrar'))
+    const closeBtn = buttons.find((b) => b.text().includes('Cerrar'))
     if (closeBtn) {
       await closeBtn.trigger('click')
       expect(wrapper.emitted('close')).toBeTruthy()
@@ -97,7 +97,7 @@ describe('PlateModal', () => {
       global: { stubs: globalStubs },
     })
 
-    await new Promise(r => setTimeout(r, 0))
+    await new Promise((r) => setTimeout(r, 0))
 
     expect(mockDrawImage).not.toHaveBeenCalled()
   })

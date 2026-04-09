@@ -1,1 +1,84 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  /* --- Color Palette: Violet/Indigo --- */
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-200: #ddd6fe;
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-brand-700: #6d28d9;
+  --color-brand-800: #5b21b6;
+  --color-brand-900: #4c1d95;
+
+  /* --- Surface palette (cool-gray with violet tint) --- */
+  --color-surface-0: #ffffff;
+  --color-surface-50: #f8f7ff;
+  --color-surface-100: #f1f0fa;
+  --color-surface-200: #e4e2f5;
+  --color-surface-700: #3d3a5c;
+  --color-surface-800: #27243f;
+  --color-surface-850: #1e1b33;
+  --color-surface-900: #16132a;
+  --color-surface-950: #0e0c1e;
+
+  /* --- Semantic status colors --- */
+  --color-conf-high: #22c55e;
+  --color-conf-good: #84cc16;
+  --color-conf-mid: #f59e0b;
+  --color-conf-low: #f97316;
+  --color-conf-poor: #ef4444;
+
+  /* --- Typography --- */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* --- Custom shadows --- */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07);
+  --shadow-card-hover: 0 4px 12px 0 rgb(0 0 0 / 0.12), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-modal: 0 20px 60px -12px rgb(0 0 0 / 0.35);
+  --shadow-camera: 0 8px 32px -4px rgb(139 40 217 / 0.25);
+  --shadow-glow-brand: 0 0 20px 0 rgb(139 92 246 / 0.3);
+
+  /* --- Border radius --- */
+  --radius-card: 0.75rem;
+  --radius-modal: 1.25rem;
+  --radius-pill: 9999px;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--color-surface-50);
+  }
+  .dark body {
+    background-color: var(--color-surface-900);
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-card shadow-card;
+  }
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-semibold rounded-lg px-4 py-2 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500;
+  }
+  .btn-ghost {
+    @apply text-surface-700 dark:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg px-3 py-1.5 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500;
+  }
+  .plate-text {
+    font-family: var(--font-mono);
+    @apply font-semibold tracking-widest;
+  }
+  .heading-display {
+    font-family: var(--font-display);
+  }
+}
