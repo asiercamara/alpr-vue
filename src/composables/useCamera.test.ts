@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createPinia, setActivePinia } from 'pinia'
 
 const mockDrawBoxesAndUpdate = vi.fn()
 const mockProcessFrame = vi.fn()
 const mockOnBoxes = vi.fn(() => vi.fn())
 const mockResetProcessing = vi.fn()
+const mockSetCameraActive = vi.fn()
 
 vi.mock('@/composables/useDetection', () => ({
   useDetection: () => ({
@@ -35,21 +35,46 @@ vi.mock('@/stores/plateStore', () => ({
   }),
 }))
 
+const createAppStoreMock = () => {
+  const state: { cameraError: string | null; cameraActive: boolean } = {
+    cameraError: null,
+    cameraActive: false,
+  }
+  return {
+    cameraError: null as string | null,
+    modelError: null as string | null,
+    isModelLoading: false,
+    isCameraActive: false,
+    setCameraError: vi.fn((msg: string | null) => {
+      state.cameraError = msg
+    }),
+    setModelError: vi.fn(),
+    setModelReady: vi.fn(),
+    setCameraActive: mockSetCameraActive,
+    get cameraErrorState() {
+      return state.cameraError
+    },
+  }
+}
+
+let appStoreMock: ReturnType<typeof createAppStoreMock>
+
+vi.mock('@/stores/appStore', () => ({
+  useAppStore: () => appStoreMock,
+}))
+
 import { useCamera } from '@/composables/useCamera'
-import { useAppStore } from '@/stores/appStore'
 
 describe('useCamera', () => {
-  let appStore: ReturnType<typeof useAppStore>
-
   beforeEach(() => {
-    setActivePinia(createPinia())
-    appStore = useAppStore()
+    appStoreMock = createAppStoreMock()
     mockSetMode.mockClear()
     mockDrawBoxesAndUpdate.mockClear()
     mockProcessFrame.mockClear()
     mockOnBoxes.mockClear()
     mockResetProcessing.mockClear()
     mockClearConsecutiveDetections.mockClear()
+    mockSetCameraActive.mockClear()
 
     vi.stubGlobal('navigator', {
       mediaDevices: {
@@ -58,11 +83,14 @@ describe('useCamera', () => {
       vibrate: vi.fn(),
     })
 
-    vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue({
-      width: 100,
-      height: 100,
-      close: vi.fn(),
-    }))
+    vi.stubGlobal(
+      'createImageBitmap',
+      vi.fn().mockResolvedValue({
+        width: 100,
+        height: 100,
+        close: vi.fn(),
+      }),
+    )
   })
 
   it('starts as inactive', () => {
@@ -82,7 +110,7 @@ describe('useCamera', () => {
     const camera = useCamera()
     await camera.startCamera()
 
-    expect(appStore.cameraError).toBe('Permiso de cámara denegado')
+    expect(appStoreMock.setCameraError).toHaveBeenCalledWith('Permiso de cámara denegado')
   })
 
   it('sets cameraError on NotFoundError', async () => {
@@ -92,7 +120,7 @@ describe('useCamera', () => {
     const camera = useCamera()
     await camera.startCamera()
 
-    expect(appStore.cameraError).toBe('No se encontró cámara disponible')
+    expect(appStoreMock.setCameraError).toHaveBeenCalledWith('No se encontró cámara disponible')
   })
 
   it('sets cameraError on generic DOMException', async () => {
@@ -102,7 +130,7 @@ describe('useCamera', () => {
     const camera = useCamera()
     await camera.startCamera()
 
-    expect(appStore.cameraError).toBe('Some error')
+    expect(appStoreMock.setCameraError).toHaveBeenCalledWith('Some error')
   })
 
   it('sets cameraError on non-DOMException error', async () => {
@@ -111,7 +139,9 @@ describe('useCamera', () => {
     const camera = useCamera()
     await camera.startCamera()
 
-    expect(appStore.cameraError).toBe('Error inesperado al acceder a la cámara')
+    expect(appStoreMock.setCameraError).toHaveBeenCalledWith(
+      'Error inesperado al acceder a la cámara',
+    )
   })
 
   it('starts camera successfully and calls plateStore.setMode', async () => {
@@ -128,7 +158,8 @@ describe('useCamera', () => {
 
     expect(camera.isCameraActive.value).toBe(true)
     expect(mockSetMode).toHaveBeenCalledWith('camera')
-    expect(appStore.cameraError).toBeNull()
+    expect(appStoreMock.setCameraError).not.toHaveBeenCalled()
+    expect(mockSetCameraActive).toHaveBeenCalledWith(true)
   })
 
   it('does not start interval if videoRef is null', async () => {
@@ -159,6 +190,7 @@ describe('useCamera', () => {
     expect(mockTrack.stop).toHaveBeenCalled()
     expect(mockResetProcessing).toHaveBeenCalled()
     expect(mockClearConsecutiveDetections).toHaveBeenCalled()
+    expect(mockSetCameraActive).toHaveBeenCalledWith(false)
   })
 
   it('stopCamera clears canvas', async () => {
@@ -195,5 +227,55 @@ describe('useCamera', () => {
 
     expect(mockClearConsecutiveDetections).toHaveBeenCalled()
     expect(mockResetProcessing).toHaveBeenCalled()
+  })
+
+  describe('toggleCameraFacing', () => {
+    it('starts with environment facing mode by default', () => {
+      const camera = useCamera()
+      expect(camera.facingMode.value).toBe('environment')
+    })
+
+    it('toggles facing mode from environment to user', () => {
+      const camera = useCamera()
+      expect(camera.facingMode.value).toBe('environment')
+      camera.toggleCameraFacing()
+      expect(camera.facingMode.value).toBe('user')
+    })
+
+    it('toggles facing mode back from user to environment', () => {
+      const camera = useCamera()
+      camera.toggleCameraFacing()
+      expect(camera.facingMode.value).toBe('user')
+      camera.toggleCameraFacing()
+      expect(camera.facingMode.value).toBe('environment')
+    })
+
+    it('does not restart camera when camera is inactive', async () => {
+      const camera = useCamera()
+      const getUserMediaCalls = vi.mocked(navigator.mediaDevices.getUserMedia)
+
+      camera.toggleCameraFacing()
+
+      expect(getUserMediaCalls).not.toHaveBeenCalled()
+    })
+
+    it('restarts camera with new facing mode when camera is active', async () => {
+      const mockTrack = { stop: vi.fn() }
+      const mockStream = { getTracks: () => [mockTrack] }
+      vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
+
+      const camera = useCamera()
+      const mockVideo = document.createElement('video')
+      mockVideo.play = vi.fn().mockResolvedValue(undefined)
+      Object.defineProperty(camera.videoRef, 'value', { value: mockVideo, writable: true })
+
+      await camera.startCamera()
+      vi.mocked(navigator.mediaDevices.getUserMedia).mockClear()
+
+      await camera.toggleCameraFacing()
+
+      expect(camera.facingMode.value).toBe('user')
+      expect(vi.mocked(navigator.mediaDevices.getUserMedia)).toHaveBeenCalled()
+    })
   })
 })

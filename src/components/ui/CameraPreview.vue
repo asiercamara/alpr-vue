@@ -25,7 +25,7 @@
           <IconAlertTriangle class="w-6 h-6 text-red-400" />
         </div>
         <p class="text-white font-semibold mb-1">Error de cámara</p>
-        <p class="text-surface-400 text-sm mb-4">{{ appStore.cameraError }}</p>
+        <p class="text-surface-300 text-sm mb-4">{{ appStore.cameraError }}</p>
         <button class="btn-primary text-sm" @click="startCamera()">Reintentar</button>
       </div>
     </div>
@@ -48,7 +48,7 @@
         </div>
         <div class="text-center">
           <p class="text-white font-medium text-sm">Cargando modelo</p>
-          <p class="text-surface-400 text-xs mt-0.5">Detección de matrículas</p>
+          <p class="text-surface-300 text-xs mt-0.5">Detección de matrículas</p>
         </div>
       </div>
     </div>
@@ -59,11 +59,11 @@
       class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-950"
     >
       <div class="w-16 h-16 rounded-2xl bg-surface-800 flex items-center justify-center">
-        <IconCamera class="w-8 h-8 text-surface-500" />
+        <IconCamera class="w-8 h-8 text-surface-400" />
       </div>
       <div class="text-center">
-        <p class="text-surface-300 font-medium">Cámara desactivada</p>
-        <p class="text-surface-500 text-sm mt-1">Pulsa Iniciar para comenzar</p>
+        <p class="text-surface-200 font-medium">Cámara desactivada</p>
+        <p class="text-surface-400 text-sm mt-1">Pulsa Iniciar o sube un archivo</p>
       </div>
     </div>
 
@@ -75,16 +75,17 @@
       <span
         :class="[
           'w-2 h-2 rounded-full',
-          isProcessing ? 'bg-brand-400 animate-pulse' : 'bg-surface-500',
+          isProcessing ? 'bg-brand-400 animate-pulse' : 'bg-emerald-400',
         ]"
       ></span>
-      <span class="text-xs text-surface-300 font-medium">{{
+      <span class="text-xs text-surface-200 font-medium">{{
         isProcessing ? 'Escaneando' : 'En vivo'
       }}</span>
     </div>
 
     <!-- Controls -->
-    <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3">
+      <!-- Start/Stop camera button -->
       <button
         :class="[
           'flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm shadow-lg',
@@ -98,6 +99,19 @@
         <component :is="isCameraActive ? IconStop : IconPlay" class="w-4 h-4" />
         <span>{{ isCameraActive ? 'Detener' : 'Iniciar cámara' }}</span>
       </button>
+
+      <!-- Flip camera button (only when camera is active) -->
+      <button
+        v-if="isCameraActive"
+        class="p-2.5 rounded-full bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white shadow-lg transition-all duration-200 backdrop-blur-sm"
+        title="Cambiar cámara"
+        @click="toggleCameraFacing()"
+      >
+        <IconFlipCamera class="w-4 h-4" />
+      </button>
+
+      <!-- Upload button (only when camera is inactive) -->
+      <MediaUploader v-if="!isCameraActive" @detection="onMediaDetection" />
     </div>
   </div>
 </template>
@@ -109,10 +123,24 @@ import IconPlay from '@/components/icons/IconPlay.vue'
 import IconStop from '@/components/icons/IconStop.vue'
 import IconCamera from '@/components/icons/IconCamera.vue'
 import IconAlertTriangle from '@/components/icons/IconAlertTriangle.vue'
+import IconFlipCamera from '@/components/icons/IconFlipCamera.vue'
+import MediaUploader from './MediaUploader.vue'
 
 const appStore = useAppStore()
 
-const { videoRef, canvasRef, isCameraActive, isProcessing, startCamera, stopCamera } = useCamera()
+const {
+  videoRef,
+  canvasRef,
+  isCameraActive,
+  isProcessing,
+  startCamera,
+  stopCamera,
+  toggleCameraFacing,
+} = useCamera()
+
+const onMediaDetection = () => {
+  // Detections are automatically added to the store by useStaticMedia
+}
 </script>
 
 <style scoped></style>

@@ -37,7 +37,11 @@ describe('plateStore', () => {
     })
 
     it('generates an id if not provided', () => {
-      store.addPlate({ text: 'XYZ', confidence: 0.8, plateText: { text: 'XYZ', confidence: [0.8] } })
+      store.addPlate({
+        text: 'XYZ',
+        confidence: 0.8,
+        plateText: { text: 'XYZ', confidence: [0.8] },
+      })
       expect(store.plates[0].id).toBeTruthy()
     })
 
@@ -59,12 +63,24 @@ describe('plateStore', () => {
       const now = Date.now()
       vi.spyOn(Date, 'now').mockReturnValue(now)
 
-      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.6,
-        plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p1',
+          text: 'ABC123',
+          confidence: 0.6,
+          plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] },
+        }),
+      )
 
       vi.spyOn(Date, 'now').mockReturnValue(now + 2000)
-      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.6,
-        plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] } }))
+      const result = store.addPlate(
+        makePlate({
+          id: 'p2',
+          text: 'ABC123',
+          confidence: 0.6,
+          plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] },
+        }),
+      )
 
       expect(result).toBe(false)
       vi.restoreAllMocks()
@@ -75,12 +91,24 @@ describe('plateStore', () => {
       const now = Date.now()
       vi.spyOn(Date, 'now').mockReturnValue(now)
 
-      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.6,
-        plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p1',
+          text: 'ABC123',
+          confidence: 0.6,
+          plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] },
+        }),
+      )
 
       vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
-      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.7,
-        plateText: { text: 'ABC123', confidence: [0.6, 0.6, 0.7, 0.8, 0.7, 0.6] } }))
+      const result = store.addPlate(
+        makePlate({
+          id: 'p2',
+          text: 'ABC123',
+          confidence: 0.7,
+          plateText: { text: 'ABC123', confidence: [0.6, 0.6, 0.7, 0.8, 0.7, 0.6] },
+        }),
+      )
 
       expect(result).toBe(true)
       vi.restoreAllMocks()
@@ -91,12 +119,24 @@ describe('plateStore', () => {
       const now = Date.now()
       vi.spyOn(Date, 'now').mockReturnValue(now)
 
-      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9,
-        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p1',
+          text: 'ABC123',
+          confidence: 0.9,
+          plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        }),
+      )
 
       vi.spyOn(Date, 'now').mockReturnValue(now + 500)
-      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.9,
-        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+      const result = store.addPlate(
+        makePlate({
+          id: 'p2',
+          text: 'ABC123',
+          confidence: 0.9,
+          plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        }),
+      )
 
       expect(result).toBe(false)
       vi.restoreAllMocks()
@@ -107,12 +147,24 @@ describe('plateStore', () => {
       const now = Date.now()
       vi.spyOn(Date, 'now').mockReturnValue(now)
 
-      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9,
-        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p1',
+          text: 'ABC123',
+          confidence: 0.9,
+          plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        }),
+      )
 
       vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
-      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.85,
-        plateText: { text: 'ABC123', confidence: [0.85, 0.8, 0.9, 0.88, 0.82, 0.85] } }))
+      const result = store.addPlate(
+        makePlate({
+          id: 'p2',
+          text: 'ABC123',
+          confidence: 0.85,
+          plateText: { text: 'ABC123', confidence: [0.85, 0.8, 0.9, 0.88, 0.82, 0.85] },
+        }),
+      )
 
       expect(result).toBe(true)
       vi.restoreAllMocks()
@@ -158,12 +210,24 @@ describe('plateStore', () => {
       const now = Date.now()
       vi.spyOn(Date, 'now').mockReturnValue(now)
 
-      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.7,
-        plateText: { text: 'ABC123', confidence: [0.7, 0.7, 0.7, 0.7, 0.7, 0.7] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p1',
+          text: 'ABC123',
+          confidence: 0.7,
+          plateText: { text: 'ABC123', confidence: [0.7, 0.7, 0.7, 0.7, 0.7, 0.7] },
+        }),
+      )
 
       vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
-      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.95,
-        plateText: { text: 'ABC123', confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.95] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p2',
+          text: 'ABC123',
+          confidence: 0.95,
+          plateText: { text: 'ABC123', confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.95] },
+        }),
+      )
 
       expect(store.plates).toHaveLength(1)
       expect(store.plates[0].confidence).toBe(0.95)
@@ -176,12 +240,24 @@ describe('plateStore', () => {
       const now = Date.now()
       vi.spyOn(Date, 'now').mockReturnValue(now)
 
-      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9,
-        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p1',
+          text: 'ABC123',
+          confidence: 0.9,
+          plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        }),
+      )
 
       vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
-      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.9,
-        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+      store.addPlate(
+        makePlate({
+          id: 'p2',
+          text: 'ABC123',
+          confidence: 0.9,
+          plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        }),
+      )
 
       expect(store.plates[0].confirmed).toBe(true)
       vi.restoreAllMocks()
@@ -274,6 +350,38 @@ describe('plateStore', () => {
       const best = store.bestDetections
       expect(best).toHaveLength(1)
       expect(best[0].confidence).toBe(0.95)
+    })
+  })
+
+  describe('updatePlateText', () => {
+    it('updates text and plateText.text of an existing plate', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+      const result = store.updatePlateText('p1', 'XYZ789')
+      expect(result).toBe(true)
+      expect(store.plates[0].text).toBe('XYZ789')
+      expect(store.plates[0].plateText.text).toBe('XYZ789')
+    })
+
+    it('returns false for non-existent plate id', () => {
+      const result = store.updatePlateText('nonexistent', 'XYZ789')
+      expect(result).toBe(false)
+    })
+
+    it('updates variant text in plate groups', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+      store.updatePlateText('p1', 'XYZ789')
+      const groups = store.plateGroups as any
+      const keys = Object.keys(groups)
+      expect(keys).toHaveLength(1)
+    })
+
+    it('recalculates group confidence after text update', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9 }))
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.8 }))
+
+      store.updatePlateText('p1', 'ABC124')
+      const groupsAfter = store.plateGroups as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      expect(Object.keys(groupsAfter)).toHaveLength(1)
     })
   })
 

@@ -13,10 +13,10 @@
           {{ plate.plateText.text }}
         </div>
         <div class="flex items-center gap-2 mt-0.5">
-          <span class="text-xs text-surface-400">{{ formattedTime }}</span>
+          <span class="text-xs text-surface-500 dark:text-surface-300">{{ formattedTime }}</span>
           <span
             v-if="plate.occurrences && plate.occurrences > 1"
-            class="text-xs px-1.5 py-0.5 bg-surface-100 dark:bg-surface-700 text-surface-500 rounded-md"
+            class="text-xs px-1.5 py-0.5 bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-200 rounded-md"
           >
             ×{{ plate.occurrences }}
           </span>

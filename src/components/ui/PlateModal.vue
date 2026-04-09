@@ -10,7 +10,7 @@
           <div class="bg-surface-950 rounded-t-modal overflow-hidden">
             <canvas ref="cropCanvas" class="w-full max-h-32 object-contain" />
             <div v-if="!plate?.croppedImage" class="h-24 flex items-center justify-center">
-              <p class="text-surface-500 text-xs">Sin imagen disponible</p>
+              <p class="text-surface-400 text-xs">Sin imagen disponible</p>
             </div>
           </div>
 
@@ -31,18 +31,65 @@
 
           <!-- Content -->
           <div class="p-5">
-            <!-- Plate text with copy button -->
-            <div class="flex items-center justify-center gap-3 mb-4">
-              <p class="plate-text text-4xl text-surface-900 dark:text-white tracking-[0.2em]">
-                {{ plate.plateText.text }}
-              </p>
-              <button
-                class="p-1.5 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
-                :title="`Copiar: ${plate.plateText.text}`"
-                @click="navigator.clipboard?.writeText(plate.plateText.text)"
-              >
-                <IconCopy class="w-4 h-4" />
-              </button>
+            <!-- Plate text with edit/copy -->
+            <div class="flex items-center justify-center gap-2 mb-4">
+              <template v-if="isEditing">
+                <input
+                  ref="editInputRef"
+                  v-model="editText"
+                  class="plate-text text-4xl text-surface-900 dark:text-white tracking-[0.2em] bg-surface-100 dark:bg-surface-700 rounded-lg px-3 py-1 w-full text-center border-2 border-brand-500 outline-none"
+                  maxlength="12"
+                  @keydown.enter="saveEdit"
+                  @keydown.escape="cancelEdit"
+                />
+                <button
+                  class="p-1.5 rounded-md text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                  title="Guardar"
+                  @click="saveEdit"
+                >
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="p-1.5 rounded-md text-surface-400 hover:text-red-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                  title="Cancelar"
+                  @click="cancelEdit"
+                >
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </template>
+              <template v-else>
+                <p class="plate-text text-4xl text-surface-900 dark:text-white tracking-[0.2em]">
+                  {{ plate.plateText.text }}
+                </p>
+                <button
+                  class="p-1.5 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
+                  title="Copiar"
+                  @click="copyToClipboard"
+                >
+                  <IconCopy class="w-4 h-4" />
+                </button>
+                <button
+                  class="p-1.5 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
+                  title="Editar"
+                  @click="startEdit"
+                >
+                  <IconEdit class="w-4 h-4" />
+                </button>
+              </template>
             </div>
 
             <!-- Overall confidence with ring -->
@@ -121,20 +168,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, nextTick, watchEffect } from 'vue'
+import { usePlateStore } from '@/stores/plateStore'
 import type { PlateRecord } from '@/types/detection'
 import ConfidenceRing from './ConfidenceRing.vue'
 import IconCopy from '@/components/icons/IconCopy.vue'
+import IconEdit from '@/components/icons/IconEdit.vue'
+
+const emit = defineEmits<{
+  close: []
+  edited: [plateId: string, newText: string]
+}>()
 
 const props = defineProps<{
   plate: PlateRecord | null
 }>()
 
-defineEmits<{
-  close: []
-}>()
-
+const plateStore = usePlateStore()
 const cropCanvas = ref<HTMLCanvasElement | null>(null)
+const isEditing = ref(false)
+const editText = ref('')
+const editInputRef = ref<HTMLInputElement | null>(null)
 
 watchEffect(() => {
   if (props.plate?.croppedImage && cropCanvas.value) {
@@ -158,6 +212,36 @@ function charColor(conf: number): string {
   if (conf >= 0.6) return 'var(--color-conf-mid)'
   if (conf >= 0.45) return 'var(--color-conf-low)'
   return 'var(--color-conf-poor)'
+}
+
+function copyToClipboard() {
+  if (props.plate) {
+    navigator.clipboard?.writeText(props.plate.plateText.text)
+  }
+}
+
+function startEdit() {
+  if (!props.plate) return
+  editText.value = props.plate.plateText.text
+  isEditing.value = true
+  nextTick(() => {
+    editInputRef.value?.focus()
+    editInputRef.value?.select()
+  })
+}
+
+function saveEdit() {
+  if (!props.plate) return
+  const trimmed = editText.value.trim()
+  if (!trimmed) return
+
+  plateStore.updatePlateText(props.plate.id, trimmed)
+  emit('edited', props.plate.id, trimmed)
+  isEditing.value = false
+}
+
+function cancelEdit() {
+  isEditing.value = false
 }
 </script>
 

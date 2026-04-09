@@ -10,12 +10,15 @@ export function useCamera(): {
   isCameraActive: Ref<boolean>
   isProcessing: Ref<boolean>
   modelReady: Ref<boolean>
+  facingMode: Ref<string>
   startCamera: () => Promise<void>
   stopCamera: () => void
+  toggleCameraFacing: () => Promise<void>
 } {
   const videoRef = ref<HTMLVideoElement | null>(null)
   const canvasRef = ref<HTMLCanvasElement | null>(null)
   const isCameraActive = ref(false)
+  const facingMode = ref('environment')
 
   let stream: MediaStream | null = null
   let intervalId: ReturnType<typeof setInterval> | null = null
@@ -23,7 +26,8 @@ export function useCamera(): {
 
   const plateStore = usePlateStore()
   const appStore = useAppStore()
-  const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate, resetProcessing } = useDetection()
+  const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate, resetProcessing } =
+    useDetection()
 
   const unsubscribeBoxes = onBoxes((boxes) => {
     lastBoxes = boxes
@@ -34,12 +38,13 @@ export function useCamera(): {
       clearInterval(intervalId)
       intervalId = null
     }
-    stream?.getTracks().forEach(t => t.stop())
+    stream?.getTracks().forEach((t) => t.stop())
     stream = null
     isCameraActive.value = false
     lastBoxes = []
     resetProcessing()
     plateStore.clearConsecutiveDetections()
+    appStore.setCameraActive(false)
     const ctx = canvasRef.value?.getContext('2d')
     if (ctx && canvasRef.value) {
       ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
@@ -53,7 +58,7 @@ export function useCamera(): {
       resetProcessing()
 
       const constraints: MediaStreamConstraints = {
-        video: { facingMode: { ideal: 'environment' } },
+        video: { facingMode: { ideal: facingMode.value } },
         audio: false,
       }
       stream = await navigator.mediaDevices.getUserMedia(constraints)
@@ -61,6 +66,7 @@ export function useCamera(): {
         videoRef.value.srcObject = stream
         await videoRef.value.play()
         isCameraActive.value = true
+        appStore.setCameraActive(true)
         plateStore.setMode('camera')
 
         intervalId = setInterval(async () => {
@@ -88,14 +94,24 @@ export function useCamera(): {
         }, 20)
       }
     } catch (err) {
+      appStore.setCameraActive(false)
       console.error('Error accessing camera:', err)
       if (err instanceof DOMException) {
         if (err.name === 'NotAllowedError') appStore.setCameraError('Permiso de cámara denegado')
-        else if (err.name === 'NotFoundError') appStore.setCameraError('No se encontró cámara disponible')
+        else if (err.name === 'NotFoundError')
+          appStore.setCameraError('No se encontró cámara disponible')
         else appStore.setCameraError(err.message)
       } else {
         appStore.setCameraError('Error inesperado al acceder a la cámara')
       }
+    }
+  }
+
+  const toggleCameraFacing = async (): Promise<void> => {
+    facingMode.value = facingMode.value === 'environment' ? 'user' : 'environment'
+    if (isCameraActive.value) {
+      stopCamera()
+      await startCamera()
     }
   }
 
@@ -110,7 +126,9 @@ export function useCamera(): {
     isCameraActive,
     isProcessing,
     modelReady,
+    facingMode,
     startCamera,
     stopCamera,
+    toggleCameraFacing,
   }
 }

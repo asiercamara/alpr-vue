@@ -1,6 +1,10 @@
 import { ref, computed, markRaw } from 'vue'
 import { defineStore } from 'pinia'
-import { calculateTextSimilarity, PLATE_HIGH_CONF_MEAN, PLATE_CHAR_MIN_CONF } from '@/utils/validation'
+import {
+  calculateTextSimilarity,
+  PLATE_HIGH_CONF_MEAN,
+  PLATE_CHAR_MIN_CONF,
+} from '@/utils/validation'
 import type { PlateRecord, PlateTextResult } from '@/types/detection'
 
 interface VariantText {
@@ -46,8 +50,8 @@ export const usePlateStore = defineStore('plateStore', () => {
       return b.confidenceMean - a.confidenceMean
     })
 
-    return sortedGroups.map(group => {
-      const confirmedVariants = group.variants.filter(v => v.confirmed)
+    return sortedGroups.map((group) => {
+      const confirmedVariants = group.variants.filter((v) => v.confirmed)
       const pool = confirmedVariants.length > 0 ? confirmedVariants : group.variants
       const sortedVariants = [...pool].sort((a, b) => b.confidence - a.confidence)
       const best = { ...sortedVariants[0] }
@@ -58,7 +62,7 @@ export const usePlateStore = defineStore('plateStore', () => {
 
   function isHighQuality(plateText: PlateTextResult, confidenceMean: number): boolean {
     if (confidenceMean < HIGH_CONFIDENCE_MEAN) return false
-    if (plateText.confidence.some(c => c < HIGH_CONFIDENCE_MIN_CHAR)) return false
+    if (plateText.confidence.some((c) => c < HIGH_CONFIDENCE_MIN_CHAR)) return false
     return true
   }
 
@@ -71,7 +75,7 @@ export const usePlateStore = defineStore('plateStore', () => {
     plateText: PlateTextResult
     timestamp?: Date
   }): boolean {
-    if (plates.value.find(p => p.id === plate.id)) return false
+    if (plates.value.find((p) => p.id === plate.id)) return false
 
     const id = plate.id || `plate_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
     const detectionObj: PlateRecord = {
@@ -110,7 +114,7 @@ export const usePlateStore = defineStore('plateStore', () => {
 
     const current = consecutiveDetections.value[text]
 
-    if (current.lastTimestamp && (now - current.lastTimestamp) > CONSECUTIVE_DETECTION_TIMEOUT) {
+    if (current.lastTimestamp && now - current.lastTimestamp > CONSECUTIVE_DETECTION_TIMEOUT) {
       current.count = 0
       current.firstTimestamp = null
       current.detections = []
@@ -161,7 +165,7 @@ export const usePlateStore = defineStore('plateStore', () => {
         group.totalOccurrences++
 
         if (!group.variantTexts) group.variantTexts = []
-        const variantIndex = group.variantTexts.findIndex(v => v.text === text)
+        const variantIndex = group.variantTexts.findIndex((v) => v.text === text)
         if (variantIndex >= 0) {
           group.variantTexts[variantIndex].occurrences++
         } else {
@@ -190,12 +194,15 @@ export const usePlateStore = defineStore('plateStore', () => {
     if (!group || !group.variantTexts || group.variantTexts.length === 0) return
 
     const mainVariant = group.variantTexts.reduce(
-      (max, v) => v.occurrences > max.occurrences ? v : max,
+      (max, v) => (v.occurrences > max.occurrences ? v : max),
       { text: '', occurrences: 0 },
     )
 
-    if (mainVariant.text !== groupKey && mainVariant.occurrences >
-        (group.variantTexts.find(v => v.text === groupKey)?.occurrences || 0)) {
+    if (
+      mainVariant.text !== groupKey &&
+      mainVariant.occurrences >
+        (group.variantTexts.find((v) => v.text === groupKey)?.occurrences || 0)
+    ) {
       const oldGroup = { ...plateGroups.value[groupKey] }
       plateGroups.value[mainVariant.text] = {
         mainText: mainVariant.text,
@@ -214,8 +221,47 @@ export const usePlateStore = defineStore('plateStore', () => {
     return sum / variants.length
   }
 
+  function updatePlateText(plateId: string, newText: string): boolean {
+    const plate = plates.value.find((p) => p.id === plateId)
+    if (!plate) return false
+
+    const oldText = plate.text
+    plate.text = newText
+    plate.plateText = { ...plate.plateText, text: newText }
+
+    const oldGroupKey = oldText
+    const group = plateGroups.value[oldGroupKey]
+    if (group) {
+      const variantIndex = group.variantTexts.findIndex((v) => v.text === oldText)
+      if (variantIndex >= 0) {
+        group.variantTexts[variantIndex].text = newText
+      }
+      const variantPlateIndex = group.variants.findIndex((v) => v.id === plateId)
+      if (variantPlateIndex >= 0) {
+        group.variants[variantPlateIndex] = {
+          ...group.variants[variantPlateIndex],
+          text: newText,
+          plateText: { ...group.variants[variantPlateIndex].plateText, text: newText },
+        }
+      }
+      group.confidenceMean = calculateGroupConfidence(group.variants)
+      updateMainVariant(oldGroupKey)
+    }
+
+    const newGroupKey = Object.keys(plateGroups.value).find((key) => {
+      const existingGroup = plateGroups.value[key]
+      return existingGroup.variants.some((v) => v.id === plateId)
+    })
+    if (newGroupKey) {
+      const newGroup = plateGroups.value[newGroupKey]
+      newGroup.confidenceMean = calculateGroupConfidence(newGroup.variants)
+    }
+
+    return true
+  }
+
   function removePlate(plateId: string): void {
-    plates.value = plates.value.filter(p => p.id !== plateId)
+    plates.value = plates.value.filter((p) => p.id !== plateId)
   }
 
   function clearPlates(): void {
@@ -239,6 +285,7 @@ export const usePlateStore = defineStore('plateStore', () => {
     currentMode,
     bestDetections,
     addPlate,
+    updatePlateText,
     removePlate,
     clearPlates,
     clearConsecutiveDetections,

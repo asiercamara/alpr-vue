@@ -5,6 +5,7 @@ export const useAppStore = defineStore('app', () => {
   const cameraError = ref<string | null>(null)
   const modelError = ref<string | null>(null)
   const isModelLoading = ref(true)
+  const isCameraActive = ref(false)
 
   function setCameraError(msg: string | null): void {
     cameraError.value = msg
@@ -19,12 +20,18 @@ export const useAppStore = defineStore('app', () => {
     modelError.value = null
   }
 
+  function setCameraActive(active: boolean): void {
+    isCameraActive.value = active
+  }
+
   return {
     cameraError,
     modelError,
     isModelLoading,
+    isCameraActive,
     setCameraError,
     setModelError,
     setModelReady,
+    setCameraActive,
   }
 })
