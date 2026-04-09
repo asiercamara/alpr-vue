@@ -7,7 +7,9 @@
         @click.self="$emit('update:modelValue', false)"
       >
         <div class="sheet-backdrop" @click="$emit('update:modelValue', false)"></div>
-        <div class="sheet-content">
+        <div
+          class="sheet-content absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto bg-white dark:bg-surface-900 rounded-t-2xl p-6 shadow-[0_-4px_30px_rgba(0,0,0,0.15)] dark:shadow-[0_-4px_30px_rgba(0,0,0,0.35)]"
+        >
           <div class="w-10 h-1 rounded-full bg-surface-300 dark:bg-surface-600 mx-auto mb-5"></div>
 
           <div class="flex items-center gap-2 mb-5">
@@ -78,22 +80,6 @@ defineEmits<{
   background: rgba(2, 6, 23, 0.6);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-}
-
-.sheet-content {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  max-height: 80vh;
-  overflow-y: auto;
-  background: white;
-  border-radius: 1rem 1rem 0 0;
-  padding: 1.5rem;
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
-}
-
-:root.dark .sheet-content {
-  background: #1e293b;
 }
 
 .sheet-enter-active {
