@@ -9,6 +9,7 @@ let capturedWorkerInstance: {
 
 const mockSetModelReady = vi.fn()
 const mockSetModelError = vi.fn()
+const mockNotifyDetection = vi.fn()
 
 vi.stubGlobal('Worker', class {
   onmessage: ((event: MessageEvent) => void) | null = null
@@ -26,6 +27,12 @@ vi.mock('@/stores/appStore', () => ({
   })),
 }))
 
+vi.mock('@/utils/feedback', () => ({
+  notifyDetection: mockNotifyDetection,
+  playBeep: vi.fn(),
+  triggerVibration: vi.fn(),
+}))
+
 function simulateWorkerMessage(data: unknown) {
   if (capturedWorkerInstance?.onmessage) {
     capturedWorkerInstance.onmessage({ data } as MessageEvent)
@@ -38,6 +45,7 @@ describe('useDetection', () => {
     vi.resetModules()
     mockSetModelReady.mockClear()
     mockSetModelError.mockClear()
+    mockNotifyDetection.mockClear()
   })
 
   function makeBox(overrides: Record<string, unknown> = {}) {
@@ -243,7 +251,7 @@ describe('useDetection', () => {
       detection.drawBoxesAndUpdate(canvas, [lowConfBox], vi.fn())
     })
 
-    it('draws boxes and adds valid plates to store', async () => {
+    it('draws boxes and adds valid plates to store when not in camera mode', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const { usePlateStore } = await import('@/stores/plateStore')
       const store = usePlateStore()
@@ -258,13 +266,16 @@ describe('useDetection', () => {
       expect(mockCtx.strokeRect).toHaveBeenCalled()
     })
 
-    it('calls stopCallback when shouldStop is true', async () => {
+    it('calls notifyDetection when shouldStop is true', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const { usePlateStore } = await import('@/stores/plateStore')
       const store = usePlateStore()
       store.setMode('camera')
 
-      for (let i = 0; i < 10; i++) {
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      for (let i = 0; i < 5; i++) {
         store.addPlate({
           id: `existing_${i}`,
           text: 'AB1234',
@@ -272,6 +283,8 @@ describe('useDetection', () => {
           plateText: { text: 'AB1234', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
         })
       }
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
 
       const detection = useDetection()
       const canvas = document.createElement('canvas')
@@ -282,6 +295,33 @@ describe('useDetection', () => {
       detection.drawBoxesAndUpdate(canvas, [makeBox()], stopCallback)
 
       expect(stopCallback).toHaveBeenCalled()
+
+      vi.restoreAllMocks()
+    })
+
+    it('selects longest plate text when multiple candidates', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const shortBox = makeBox({
+        plateText: { text: 'AB12', confidence: [0.9, 0.9, 0.9, 0.9] },
+      })
+      const longBox = makeBox({
+        plateText: { text: 'AB12345', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+      })
+
+      detection.drawBoxesAndUpdate(canvas, [shortBox, longBox], vi.fn())
+    })
+
+    it('resetProcessing sets isProcessing to false', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      detection.isProcessing.value = true
+      detection.resetProcessing()
+      expect(detection.isProcessing.value).toBe(false)
     })
   })
 })

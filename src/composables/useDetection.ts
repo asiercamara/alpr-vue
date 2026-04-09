@@ -2,6 +2,7 @@ import { ref, markRaw } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
 import { evaluatePlateQuality } from '@/utils/validation'
+import { notifyDetection } from '@/utils/feedback'
 import type { DetectionBox } from '@/types/detection'
 
 let _worker: Worker | null = null
@@ -48,6 +49,34 @@ function getWorker(): Worker {
   return _worker
 }
 
+function selectBestBoxes(boxes: DetectionBox[]): DetectionBox[] {
+  const CONF_THRESH = 0.7
+
+  const validBoxes = boxes.filter(box => {
+    if (!box.plateText?.confidence?.length) return false
+    const conf = box.plateText.confidence
+    const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+    return confMean >= CONF_THRESH
+  })
+
+  const grouped = new Map<string, DetectionBox>()
+  for (const box of validBoxes) {
+    const key = box.plateText.text
+    const existing = grouped.get(key)
+    if (!existing || box.plateText.text.length > existing.plateText.text.length) {
+      grouped.set(key, box)
+    } else if (box.plateText.text.length === existing.plateText.text.length) {
+      const existingConf = existing.plateText.confidence.reduce((a, b) => a + b, 0) / existing.plateText.confidence.length
+      const boxConf = box.plateText.confidence.reduce((a, b) => a + b, 0) / box.plateText.confidence.length
+      if (boxConf > existingConf) {
+        grouped.set(key, box)
+      }
+    }
+  }
+
+  return Array.from(grouped.values())
+}
+
 export function useDetection() {
   const plateStore = usePlateStore()
   const worker = getWorker()
@@ -77,14 +106,13 @@ export function useDetection() {
     ctx.strokeStyle = '#00FF00'
     ctx.lineWidth = 3
     ctx.font = '18px monospace'
-    const CONF_THRESH = 0.7
 
-    for (const box of boxes) {
-      if (!box.plateText?.confidence?.length) continue
+    const bestBoxes = selectBestBoxes(boxes)
+    if (!bestBoxes.length) return
 
+    for (const box of bestBoxes) {
       const conf = box.plateText.confidence
       const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
-      if (confMean < CONF_THRESH) continue
 
       const { x1, y1, x2, y2 } = box
       ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
@@ -95,25 +123,37 @@ export function useDetection() {
       ctx.fillRect(x1, y1 - 24, tw + 10, 24)
       ctx.fillStyle = '#000'
       ctx.fillText(label, x1 + 5, y1 - 6)
-
-      const quality = evaluatePlateQuality({ ...box, confidenceMean: confMean })
-      if (!quality.isValid) continue
-
-      const shouldStop = plateStore.addPlate({
-        id: `plate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        text: box.plateText.text,
-        confidence: confMean,
-        croppedImage: box.croppedImage ? markRaw(box.croppedImage) : null,
-        boundingBox: { x1, y1, x2, y2 },
-        plateText: box.plateText,
-        timestamp: new Date(),
-      })
-
-      if (shouldStop === true) {
-        stopCallback?.()
-        return
-      }
     }
+
+    const longestBox = bestBoxes.reduce((longest, box) =>
+      box.plateText.text.length > longest.plateText.text.length ? box : longest
+    , bestBoxes[0])
+
+    const conf = longestBox.plateText.confidence
+    const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+
+    const quality = evaluatePlateQuality({ ...longestBox, confidenceMean: confMean })
+    if (!quality.isValid) return
+
+    const shouldStop = plateStore.addPlate({
+      id: `plate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      text: longestBox.plateText.text,
+      confidence: confMean,
+      croppedImage: longestBox.croppedImage ? markRaw(longestBox.croppedImage) : null,
+      boundingBox: { x1: longestBox.x1, y1: longestBox.y1, x2: longestBox.x2, y2: longestBox.y2 },
+      plateText: longestBox.plateText,
+      timestamp: new Date(),
+    })
+
+    if (shouldStop === true) {
+      notifyDetection()
+      stopCallback?.()
+      return
+    }
+  }
+
+  const resetProcessing = (): void => {
+    _isProcessing.value = false
   }
 
   return {
@@ -123,5 +163,6 @@ export function useDetection() {
     processFrame,
     onBoxes,
     drawBoxesAndUpdate,
+    resetProcessing,
   }
 }

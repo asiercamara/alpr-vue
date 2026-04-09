@@ -10,7 +10,7 @@
       </button>
     </div>
 
-    <div v-if="plateStore.plates.length === 0" class="text-center py-10 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+    <div v-if="plateStore.bestDetections.length === 0" class="text-center py-10 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
       <p class="text-gray-500 dark:text-gray-400">No hay detecciones recientes</p>
     </div>
 
@@ -20,7 +20,7 @@
       class="space-y-2"
     >
       <div
-        v-for="plate in plateStore.plates"
+        v-for="plate in plateStore.bestDetections"
         :key="plate.id"
         class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
       >

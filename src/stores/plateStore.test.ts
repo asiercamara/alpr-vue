@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateTextResult } from '@/types/detection'
 
@@ -23,7 +23,7 @@ describe('plateStore', () => {
   })
 
   describe('addPlate', () => {
-    it('adds a plate to the list', () => {
+    it('adds a plate to the list outside camera mode', () => {
       const result = store.addPlate(makePlate({ id: 'p1' }))
       expect(result).toBe(false)
       expect(store.plates).toHaveLength(1)
@@ -46,36 +46,88 @@ describe('plateStore', () => {
       expect(result).toBe(false)
     })
 
-    it('returns true in camera mode after 10 consecutive detections', () => {
+    it('uses markRaw for croppedImage', () => {
+      const mockBitmap = {} as any
+      store.addPlate(makePlate({ id: 'p1', croppedImage: mockBitmap }))
+      expect(store.plates).toHaveLength(1)
+    })
+  })
+
+  describe('camera mode confirmation - time based', () => {
+    it('does not confirm before MIN_CONFIRMATION_TIME with normal confidence', () => {
       store.setMode('camera')
-      for (let i = 0; i < 9; i++) {
-        const result = store.addPlate(makePlate({ id: `p${i}`, text: 'ABC123' }))
-        expect(result).toBe(false)
-      }
-      const result = store.addPlate(makePlate({ id: 'p10', text: 'ABC123' }))
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.6,
+        plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] } }))
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 2000)
+      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.6,
+        plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] } }))
+
+      expect(result).toBe(false)
+      vi.restoreAllMocks()
+    })
+
+    it('confirms after MIN_CONFIRMATION_TIME with normal confidence', () => {
+      store.setMode('camera')
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.6,
+        plateText: { text: 'ABC123', confidence: [0.5, 0.5, 0.6, 0.7, 0.6, 0.5] } }))
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
+      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.7,
+        plateText: { text: 'ABC123', confidence: [0.6, 0.6, 0.7, 0.8, 0.7, 0.6] } }))
+
       expect(result).toBe(true)
+      vi.restoreAllMocks()
     })
 
-    it('tracks different texts separately', () => {
+    it('does not confirm before MIN_FAST_CONFIRMATION_TIME even with high confidence', () => {
       store.setMode('camera')
-      for (let i = 0; i < 5; i++) {
-        store.addPlate(makePlate({ id: `a${i}`, text: 'AAA111' }))
-        store.addPlate(makePlate({ id: `b${i}`, text: 'BBB222' }))
-      }
-      expect(store.plates).toHaveLength(10)
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9,
+        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 500)
+      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.9,
+        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+
+      expect(result).toBe(false)
+      vi.restoreAllMocks()
     })
 
-    it('resets consecutive counter after timeout', () => {
+    it('confirms after MIN_FAST_CONFIRMATION_TIME with high confidence and all chars >= 0.5', () => {
       store.setMode('camera')
-      const originalNow = Date.now
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9,
+        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+      const result = store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.85,
+        plateText: { text: 'ABC123', confidence: [0.85, 0.8, 0.9, 0.88, 0.82, 0.85] } }))
+
+      expect(result).toBe(true)
+      vi.restoreAllMocks()
+    })
+
+    it('resets consecutive counter after timeout in camera mode', () => {
+      store.setMode('camera')
       const now = Date.now()
 
+      vi.spyOn(Date, 'now').mockReturnValue(now)
       for (let i = 0; i < 5; i++) {
         store.addPlate(makePlate({ id: `p${i}`, text: 'ABC123' }))
       }
 
       vi.spyOn(Date, 'now').mockReturnValue(now + 10000)
-
       const result = store.addPlate(makePlate({ id: 'p_late', text: 'ABC123' }))
       expect(result).toBe(false)
 
@@ -88,10 +140,72 @@ describe('plateStore', () => {
       vi.restoreAllMocks()
     })
 
-    it('uses markRaw for croppedImage', () => {
-      const mockBitmap = {} as any
-      store.addPlate(makePlate({ id: 'p1', croppedImage: mockBitmap }))
+    it('does not add intermediate detections to plates in camera mode', () => {
+      store.setMode('camera')
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+      vi.spyOn(Date, 'now').mockReturnValue(now + 500)
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123' }))
+
+      expect(store.plates).toHaveLength(0)
+      vi.restoreAllMocks()
+    })
+
+    it('adds only best-confidence detection when confirmed', () => {
+      store.setMode('camera')
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.7,
+        plateText: { text: 'ABC123', confidence: [0.7, 0.7, 0.7, 0.7, 0.7, 0.7] } }))
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.95,
+        plateText: { text: 'ABC123', confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.95] } }))
+
       expect(store.plates).toHaveLength(1)
+      expect(store.plates[0].confidence).toBe(0.95)
+      expect(store.plates[0].confirmed).toBe(true)
+      vi.restoreAllMocks()
+    })
+
+    it('adds confirmed flag to confirmed plates', () => {
+      store.setMode('camera')
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9,
+        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.9,
+        plateText: { text: 'ABC123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }))
+
+      expect(store.plates[0].confirmed).toBe(true)
+      vi.restoreAllMocks()
+    })
+
+    it('tracks different texts separately in camera mode', () => {
+      store.setMode('camera')
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      for (let i = 0; i < 5; i++) {
+        store.addPlate(makePlate({ id: `a${i}`, text: 'AAA111' }))
+        store.addPlate(makePlate({ id: `b${i}`, text: 'BBB222' }))
+      }
+
+      expect(store.plates).toHaveLength(0)
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
+
+      store.addPlate(makePlate({ id: 'a_final', text: 'AAA111' }))
+      store.addPlate(makePlate({ id: 'b_final', text: 'BBB222' }))
+
+      expect(store.plates).toHaveLength(2)
+      vi.restoreAllMocks()
     })
   })
 
@@ -186,6 +300,27 @@ describe('plateStore', () => {
       expect(store.plates).toHaveLength(0)
       const groups = store.plateGroups as any
       expect(Object.keys(groups)).toHaveLength(0)
+    })
+  })
+
+  describe('clearConsecutiveDetections', () => {
+    it('clears consecutive detections without clearing plates or groups', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      store.addPlate(makePlate({ id: 'p2', text: 'XYZ789' }))
+
+      expect(Object.keys(store.consecutiveDetections)).toContain('XYZ789')
+
+      store.clearConsecutiveDetections()
+
+      expect(Object.keys(store.consecutiveDetections)).toHaveLength(0)
+      expect(store.plates).toHaveLength(1)
+      expect(Object.keys(store.plateGroups)).toHaveLength(1)
+
+      vi.restoreAllMocks()
     })
   })
 

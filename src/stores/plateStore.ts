@@ -18,13 +18,17 @@ interface PlateGroup {
 
 interface ConsecutiveDetection {
   count: number
+  firstTimestamp: number | null
   lastTimestamp: number | null
   detections: PlateRecord[]
 }
 
 const SIMILARITY_THRESHOLD = 0.8
 const CONSECUTIVE_DETECTION_TIMEOUT = 5000
-const CONSECUTIVE_DETECTIONS_REQUIRED = 10
+const MIN_CONFIRMATION_TIME = 3000
+const MIN_FAST_CONFIRMATION_TIME = 1000
+const HIGH_CONFIDENCE_MEAN = 0.8
+const HIGH_CONFIDENCE_MIN_CHAR = 0.5
 
 export const usePlateStore = defineStore('plateStore', () => {
   const plates = ref<PlateRecord[]>([])
@@ -43,12 +47,20 @@ export const usePlateStore = defineStore('plateStore', () => {
     })
 
     return sortedGroups.map(group => {
-      const sortedVariants = [...group.variants].sort((a, b) => b.confidence - a.confidence)
+      const confirmedVariants = group.variants.filter(v => v.confirmed)
+      const pool = confirmedVariants.length > 0 ? confirmedVariants : group.variants
+      const sortedVariants = [...pool].sort((a, b) => b.confidence - a.confidence)
       const best = { ...sortedVariants[0] }
       best.occurrences = group.totalOccurrences
       return best
     })
   })
+
+  function isHighQuality(plateText: PlateTextResult, confidenceMean: number): boolean {
+    if (confidenceMean < HIGH_CONFIDENCE_MEAN) return false
+    if (plateText.confidence.some(c => c < HIGH_CONFIDENCE_MIN_CHAR)) return false
+    return true
+  }
 
   function addPlate(plate: {
     id?: string
@@ -73,42 +85,62 @@ export const usePlateStore = defineStore('plateStore', () => {
       occurrences: 1,
     }
 
-    let shouldStop = false
-
     if (currentMode.value === 'camera') {
-      shouldStop = processForCameraMode(detectionObj)
+      return processForCameraMode(detectionObj)
     }
 
     plates.value.unshift(detectionObj)
     groupSimilarDetections(detectionObj)
 
-    return shouldStop
+    return false
   }
 
   function processForCameraMode(detectionObj: PlateRecord): boolean {
     const text = detectionObj.text
+    const now = Date.now()
 
     if (!consecutiveDetections.value[text]) {
       consecutiveDetections.value[text] = {
         count: 0,
+        firstTimestamp: null,
         lastTimestamp: null,
         detections: [],
       }
     }
 
     const current = consecutiveDetections.value[text]
-    const now = Date.now()
 
     if (current.lastTimestamp && (now - current.lastTimestamp) > CONSECUTIVE_DETECTION_TIMEOUT) {
       current.count = 0
+      current.firstTimestamp = null
       current.detections = []
     }
 
     current.count++
     current.lastTimestamp = now
+    if (!current.firstTimestamp) {
+      current.firstTimestamp = now
+    }
     current.detections.push(detectionObj)
 
-    if (current.count >= CONSECUTIVE_DETECTIONS_REQUIRED) {
+    const elapsed = current.firstTimestamp ? now - current.firstTimestamp : 0
+    const highQuality = isHighQuality(detectionObj.plateText, detectionObj.confidence)
+    const minTime = highQuality ? MIN_FAST_CONFIRMATION_TIME : MIN_CONFIRMATION_TIME
+
+    if (elapsed >= minTime) {
+      detectionObj.confirmed = true
+
+      const bestDetection = [...current.detections].sort((a, b) => b.confidence - a.confidence)[0]
+      const confirmedPlate: PlateRecord = {
+        ...bestDetection,
+        confirmed: true,
+        occurrences: current.count,
+      }
+
+      plates.value.unshift(confirmedPlate)
+      groupSimilarDetections(confirmedPlate)
+
+      delete consecutiveDetections.value[text]
       return true
     }
 
@@ -193,6 +225,10 @@ export const usePlateStore = defineStore('plateStore', () => {
     consecutiveDetections.value = {}
   }
 
+  function clearConsecutiveDetections(): void {
+    consecutiveDetections.value = {}
+  }
+
   function setMode(mode: string | null): void {
     currentMode.value = mode
   }
@@ -206,6 +242,9 @@ export const usePlateStore = defineStore('plateStore', () => {
     addPlate,
     removePlate,
     clearPlates,
+    clearConsecutiveDetections,
     setMode,
+    MIN_CONFIRMATION_TIME,
+    MIN_FAST_CONFIRMATION_TIME,
   }
 })

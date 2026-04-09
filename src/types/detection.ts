@@ -24,6 +24,7 @@ export interface PlateRecord {
   timestamp: Date
   occurrences?: number
   originalBoundingBox?: { x1: number; y1: number; x2: number; y2: number } | null
+  confirmed?: boolean
 }
 
 export type WorkerResponse =

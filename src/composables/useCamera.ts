@@ -22,7 +22,7 @@ export function useCamera(): {
 
   const plateStore = usePlateStore()
   const appStore = useAppStore()
-  const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate } = useDetection()
+  const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate, resetProcessing } = useDetection()
 
   const unsubscribeBoxes = onBoxes((boxes) => {
     lastBoxes = boxes
@@ -36,6 +36,9 @@ export function useCamera(): {
     stream?.getTracks().forEach(t => t.stop())
     stream = null
     isCameraActive.value = false
+    lastBoxes = []
+    resetProcessing()
+    plateStore.clearConsecutiveDetections()
     const ctx = canvasRef.value?.getContext('2d')
     if (ctx && canvasRef.value) {
       ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
@@ -44,6 +47,10 @@ export function useCamera(): {
 
   const startCamera = async (): Promise<void> => {
     try {
+      lastBoxes = []
+      plateStore.clearConsecutiveDetections()
+      resetProcessing()
+
       const constraints: MediaStreamConstraints = {
         video: { facingMode: { ideal: 'environment' } },
         audio: false,

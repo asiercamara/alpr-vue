@@ -1,16 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { usePlateStore } from '@/stores/plateStore'
 import PlateList from '@/components/ui/PlateList.vue'
 import type { PlateTextResult } from '@/types/detection'
 
-function makePlateData(id: string, text: string) {
+function makePlateData(id: string, text: string, confidence: number = 0.95) {
   return {
     id,
     text,
-    confidence: 0.95,
-    plateText: { text, confidence: [0.95, 0.92, 0.88, 0.91, 0.93, 0.90] } as PlateTextResult,
+    confidence,
+    plateText: { text, confidence: [confidence, confidence, confidence, confidence, confidence, confidence] } as PlateTextResult,
     timestamp: new Date(),
     croppedImage: null,
     boundingBox: null,
@@ -36,8 +36,10 @@ describe('PlateList', () => {
     expect(wrapper.text()).toContain('No hay detecciones recientes')
   })
 
-  it('renders plates list with plate data', () => {
-    plateStore.addPlate(makePlateData('1', 'ABC123'))
+  it('renders best detections (deduplicated)', () => {
+    plateStore.addPlate(makePlateData('1', 'ABC123', 0.7))
+    plateStore.addPlate(makePlateData('2', 'ABC123', 0.95))
+    plateStore.addPlate(makePlateData('3', 'ABC123', 0.85))
 
     const wrapper = mount(PlateList, {
       global: {
@@ -46,13 +48,15 @@ describe('PlateList', () => {
         },
       },
     })
-    expect(wrapper.text()).toContain('ABC123')
-    expect(wrapper.text()).toContain('95.0%')
+
+    const textContent = wrapper.text()
+    expect(textContent).toContain('ABC123')
+    expect(textContent).toContain('95.0%')
   })
 
-  it('renders multiple plates', () => {
-    plateStore.addPlate(makePlateData('1', 'ABC123'))
-    plateStore.addPlate(makePlateData('2', 'XYZ789'))
+  it('shows different plates as separate entries', () => {
+    plateStore.addPlate(makePlateData('1', 'AAA111'))
+    plateStore.addPlate(makePlateData('2', 'BBB222'))
 
     const wrapper = mount(PlateList, {
       global: {
@@ -61,8 +65,17 @@ describe('PlateList', () => {
         },
       },
     })
-    expect(wrapper.text()).toContain('ABC123')
-    expect(wrapper.text()).toContain('XYZ789')
+    expect(wrapper.text()).toContain('AAA111')
+    expect(wrapper.text()).toContain('BBB222')
+  })
+
+  it('shows the highest confidence version for similar plates', () => {
+    plateStore.addPlate(makePlateData('1', 'XYZ789', 0.7))
+    plateStore.addPlate(makePlateData('2', 'XYZ789', 0.95))
+
+    const best = plateStore.bestDetections
+    expect(best).toHaveLength(1)
+    expect(best[0].confidence).toBe(0.95)
   })
 
   it('clears plates when clear button is clicked', async () => {

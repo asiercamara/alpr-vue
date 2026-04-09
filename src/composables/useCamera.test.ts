@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 const mockDrawBoxesAndUpdate = vi.fn()
 const mockProcessFrame = vi.fn()
 const mockOnBoxes = vi.fn(() => vi.fn())
+const mockResetProcessing = vi.fn()
 
 vi.mock('@/composables/useDetection', () => ({
   useDetection: () => ({
@@ -12,10 +13,12 @@ vi.mock('@/composables/useDetection', () => ({
     processFrame: mockProcessFrame,
     onBoxes: mockOnBoxes,
     drawBoxesAndUpdate: mockDrawBoxesAndUpdate,
+    resetProcessing: mockResetProcessing,
   }),
 }))
 
 const mockSetMode = vi.fn()
+const mockClearConsecutiveDetections = vi.fn()
 
 vi.mock('@/stores/plateStore', () => ({
   usePlateStore: () => ({
@@ -24,6 +27,7 @@ vi.mock('@/stores/plateStore', () => ({
     addPlate: vi.fn(),
     removePlate: vi.fn(),
     clearPlates: vi.fn(),
+    clearConsecutiveDetections: mockClearConsecutiveDetections,
     currentMode: null,
     bestDetections: [],
     plateGroups: {},
@@ -44,11 +48,14 @@ describe('useCamera', () => {
     mockDrawBoxesAndUpdate.mockClear()
     mockProcessFrame.mockClear()
     mockOnBoxes.mockClear()
+    mockResetProcessing.mockClear()
+    mockClearConsecutiveDetections.mockClear()
 
     vi.stubGlobal('navigator', {
       mediaDevices: {
         getUserMedia: vi.fn(),
       },
+      vibrate: vi.fn(),
     })
 
     vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue({
@@ -134,7 +141,7 @@ describe('useCamera', () => {
     expect(camera.isCameraActive.value).toBe(false)
   })
 
-  it('stopCamera stops tracks and sets inactive', async () => {
+  it('stopCamera stops tracks, resets processing and clears consecutive detections', async () => {
     const mockTrack = { stop: vi.fn() }
     const mockStream = { getTracks: () => [mockTrack] }
     vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
@@ -150,6 +157,8 @@ describe('useCamera', () => {
     camera.stopCamera()
     expect(camera.isCameraActive.value).toBe(false)
     expect(mockTrack.stop).toHaveBeenCalled()
+    expect(mockResetProcessing).toHaveBeenCalled()
+    expect(mockClearConsecutiveDetections).toHaveBeenCalled()
   })
 
   it('stopCamera clears canvas', async () => {
@@ -167,5 +176,24 @@ describe('useCamera', () => {
     camera.stopCamera()
 
     expect(mockCtx.clearRect).toHaveBeenCalled()
+  })
+
+  it('startCamera calls clearConsecutiveDetections and resetProcessing', async () => {
+    const mockTrack = { stop: vi.fn() }
+    const mockStream = { getTracks: () => [mockTrack] }
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
+
+    const camera = useCamera()
+    const mockVideo = document.createElement('video')
+    mockVideo.play = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(camera.videoRef, 'value', { value: mockVideo, writable: true })
+
+    mockClearConsecutiveDetections.mockClear()
+    mockResetProcessing.mockClear()
+
+    await camera.startCamera()
+
+    expect(mockClearConsecutiveDetections).toHaveBeenCalled()
+    expect(mockResetProcessing).toHaveBeenCalled()
   })
 })
