@@ -1,10 +1,12 @@
 import { ref, markRaw } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
-import { evaluatePlateQuality } from '@/utils/validation'
+import { evaluatePlateQuality, PLATE_CONF_THRESHOLD } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
 import type { DetectionBox } from '@/types/detection'
 
+// Module-level singleton: the Worker and its state are shared across all composable instances.
+// This is intentional — only one Worker processes frames at a time, avoiding race conditions.
 let _worker: Worker | null = null
 const _modelReady = ref(false)
 const _modelFailed = ref(false)
@@ -24,13 +26,13 @@ function getWorker(): Worker {
 
     if (data?.status === 'model_ready') {
       _modelReady.value = true
-      try { useAppStore().setModelReady() } catch {}
+      try { useAppStore().setModelReady() } catch { /* store puede no estar disponible fuera de componentes */ }
       return
     }
 
     if (data?.status === 'model_failed') {
       _modelFailed.value = true
-      try { useAppStore().setModelError('No se pudo cargar el modelo de detección') } catch {}
+      try { useAppStore().setModelError('No se pudo cargar el modelo de detección') } catch { /* store puede no estar disponible fuera de componentes */ }
       return
     }
 
@@ -50,13 +52,11 @@ function getWorker(): Worker {
 }
 
 function selectBestBoxes(boxes: DetectionBox[]): DetectionBox[] {
-  const CONF_THRESH = 0.7
-
   const validBoxes = boxes.filter(box => {
     if (!box.plateText?.confidence?.length) return false
     const conf = box.plateText.confidence
     const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
-    return confMean >= CONF_THRESH
+    return confMean >= PLATE_CONF_THRESHOLD
   })
 
   const grouped = new Map<string, DetectionBox>()

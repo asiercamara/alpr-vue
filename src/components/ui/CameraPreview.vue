@@ -16,7 +16,7 @@
       <div>
         <p class="font-semibold mb-1">Error de cámara</p>
         <p class="text-sm">{{ appStore.cameraError }}</p>
-        <button @click="startCamera()" class="mt-3 px-4 py-2 bg-white text-red-700 rounded-lg text-sm font-medium">Reintentar</button>
+        <button class="mt-3 px-4 py-2 bg-white text-red-700 rounded-lg text-sm font-medium" @click="startCamera()">Reintentar</button>
       </div>
     </div>
 
@@ -36,11 +36,11 @@
     <!-- Controls -->
     <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
       <button
-        @click="isCameraActive ? stopCamera() : startCamera()"
         :class="[
           'p-3 rounded-full shadow-lg transition-transform active:scale-95',
           isCameraActive ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
         ]"
+        @click="isCameraActive ? stopCamera() : startCamera()"
       >
         <component :is="isCameraActive ? IconStop : IconPlay" class="w-6 h-6" />
       </button>

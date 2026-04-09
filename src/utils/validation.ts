@@ -4,6 +4,11 @@
  */
 import type { PlateTextResult } from '@/types/detection'
 
+export const PLATE_CONF_THRESHOLD = 0.7      // Confianza media mínima para aceptar una detección
+export const PLATE_CHAR_MIN_CONF = 0.5       // Confianza mínima por carácter individual
+export const PLATE_HIGH_CONF_MEAN = 0.8      // Umbral de alta confianza para confirmación rápida
+export const PLATE_FORMAT_REGEX = /^[A-Z0-9]{2,4}[\s-]?[A-Z0-9]{2,4}$/i
+
 export function calculateTextSimilarity(text1: string, text2: string): number {
   if (text1 === text2) return 1.0
 
@@ -57,17 +62,17 @@ export function evaluatePlateQuality(detection: {
       reason: 'Longitud inadecuada',
     },
     {
-      check: confidenceMean >= 0.7,
+      check: confidenceMean >= PLATE_CONF_THRESHOLD,
       weight: 0.3,
       reason: 'Baja confianza general',
     },
     {
-      check: Math.min(...plateText.confidence) >= 0.5,
+      check: Math.min(...plateText.confidence) >= PLATE_CHAR_MIN_CONF,
       weight: 0.25,
       reason: 'Caracteres de muy baja confianza',
     },
     {
-      check: /^[A-Z0-9]{2,4}[\s-]?[A-Z0-9]{2,4}$/i.test(text.trim()),
+      check: PLATE_FORMAT_REGEX.test(text.trim()),
       weight: 0.25,
       reason: 'Formato inconsistente',
     },

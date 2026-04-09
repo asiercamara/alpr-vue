@@ -3,8 +3,8 @@
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Matrículas Detectadas</h2>
       <button
-        @click="plateStore.clearPlates()"
         class="text-sm text-red-500 hover:text-red-700 transition-colors"
+        @click="plateStore.clearPlates()"
       >
         Limpiar lista
       </button>

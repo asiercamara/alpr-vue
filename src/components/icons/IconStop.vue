@@ -3,6 +3,3 @@
     <path d="M6 6h12v12H6z"/>
   </svg>
 </template>
-
-<script setup lang="ts">
-</script>

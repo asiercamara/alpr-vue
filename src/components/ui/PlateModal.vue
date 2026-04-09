@@ -5,8 +5,8 @@
         <div class="absolute inset-0 bg-black/60" @click="$emit('close')" />
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl">
           <button
-            @click="$emit('close')"
             class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl"
+            @click="$emit('close')"
           >
             ✕
           </button>
@@ -57,8 +57,8 @@
           </div>
 
           <button
-            @click="$emit('close')"
             class="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors"
+            @click="$emit('close')"
           >
             Cerrar
           </button>

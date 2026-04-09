@@ -1,6 +1,6 @@
 import { ref, computed, markRaw } from 'vue'
 import { defineStore } from 'pinia'
-import { calculateTextSimilarity } from '@/utils/validation'
+import { calculateTextSimilarity, PLATE_HIGH_CONF_MEAN, PLATE_CHAR_MIN_CONF } from '@/utils/validation'
 import type { PlateRecord, PlateTextResult } from '@/types/detection'
 
 interface VariantText {
@@ -27,8 +27,8 @@ const SIMILARITY_THRESHOLD = 0.8
 const CONSECUTIVE_DETECTION_TIMEOUT = 5000
 const MIN_CONFIRMATION_TIME = 3000
 const MIN_FAST_CONFIRMATION_TIME = 1000
-const HIGH_CONFIDENCE_MEAN = 0.8
-const HIGH_CONFIDENCE_MIN_CHAR = 0.5
+const HIGH_CONFIDENCE_MEAN = PLATE_HIGH_CONF_MEAN
+const HIGH_CONFIDENCE_MIN_CHAR = PLATE_CHAR_MIN_CONF
 
 export const usePlateStore = defineStore('plateStore', () => {
   const plates = ref<PlateRecord[]>([])
@@ -197,8 +197,6 @@ export const usePlateStore = defineStore('plateStore', () => {
     if (mainVariant.text !== groupKey && mainVariant.occurrences >
         (group.variantTexts.find(v => v.text === groupKey)?.occurrences || 0)) {
       const oldGroup = { ...plateGroups.value[groupKey] }
-      delete plateGroups.value[groupKey]
-
       plateGroups.value[mainVariant.text] = {
         mainText: mainVariant.text,
         totalOccurrences: oldGroup.totalOccurrences,
@@ -206,6 +204,7 @@ export const usePlateStore = defineStore('plateStore', () => {
         variantTexts: oldGroup.variantTexts,
         confidenceMean: calculateGroupConfidence(oldGroup.variants),
       }
+      delete plateGroups.value[groupKey]
     }
   }
 
