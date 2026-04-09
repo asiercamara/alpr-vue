@@ -332,15 +332,16 @@ describe('plateStore', () => {
       expect(store.bestDetections).toEqual([])
     })
 
-    it('returns sorted by occurrences descending', () => {
-      store.addPlate(makePlate({ id: 'p1', text: 'AAA111' }))
-      store.addPlate(makePlate({ id: 'p2', text: 'BBB222' }))
+    it('returns sorted by most recent detection first', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'AAA111', timestamp: new Date('2025-01-01') }))
+      store.addPlate(makePlate({ id: 'p2', text: 'BBB222', timestamp: new Date('2025-01-03') }))
       store.addPlate(makePlate({ id: 'p3', text: 'BBB222' }))
       store.addPlate(makePlate({ id: 'p4', text: 'BBB222' }))
 
       const best = store.bestDetections
       expect(best.length).toBe(2)
-      expect(best[0].occurrences).toBeGreaterThanOrEqual(best[1].occurrences!)
+      expect(best[0].text).toBe('BBB222')
+      expect(best[1].text).toBe('AAA111')
     })
 
     it('returns best variant per group sorted by confidence', () => {

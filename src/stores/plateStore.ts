@@ -44,10 +44,9 @@ export const usePlateStore = defineStore('plateStore', () => {
     const groupsArray = Object.values(plateGroups.value)
 
     const sortedGroups = [...groupsArray].sort((a, b) => {
-      if (b.totalOccurrences !== a.totalOccurrences) {
-        return b.totalOccurrences - a.totalOccurrences
-      }
-      return b.confidenceMean - a.confidenceMean
+      const aTime = Math.max(...a.variants.map((v) => new Date(v.timestamp).getTime()))
+      const bTime = Math.max(...b.variants.map((v) => new Date(v.timestamp).getTime()))
+      return bTime - aTime
     })
 
     return sortedGroups.map((group) => {

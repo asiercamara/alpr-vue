@@ -53,8 +53,8 @@
           class="absolute inset-x-0 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-brand-400 to-transparent opacity-60 animate-pulse"
         ></div>
       </div>
-      <p class="text-sm font-medium text-surface-600 dark:text-surface-300">Sin detecciones</p>
-      <p class="text-xs text-surface-400 dark:text-surface-500 mt-1 text-center">
+      <p class="text-sm font-medium text-surface-600 dark:text-white/70">Sin detecciones</p>
+      <p class="text-xs text-surface-400 dark:text-white/50 mt-1 text-center">
         Activa la cámara o sube una imagen
       </p>
     </div>

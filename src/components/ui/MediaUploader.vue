@@ -8,7 +8,7 @@
       @change="handleFileSelect"
     />
     <button
-      class="flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-sm shadow-lg transition-all duration-200 active:scale-95 bg-surface-700 hover:bg-surface-600 text-surface-200 backdrop-blur-sm"
+      class="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-lg transition-all duration-200 active:scale-95 bg-surface-700 hover:bg-surface-600 text-white/80 hover:text-white backdrop-blur-sm"
       @click="triggerFileSelect"
     >
       <IconUpload class="w-4 h-4" />

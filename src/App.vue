@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-surface-50 dark:bg-surface-900 transition-colors duration-300">
     <!-- Header -->
     <header
-      class="bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200/70 dark:border-surface-700/50 sticky top-0 z-40 py-3 px-6"
+      class="bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200/70 dark:border-surface-700/50 sticky top-0 z-40 py-3 px-4 sm:px-6"
     >
       <div class="max-w-5xl mx-auto flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -46,62 +46,27 @@
             ]"
             :title="statusTitle"
           ></span>
-          <span class="text-sm font-medium text-surface-600 dark:text-surface-300">
+          <span class="text-sm font-medium text-surface-500 dark:text-white/70">
             {{
               appStore.cameraError ? 'Error' : appStore.isCameraActive ? 'Escaneando' : 'Esperando'
             }}
           </span>
+          <button
+            class="ml-1 w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors text-xs font-bold"
+            title="Cómo usar"
+            @click="showHelp = true"
+          >
+            ?
+          </button>
         </div>
       </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-4 pb-12">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <!-- Main Camera Section -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2">
           <CameraPreview />
-
-          <Transition name="collapse">
-            <div v-if="!appStore.isCameraActive" class="card p-5">
-              <div class="flex items-center gap-2 mb-4">
-                <div class="w-1 h-5 bg-brand-500 rounded-full"></div>
-                <h2
-                  class="heading-display text-sm font-semibold text-surface-700 dark:text-surface-300 uppercase tracking-wider"
-                >
-                  Cómo usar
-                </h2>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="flex gap-3 items-start">
-                  <span
-                    class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-xs font-bold flex items-center justify-center flex-none"
-                    >1</span
-                  >
-                  <p class="text-sm text-surface-600 dark:text-surface-300 leading-relaxed">
-                    Activa la cámara para comenzar el escaneo en tiempo real.
-                  </p>
-                </div>
-                <div class="flex gap-3 items-start">
-                  <span
-                    class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-xs font-bold flex items-center justify-center flex-none"
-                    >2</span
-                  >
-                  <p class="text-sm text-surface-600 dark:text-surface-300 leading-relaxed">
-                    Apunta la cámara directamente a la matrícula del vehículo.
-                  </p>
-                </div>
-                <div class="flex gap-3 items-start">
-                  <span
-                    class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-xs font-bold flex items-center justify-center flex-none"
-                    >3</span
-                  >
-                  <p class="text-sm text-surface-600 dark:text-surface-300 leading-relaxed">
-                    El sistema detectará automáticamente el texto y lo guardará en el historial.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Transition>
         </div>
 
         <!-- Sidebar / History Section -->
@@ -110,16 +75,20 @@
         </div>
       </div>
     </main>
+
+    <HelpSheet v-model="showHelp" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import CameraPreview from '@/components/ui/CameraPreview.vue'
 import PlateList from '@/components/ui/PlateList.vue'
+import HelpSheet from '@/components/ui/HelpSheet.vue'
 import { useAppStore } from '@/stores/appStore'
 
 const appStore = useAppStore()
+const showHelp = ref(false)
 
 const statusTitle = computed(() => {
   if (appStore.cameraError) return 'Error de cámara'
@@ -127,22 +96,3 @@ const statusTitle = computed(() => {
   return 'Esperando activación de cámara'
 })
 </script>
-
-<style>
-.collapse-enter-active {
-  transition: all 0.3s ease;
-}
-.collapse-leave-active {
-  transition: all 0.2s ease-in;
-}
-.collapse-enter-from {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-}
-.collapse-leave-to {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-}
-</style>
