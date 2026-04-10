@@ -11,19 +11,23 @@ const mockSetModelReady = vi.fn()
 const mockSetModelError = vi.fn()
 const mockNotifyDetection = vi.fn()
 
-vi.stubGlobal('Worker', class {
-  onmessage: ((event: MessageEvent) => void) | null = null
-  postMessage = vi.fn()
-  terminate = vi.fn()
-  constructor() {
-    capturedWorkerInstance = this as any
-  }
-})
+vi.stubGlobal(
+  'Worker',
+  class {
+    onmessage: ((event: MessageEvent) => void) | null = null
+    postMessage = vi.fn()
+    terminate = vi.fn()
+    constructor() {
+      capturedWorkerInstance = this as any
+    }
+  },
+)
 
 vi.mock('@/stores/appStore', () => ({
   useAppStore: vi.fn(() => ({
     setModelReady: mockSetModelReady,
     setModelError: mockSetModelError,
+    feedbackEnabled: true,
   })),
 }))
 
@@ -54,7 +58,7 @@ describe('useDetection', () => {
       y1: 20,
       x2: 100,
       y2: 50,
-      plateText: { text: 'AB1234', confidence: [0.95, 0.92, 0.88, 0.91, 0.93, 0.90] },
+      plateText: { text: 'AB1234', confidence: [0.95, 0.92, 0.88, 0.91, 0.93, 0.9] },
       croppedImage: null,
       confidence: 0.9,
       area: 2700,
@@ -156,10 +160,9 @@ describe('useDetection', () => {
       const bitmap = { close: vi.fn() } as any
       await detection.processFrame(bitmap)
 
-      expect(capturedWorkerInstance.postMessage).toHaveBeenCalledWith(
-        { imageBitmap: bitmap },
-        [bitmap],
-      )
+      expect(capturedWorkerInstance.postMessage).toHaveBeenCalledWith({ imageBitmap: bitmap }, [
+        bitmap,
+      ])
     })
 
     it('skips when already processing', async () => {
@@ -227,17 +230,23 @@ describe('useDetection', () => {
       const { useDetection } = await import('@/composables/useDetection')
       const detection = useDetection()
       const canvas = document.createElement('canvas')
-      const stopCallback = vi.fn()
-      detection.drawBoxesAndUpdate(canvas, [], stopCallback)
-      expect(stopCallback).not.toHaveBeenCalled()
+      detection.drawBoxesAndUpdate(canvas, [])
     })
 
     it('skips boxes without plateText confidence', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const detection = useDetection()
       const canvas = document.createElement('canvas')
-      const noConfBox = { x1: 10, y1: 20, x2: 100, y2: 50, plateText: { text: 'X' }, confidence: 0.5, area: 100 }
-      detection.drawBoxesAndUpdate(canvas, [noConfBox as any], vi.fn())
+      const noConfBox = {
+        x1: 10,
+        y1: 20,
+        x2: 100,
+        y2: 50,
+        plateText: { text: 'X' },
+        confidence: 0.5,
+        area: 100,
+      }
+      detection.drawBoxesAndUpdate(canvas, [noConfBox as any])
       expect(mockCtx.strokeRect).not.toHaveBeenCalled()
     })
 
@@ -248,7 +257,7 @@ describe('useDetection', () => {
       const lowConfBox = makeBox({
         plateText: { text: 'AB12', confidence: [0.1] },
       })
-      detection.drawBoxesAndUpdate(canvas, [lowConfBox], vi.fn())
+      detection.drawBoxesAndUpdate(canvas, [lowConfBox])
     })
 
     it('draws boxes and adds valid plates to store when not in camera mode', async () => {
@@ -260,13 +269,87 @@ describe('useDetection', () => {
       canvas.width = 300
       canvas.height = 150
 
-      detection.drawBoxesAndUpdate(canvas, [makeBox()], vi.fn())
+      detection.drawBoxesAndUpdate(canvas, [makeBox()])
 
       expect(store.plates.length).toBeGreaterThan(0)
       expect(mockCtx.strokeRect).toHaveBeenCalled()
     })
 
-    it('calls notifyDetection when shouldStop is true', async () => {
+    it('adds all valid bestBoxes to the store, not just the longest', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const box1 = makeBox({
+        plateText: { text: 'AB1234', confidence: [0.95, 0.93, 0.91, 0.94, 0.92, 0.9] },
+        x1: 10,
+      })
+      const box2 = makeBox({
+        plateText: { text: 'CD5678', confidence: [0.96, 0.94, 0.92, 0.95, 0.93, 0.91] },
+        x1: 150,
+      })
+
+      detection.drawBoxesAndUpdate(canvas, [box1, box2])
+
+      const plates = store.plates
+      const plateTexts = plates.map((p: any) => p.text)
+      expect(plateTexts).toContain('AB1234')
+      expect(plateTexts).toContain('CD5678')
+    })
+
+    it('adds multiple different plate texts to the store', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const shortBox = makeBox({
+        plateText: { text: 'AB12', confidence: [0.9, 0.9, 0.9, 0.9] },
+      })
+      const longBox = makeBox({
+        plateText: { text: 'AB12345', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+      })
+
+      detection.drawBoxesAndUpdate(canvas, [shortBox, longBox])
+
+      const plateTexts = store.plates.map((p: any) => p.text)
+      expect(plateTexts).toContain('AB12')
+      expect(plateTexts).toContain('AB12345')
+    })
+
+    it('resetProcessing sets isProcessing to false', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      detection.isProcessing.value = true
+      detection.resetProcessing()
+      expect(detection.isProcessing.value).toBe(false)
+    })
+
+    it('skips boxes with low quality when adding to store', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const lowQualityBox = makeBox({
+        plateText: { text: 'AB', confidence: [0.3, 0.4] },
+        x1: 10,
+      })
+
+      detection.drawBoxesAndUpdate(canvas, [lowQualityBox])
+
+      expect(mockCtx.strokeRect).not.toHaveBeenCalled()
+    })
+
+    it('notifies detection when feedbackEnabled and shouldStop is true in camera mode', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const { usePlateStore } = await import('@/stores/plateStore')
       const store = usePlateStore()
@@ -290,38 +373,95 @@ describe('useDetection', () => {
       const canvas = document.createElement('canvas')
       canvas.width = 300
       canvas.height = 150
-      const stopCallback = vi.fn()
 
-      detection.drawBoxesAndUpdate(canvas, [makeBox()], stopCallback)
+      detection.drawBoxesAndUpdate(canvas, [makeBox()])
 
-      expect(stopCallback).toHaveBeenCalled()
+      expect(mockNotifyDetection).toHaveBeenCalled()
 
       vi.restoreAllMocks()
     })
 
-    it('selects longest plate text when multiple candidates', async () => {
+    it('does not notify when feedbackEnabled is false', async () => {
+      vi.resetModules()
+      vi.doMock('@/stores/appStore', () => ({
+        useAppStore: vi.fn(() => ({
+          setModelReady: mockSetModelReady,
+          setModelError: mockSetModelError,
+          feedbackEnabled: false,
+        })),
+      }))
+
+      const { useDetection: useDetectionFresh } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      for (let i = 0; i < 5; i++) {
+        store.addPlate({
+          id: `existing_fb_${i}`,
+          text: 'XY5678',
+          confidence: 0.9,
+          plateText: { text: 'XY5678', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        })
+      }
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+
+      const detection = useDetectionFresh()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      detection.drawBoxesAndUpdate(canvas, [
+        makeBox({ plateText: { text: 'XY5678', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }),
+      ])
+
+      expect(mockNotifyDetection).not.toHaveBeenCalled()
+
+      vi.doUnmock('@/stores/appStore')
+      vi.restoreAllMocks()
+    })
+
+    it('selects higher confidence box when same text length', async () => {
       const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
       const detection = useDetection()
       const canvas = document.createElement('canvas')
       canvas.width = 300
       canvas.height = 150
 
-      const shortBox = makeBox({
-        plateText: { text: 'AB12', confidence: [0.9, 0.9, 0.9, 0.9] },
+      const lowConfBox = makeBox({
+        plateText: { text: 'AB1234', confidence: [0.7, 0.7, 0.7, 0.7, 0.7, 0.7] },
+        x1: 10,
       })
-      const longBox = makeBox({
-        plateText: { text: 'AB12345', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+      const highConfBox = makeBox({
+        plateText: { text: 'AB1234', confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.95] },
+        x1: 200,
       })
 
-      detection.drawBoxesAndUpdate(canvas, [shortBox, longBox], vi.fn())
+      detection.drawBoxesAndUpdate(canvas, [lowConfBox, highConfBox])
+
+      expect(store.plates.length).toBe(1)
+      expect(store.plates[0].text).toBe('AB1234')
+      expect(store.plates[0].confidence).toBeCloseTo(0.95, 1)
     })
 
-    it('resetProcessing sets isProcessing to false', async () => {
+    it('does nothing when canvas has no context', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const detection = useDetection()
-      detection.isProcessing.value = true
-      detection.resetProcessing()
-      expect(detection.isProcessing.value).toBe(false)
+      const canvas = document.createElement('canvas')
+      const origGetContext = HTMLCanvasElement.prototype.getContext
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as any
+
+      detection.drawBoxesAndUpdate(canvas, [makeBox()])
+
+      expect(mockCtx.strokeRect).not.toHaveBeenCalled()
+
+      HTMLCanvasElement.prototype.getContext = origGetContext
     })
   })
 })

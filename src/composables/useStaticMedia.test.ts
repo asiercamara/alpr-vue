@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
 
 const mockProcessFrame = vi.fn()
 const mockOnBoxes = vi.fn(() => vi.fn())
 const mockDrawBoxesAndUpdate = vi.fn()
+const mockResetProcessing = vi.fn()
+const mockSetMode = vi.fn()
 
 vi.mock('@/composables/useDetection', () => ({
   useDetection: () => ({
@@ -11,13 +14,13 @@ vi.mock('@/composables/useDetection', () => ({
     processFrame: mockProcessFrame,
     onBoxes: mockOnBoxes,
     drawBoxesAndUpdate: mockDrawBoxesAndUpdate,
-    resetProcessing: vi.fn(),
+    resetProcessing: mockResetProcessing,
   }),
 }))
 
 vi.mock('@/stores/plateStore', () => ({
   usePlateStore: () => ({
-    setMode: vi.fn(),
+    setMode: mockSetMode,
   }),
 }))
 
@@ -25,25 +28,39 @@ import { useStaticMedia } from '@/composables/useStaticMedia'
 import type { DetectionBox } from '@/types/detection'
 
 describe('useStaticMedia', () => {
+  let rafSpy: ReturnType<typeof vi.spyOn>
+  let cancelRafSpy: ReturnType<typeof vi.spyOn>
+
   beforeEach(() => {
+    setActivePinia(createPinia())
     mockProcessFrame.mockClear()
     mockOnBoxes.mockClear()
     mockDrawBoxesAndUpdate.mockClear()
+    mockResetProcessing.mockClear()
+    mockSetMode.mockClear()
+    rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => {
+      return 1
+    })
+    cancelRafSpy = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
   })
 
-  it('starts with idle status and zero progress', () => {
+  afterEach(() => {
+    rafSpy.mockRestore()
+    cancelRafSpy.mockRestore()
+  })
+
+  it('starts with idle status', () => {
     const media = useStaticMedia()
     expect(media.status.value).toBe('idle')
-    expect(media.progress.value).toBe(0)
-    expect(media.currentFrame.value).toBe(0)
-    expect(media.totalFrames.value).toBe(0)
   })
 
-  it('exposes all expected methods', () => {
+  it('exposes expected methods', () => {
     const media = useStaticMedia()
     expect(typeof media.processImage).toBe('function')
-    expect(typeof media.processVideo).toBe('function')
-    expect(typeof media.cancelProcessing).toBe('function')
+    expect(typeof media.processVideoStream).toBe('function')
+    expect(typeof media.setVideoSource).toBe('function')
+    expect(typeof media.stopMediaProcessing).toBe('function')
+    expect(typeof media.cleanup).toBe('function')
   })
 
   describe('processImage', () => {
@@ -56,7 +73,7 @@ describe('useStaticMedia', () => {
           processFrame: mockProcessFrame,
           onBoxes: mockOnBoxes,
           drawBoxesAndUpdate: mockDrawBoxesAndUpdate,
-          resetProcessing: vi.fn(),
+          resetProcessing: mockResetProcessing,
         }),
       }))
 
@@ -110,7 +127,13 @@ describe('useStaticMedia', () => {
     it('processes image successfully and returns detection boxes', async () => {
       const media = useStaticMedia()
       const canvas = document.createElement('canvas')
-      const mockCtx = { drawImage: vi.fn() }
+      const mockCtx = {
+        drawImage: vi.fn(),
+        strokeRect: vi.fn(),
+        fillRect: vi.fn(),
+        fillText: vi.fn(),
+        measureText: vi.fn(() => ({ width: 100 })),
+      }
       const origGetContext = HTMLCanvasElement.prototype.getContext
       HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
 
@@ -126,7 +149,7 @@ describe('useStaticMedia', () => {
           plateText: { text: 'ABC123', confidence: [0.95] },
           confidence: 0.95,
           area: 2700,
-          croppedImage: null,
+          croppedImage: null as any,
         },
       ]
 
@@ -145,7 +168,6 @@ describe('useStaticMedia', () => {
       await new Promise((r) => setTimeout(r, 0))
 
       expect(media.status.value).toBe('processing')
-      expect(media.progress.value).toBe(50)
 
       expect(capturedCallback).not.toBeNull()
       capturedCallback!(testBoxes)
@@ -154,7 +176,6 @@ describe('useStaticMedia', () => {
 
       expect(result).toEqual(testBoxes)
       expect(media.status.value).toBe('done')
-      expect(media.progress.value).toBe(100)
       expect(mockBitmap.close).toHaveBeenCalled()
       expect(mockDrawBoxesAndUpdate).toHaveBeenCalledWith(canvas, testBoxes)
       expect(mockUnsubscribe).toHaveBeenCalled()
@@ -162,9 +183,28 @@ describe('useStaticMedia', () => {
       HTMLCanvasElement.prototype.getContext = origGetContext
       vi.unstubAllGlobals()
     })
+
+    it('calls plateStore.setMode with upload', async () => {
+      const media = useStaticMedia()
+      const canvas = document.createElement('canvas')
+      const mockCtx = { drawImage: vi.fn() }
+      const origGetContext = HTMLCanvasElement.prototype.getContext
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
+
+      const mockBitmap = { width: 200, height: 100, close: vi.fn() }
+      vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue(mockBitmap))
+
+      const file = new File([''], 'test.jpg', { type: 'image/jpeg' })
+      media.processImage(file, canvas)
+
+      expect(mockSetMode).toHaveBeenCalledWith('upload')
+
+      HTMLCanvasElement.prototype.getContext = origGetContext
+      vi.unstubAllGlobals()
+    })
   })
 
-  describe('processVideo', () => {
+  describe('processVideoStream', () => {
     it('sets status to error when model is not ready', async () => {
       vi.resetModules()
       vi.doMock('@/composables/useDetection', () => ({
@@ -174,291 +214,183 @@ describe('useStaticMedia', () => {
           processFrame: mockProcessFrame,
           onBoxes: mockOnBoxes,
           drawBoxesAndUpdate: mockDrawBoxesAndUpdate,
-          resetProcessing: vi.fn(),
+          resetProcessing: mockResetProcessing,
         }),
       }))
 
       const { useStaticMedia: useStaticMediaFresh } = await import('@/composables/useStaticMedia')
       const media = useStaticMediaFresh()
+      const video = document.createElement('video')
       const canvas = document.createElement('canvas')
-      const file = new File([''], 'test.mp4', { type: 'video/mp4' })
 
-      const result = await media.processVideo(file, canvas)
+      media.processVideoStream(video, canvas)
 
-      expect(result).toEqual([])
       expect(media.status.value).toBe('error')
 
       vi.doUnmock('@/composables/useDetection')
     })
 
-    it('sets status to error when video fails to load', async () => {
+    it('sets status to loading and calls setMode with upload', () => {
       const media = useStaticMedia()
+      const video = document.createElement('video')
       const canvas = document.createElement('canvas')
-      const file = new File([''], 'test.mp4', { type: 'video/mp4' })
 
-      const origCreate = URL.createObjectURL
-      const origRevoke = URL.revokeObjectURL
-      URL.createObjectURL = vi.fn(() => 'blob:test')
-      URL.revokeObjectURL = vi.fn()
+      media.processVideoStream(video, canvas)
 
-      const origCreateElement = document.createElement.bind(document)
-      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-        if (tag === 'video') {
-          const video = origCreateElement('video')
-          Object.defineProperty(video, 'onerror', {
-            set(fn: (() => void) | null) {
-              setTimeout(() => fn?.(), 0)
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'onloadedmetadata', {
-            set() {},
-            configurable: true,
-          })
-          return video
-        }
-        return origCreateElement(tag)
-      })
-
-      const result = await media.processVideo(file, canvas)
-
-      expect(result).toEqual([])
-      expect(media.status.value).toBe('error')
-      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test')
-      ;(document.createElement as ReturnType<typeof vi.fn>).mockRestore()
-      URL.createObjectURL = origCreate
-      URL.revokeObjectURL = origRevoke
+      expect(media.status.value).toBe('loading')
+      expect(mockSetMode).toHaveBeenCalledWith('upload')
     })
 
-    it('processes video frames successfully', async () => {
+    it('registers loadeddata listener when video not ready', () => {
       const media = useStaticMedia()
+      const video = document.createElement('video')
       const canvas = document.createElement('canvas')
-      const mockCtx = { drawImage: vi.fn() }
-      const origGetContext = HTMLCanvasElement.prototype.getContext
-      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
+      const addEventListenerSpy = vi.spyOn(video, 'addEventListener')
 
-      const origCreate = URL.createObjectURL
-      const origRevoke = URL.revokeObjectURL
-      URL.createObjectURL = vi.fn(() => 'blob:test')
-      URL.revokeObjectURL = vi.fn()
+      media.processVideoStream(video, canvas)
 
-      const origCreateElement = document.createElement.bind(document)
-      let metadataResolve: (() => void) | null = null
-      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-        if (tag === 'video') {
-          const video = origCreateElement('video')
-          Object.defineProperty(video, 'onloadedmetadata', {
-            set(fn: () => void) {
-              metadataResolve = fn
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'onerror', { set() {}, configurable: true })
-          Object.defineProperty(video, 'duration', { value: 1.0, configurable: true })
-          Object.defineProperty(video, 'onseeked', {
-            set(fn: () => void) {
-              setTimeout(fn, 0)
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'currentTime', {
-            set() {},
-            configurable: true,
-          })
-          return video
-        }
-        return origCreateElement(tag)
+      expect(addEventListenerSpy).toHaveBeenCalledWith('loadeddata', expect.any(Function), {
+        once: true,
       })
-
-      const mockBitmap = { width: 100, height: 50, close: vi.fn() }
-      vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue(mockBitmap))
-
-      const testBoxes: DetectionBox[] = [
-        {
-          x1: 10,
-          y1: 20,
-          x2: 100,
-          y2: 50,
-          plateText: { text: 'ABC123', confidence: [0.9] },
-          confidence: 0.9,
-          area: 2700,
-          croppedImage: null,
-        },
-      ]
-
-      mockOnBoxes.mockImplementation((cb: (boxes: DetectionBox[]) => void) => {
-        setTimeout(() => cb(testBoxes), 0)
-        return vi.fn()
-      })
-
-      const file = new File([''], 'test.mp4', { type: 'video/mp4' })
-
-      const resultPromise = media.processVideo(file, canvas)
-
-      if (metadataResolve) {
-        metadataResolve()
-      }
-
-      const result = await resultPromise
-
-      expect(result.length).toBeGreaterThanOrEqual(1)
-      expect(result[0].plateText.text).toBe('ABC123')
-      expect(media.status.value).toBe('done')
-      expect(media.progress.value).toBe(100)
-      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test')
-      ;(document.createElement as ReturnType<typeof vi.fn>).mockRestore()
-      HTMLCanvasElement.prototype.getContext = origGetContext
-      URL.createObjectURL = origCreate
-      URL.revokeObjectURL = origRevoke
-      vi.unstubAllGlobals()
+      addEventListenerSpy.mockRestore()
     })
 
-    it('skips frames when createImageBitmap fails in video loop', async () => {
+    it('directly calls onLoaded when video readyState >= 2', () => {
       const media = useStaticMedia()
+      const video = document.createElement('video')
       const canvas = document.createElement('canvas')
-      const mockCtx = { drawImage: vi.fn() }
-      const origGetContext = HTMLCanvasElement.prototype.getContext
-      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
 
-      const origCreate = URL.createObjectURL
-      const origRevoke = URL.revokeObjectURL
-      URL.createObjectURL = vi.fn(() => 'blob:test')
-      URL.revokeObjectURL = vi.fn()
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
 
-      const origCreateElement = document.createElement.bind(document)
-      let metadataResolve: (() => void) | null = null
-      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-        if (tag === 'video') {
-          const video = origCreateElement('video')
-          Object.defineProperty(video, 'onloadedmetadata', {
-            set(fn: () => void) {
-              metadataResolve = fn
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'onerror', { set() {}, configurable: true })
-          Object.defineProperty(video, 'duration', { value: 1.0, configurable: true })
-          Object.defineProperty(video, 'onseeked', {
-            set(fn: () => void) {
-              setTimeout(fn, 0)
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'currentTime', {
-            set() {},
-            configurable: true,
-          })
-          return video
-        }
-        return origCreateElement(tag)
-      })
+      media.processVideoStream(video, canvas)
 
-      vi.stubGlobal('createImageBitmap', vi.fn().mockRejectedValue(new Error('no bitmap')))
-
-      const file = new File([''], 'test.mp4', { type: 'video/mp4' })
-
-      const resultPromise = media.processVideo(file, canvas)
-
-      if (metadataResolve) {
-        metadataResolve()
-      }
-
-      const result = await resultPromise
-
-      expect(result).toEqual([])
-      expect(media.status.value).toBe('done')
-      ;(document.createElement as ReturnType<typeof vi.fn>).mockRestore()
-      HTMLCanvasElement.prototype.getContext = origGetContext
-      URL.createObjectURL = origCreate
-      URL.revokeObjectURL = origRevoke
-      vi.unstubAllGlobals()
-    })
-
-    it('deduplicates detections with same plate text', async () => {
-      const media = useStaticMedia()
-      const canvas = document.createElement('canvas')
-      const mockCtx = { drawImage: vi.fn() }
-      const origGetContext = HTMLCanvasElement.prototype.getContext
-      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
-
-      const origCreate = URL.createObjectURL
-      const origRevoke = URL.revokeObjectURL
-      URL.createObjectURL = vi.fn(() => 'blob:test')
-      URL.revokeObjectURL = vi.fn()
-
-      const origCreateElement = document.createElement.bind(document)
-      let metadataResolve: (() => void) | null = null
-      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-        if (tag === 'video') {
-          const video = origCreateElement('video')
-          Object.defineProperty(video, 'onloadedmetadata', {
-            set(fn: () => void) {
-              metadataResolve = fn
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'onerror', { set() {}, configurable: true })
-          Object.defineProperty(video, 'duration', { value: 1.0, configurable: true })
-          Object.defineProperty(video, 'onseeked', {
-            set(fn: () => void) {
-              setTimeout(fn, 0)
-            },
-            configurable: true,
-          })
-          Object.defineProperty(video, 'currentTime', {
-            set() {},
-            configurable: true,
-          })
-          return video
-        }
-        return origCreateElement(tag)
-      })
-
-      const mockBitmap = { width: 100, height: 50, close: vi.fn() }
-      vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue(mockBitmap))
-
-      const boxA: DetectionBox = {
-        x1: 10,
-        y1: 20,
-        x2: 100,
-        y2: 50,
-        plateText: { text: 'ABC123', confidence: [0.9] },
-        confidence: 0.9,
-        area: 2700,
-        croppedImage: null,
-      }
-
-      mockOnBoxes.mockImplementation((cb: (boxes: DetectionBox[]) => void) => {
-        setTimeout(() => cb([boxA]), 0)
-        return vi.fn()
-      })
-
-      const file = new File([''], 'test.mp4', { type: 'video/mp4' })
-      const resultPromise = media.processVideo(file, canvas)
-
-      if (metadataResolve) {
-        metadataResolve()
-      }
-
-      const result = await resultPromise
-
-      expect(result).toHaveLength(1)
-      ;(document.createElement as ReturnType<typeof vi.fn>).mockRestore()
-      HTMLCanvasElement.prototype.getContext = origGetContext
-      URL.createObjectURL = origCreate
-      URL.revokeObjectURL = origRevoke
-      vi.unstubAllGlobals()
+      expect(rafSpy).toHaveBeenCalled()
     })
   })
 
-  describe('cancelProcessing', () => {
-    it('resets status to idle and progress to 0', () => {
+  describe('setVideoSource', () => {
+    it('sets video src, muted, playsInline and calls load', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const loadSpy = vi.spyOn(video, 'load')
+
+      media.setVideoSource(video, 'blob:test-url')
+
+      expect(video.src).toBe('blob:test-url')
+      expect(video.muted).toBe(true)
+      expect(video.playsInline).toBe(true)
+      expect(loadSpy).toHaveBeenCalled()
+
+      loadSpy.mockRestore()
+    })
+
+    it('revokes previous videoUrl when different', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+
+      media.setVideoSource(video, 'blob:old-url')
+      media.setVideoSource(video, 'blob:new-url')
+
+      expect(revokeSpy).toHaveBeenCalledWith('blob:old-url')
+      revokeSpy.mockRestore()
+    })
+
+    it('does not revoke url when same', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+
+      media.setVideoSource(video, 'blob:same-url')
+      media.setVideoSource(video, 'blob:same-url')
+
+      expect(revokeSpy).not.toHaveBeenCalledWith('blob:same-url')
+      revokeSpy.mockRestore()
+    })
+
+    it('does not revoke when no previous url', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+
+      media.setVideoSource(video, 'blob:first-url')
+
+      expect(revokeSpy).not.toHaveBeenCalled()
+      revokeSpy.mockRestore()
+    })
+  })
+
+  describe('stopMediaProcessing', () => {
+    it('does nothing when no animation frame active', () => {
+      const media = useStaticMedia()
+      media.stopMediaProcessing()
+      expect(cancelRafSpy).not.toHaveBeenCalled()
+    })
+
+    it('cancels animation frame when previously set by processVideoStream', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+
+      media.processVideoStream(video, canvas)
+
+      media.stopMediaProcessing()
+
+      expect(cancelRafSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('cleanup', () => {
+    it('revokes URL and resets status', () => {
+      const media = useStaticMedia()
+      const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+      media.status.value = 'done'
+      media.cleanup()
+      expect(media.status.value).toBe('idle')
+      revokeSpy.mockRestore()
+    })
+
+    it('resets status to idle on cleanup', () => {
       const media = useStaticMedia()
       media.status.value = 'processing'
-      media.progress.value = 50
-      media.cancelProcessing()
+      media.cleanup()
       expect(media.status.value).toBe('idle')
-      expect(media.progress.value).toBe(0)
+    })
+
+    it('revokes the stored videoUrl on cleanup', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+
+      media.setVideoSource(video, 'blob:cleanup-test')
+      media.cleanup()
+
+      expect(revokeSpy).toHaveBeenCalledWith('blob:cleanup-test')
+      revokeSpy.mockRestore()
+    })
+
+    it('does not revoke when videoUrl is null', () => {
+      const media = useStaticMedia()
+      const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+
+      media.cleanup()
+
+      expect(revokeSpy).not.toHaveBeenCalled()
+      revokeSpy.mockRestore()
+    })
+
+    it('cancels animation frame on cleanup', () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+
+      media.processVideoStream(video, canvas)
+      media.cleanup()
+
+      expect(cancelRafSpy).toHaveBeenCalled()
     })
   })
 })

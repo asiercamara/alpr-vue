@@ -1,19 +1,17 @@
 import { ref } from 'vue'
 import { useDetection } from './useDetection'
+import { usePlateStore } from '@/stores/plateStore'
 import type { DetectionBox } from '@/types/detection'
 
 export type MediaProcessingStatus = 'idle' | 'loading' | 'processing' | 'done' | 'error'
 
-const VIDEO_FRAME_INTERVAL = 500
-
 export function useStaticMedia() {
   const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate } = useDetection()
+  const plateStore = usePlateStore()
 
   const status = ref<MediaProcessingStatus>('idle')
-  const progress = ref(0)
-  const currentFrame = ref(0)
-  const totalFrames = ref(0)
-  let cancelRequested = false
+  let animationFrameId: number | null = null
+  let videoUrl: string | null = null
 
   const processImage = async (file: File, canvas: HTMLCanvasElement): Promise<DetectionBox[]> => {
     if (!modelReady.value) {
@@ -22,7 +20,7 @@ export function useStaticMedia() {
     }
 
     status.value = 'loading'
-    progress.value = 0
+    plateStore.setMode('upload')
 
     try {
       const bitmap = await createImageBitmap(file)
@@ -38,7 +36,6 @@ export function useStaticMedia() {
       ctx.drawImage(bitmap, 0, 0)
 
       status.value = 'processing'
-      progress.value = 50
 
       return new Promise<DetectionBox[]>((resolve) => {
         const unsubscribe = onBoxes((boxes: DetectionBox[]) => {
@@ -46,7 +43,6 @@ export function useStaticMedia() {
           drawBoxesAndUpdate(canvas, boxes)
           bitmap.close()
           status.value = 'done'
-          progress.value = 100
           resolve(boxes)
         })
 
@@ -58,109 +54,90 @@ export function useStaticMedia() {
     }
   }
 
-  const processVideo = async (file: File, canvas: HTMLCanvasElement): Promise<DetectionBox[]> => {
+  const processVideoStream = (video: HTMLVideoElement, canvas: HTMLCanvasElement): void => {
     if (!modelReady.value) {
       status.value = 'error'
-      return []
+      return
     }
 
     status.value = 'loading'
-    cancelRequested = false
+    plateStore.setMode('upload')
+    stopMediaProcessing()
 
-    const video = document.createElement('video')
-    video.muted = true
-    video.playsInline = true
-    video.preload = 'auto'
-
-    const url = URL.createObjectURL(file)
-    video.src = url
-
-    const allDetections: DetectionBox[] = []
-
-    try {
-      await new Promise<void>((resolve, reject) => {
-        video.onloadedmetadata = () => resolve()
-        video.onerror = () => reject(new Error('Failed to load video'))
-      })
-
-      const duration = video.duration
-      totalFrames.value = Math.ceil(duration * (1000 / VIDEO_FRAME_INTERVAL))
-
+    const onLoaded = () => {
       status.value = 'processing'
-      progress.value = 0
-      currentFrame.value = 0
 
-      for (
-        let currentTime = 0;
-        currentTime < duration;
-        currentTime += VIDEO_FRAME_INTERVAL / 1000
-      ) {
-        if (cancelRequested) break
-
-        await new Promise<void>((resolve) => {
-          video.currentTime = currentTime
-          video.onseeked = () => resolve()
-        })
-
-        while (isProcessing.value) {
-          await new Promise<void>((r) => setTimeout(r, 50))
+      const loop = async () => {
+        if (video.paused || video.ended) {
+          status.value = 'done'
+          return
         }
 
-        currentFrame.value++
-        progress.value = Math.round((currentFrame.value / totalFrames.value) * 100)
-
-        try {
-          const bitmap = await createImageBitmap(video)
-
-          canvas.width = bitmap.width
-          canvas.height = bitmap.height
+        if (video.readyState >= 2) {
+          canvas.width = video.videoWidth
+          canvas.height = video.videoHeight
           const ctx = canvas.getContext('2d')
           if (ctx) {
-            ctx.drawImage(bitmap, 0, 0)
+            ctx.drawImage(video, 0, 0)
           }
-
-          await new Promise<void>((resolve) => {
-            const unsubscribe = onBoxes((boxes: DetectionBox[]) => {
-              for (const box of boxes) {
-                if (!allDetections.some((d) => d.plateText.text === box.plateText.text)) {
-                  allDetections.push(box)
-                }
-              }
-              unsubscribe()
-              drawBoxesAndUpdate(canvas, boxes)
-              resolve()
-            })
-            processFrame(bitmap)
-          })
-        } catch {
-          // Skip frame if bitmap creation fails
         }
+
+        if (!isProcessing.value && modelReady.value && video.readyState >= 2) {
+          try {
+            const bitmap = await createImageBitmap(video)
+            await processFrame(bitmap)
+          } catch {
+            // skip frame
+          }
+        }
+
+        animationFrameId = requestAnimationFrame(loop)
       }
 
-      status.value = 'done'
-      progress.value = 100
-      return allDetections
-    } catch {
-      status.value = 'error'
-      return allDetections
-    } finally {
-      URL.revokeObjectURL(url)
+      animationFrameId = requestAnimationFrame(loop)
+    }
+
+    if (video.readyState >= 2) {
+      onLoaded()
+    } else {
+      video.addEventListener('loadeddata', onLoaded, { once: true })
     }
   }
 
-  const cancelProcessing = (): void => {
-    cancelRequested = true
+  const setVideoSource = (video: HTMLVideoElement, url: string): void => {
+    if (videoUrl && videoUrl !== url) {
+      URL.revokeObjectURL(videoUrl)
+    }
+    videoUrl = url
+    video.src = url
+    video.muted = true
+    video.playsInline = true
+    video.load()
+  }
+
+  const stopMediaProcessing = (): void => {
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = null
+    }
+  }
+
+  const cleanup = (): void => {
+    stopMediaProcessing()
     status.value = 'idle'
-    progress.value = 0
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl)
+      videoUrl = null
+    }
   }
 
   return {
     status,
-    progress,
-    currentFrame,
-    totalFrames,
+    isProcessing,
     processImage,
-    processVideo,
-    cancelProcessing,
+    processVideoStream,
+    setVideoSource,
+    stopMediaProcessing,
+    cleanup,
   }
 }

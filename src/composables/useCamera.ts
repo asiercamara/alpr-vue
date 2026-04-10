@@ -80,7 +80,7 @@ export function useCamera(): {
           if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
 
           if (lastBoxes.length) {
-            drawBoxesAndUpdate(canvas, lastBoxes, stopCamera)
+            drawBoxesAndUpdate(canvas, lastBoxes)
           }
 
           if (modelReady.value) {

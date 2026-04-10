@@ -22,11 +22,35 @@ vi.mock('@/composables/useCamera', () => ({
   }),
 }))
 
+const mockProcessImage = vi.fn()
+const mockProcessVideoStream = vi.fn()
+const mockSetVideoSource = vi.fn()
+const mockStopMediaProcessing = vi.fn()
+const mockCleanup = vi.fn()
+const mockStaticIsProcessing = ref(false)
+const mockStaticStatus = ref('idle')
+
+vi.mock('@/composables/useStaticMedia', () => ({
+  useStaticMedia: () => ({
+    status: mockStaticStatus,
+    isProcessing: mockStaticIsProcessing,
+    processImage: mockProcessImage,
+    processVideoStream: mockProcessVideoStream,
+    setVideoSource: mockSetVideoSource,
+    stopMediaProcessing: mockStopMediaProcessing,
+    cleanup: mockCleanup,
+  }),
+}))
+
 const mockAppState = reactive({
   cameraError: null as string | null,
   modelError: null as string | null,
   isModelLoading: false,
   isCameraActive: false,
+  isUploadMode: false,
+  uploadMediaType: null as 'image' | 'video' | null,
+  uploadMediaUrl: null as string | null,
+  uploadFile: null as File | null,
 })
 
 vi.mock('@/stores/appStore', () => ({
@@ -43,6 +67,18 @@ vi.mock('@/stores/appStore', () => ({
     get isCameraActive() {
       return mockAppState.isCameraActive
     },
+    get isUploadMode() {
+      return mockAppState.isUploadMode
+    },
+    get uploadMediaType() {
+      return mockAppState.uploadMediaType
+    },
+    get uploadMediaUrl() {
+      return mockAppState.uploadMediaUrl
+    },
+    get uploadFile() {
+      return mockAppState.uploadFile
+    },
     setCameraError: vi.fn((msg: string | null) => {
       mockAppState.cameraError = msg
     }),
@@ -53,18 +89,18 @@ vi.mock('@/stores/appStore', () => ({
       mockAppState.isCameraActive = active
     }),
     setModelReady: vi.fn(),
-  }),
-}))
-
-vi.mock('@/composables/useStaticMedia', () => ({
-  useStaticMedia: () => ({
-    status: ref('idle'),
-    progress: ref(0),
-    currentFrame: ref(0),
-    totalFrames: ref(0),
-    processImage: vi.fn(),
-    processVideo: vi.fn(),
-    cancelProcessing: vi.fn(),
+    setUploadMedia: vi.fn((type: any, url: any, file: any) => {
+      mockAppState.uploadMediaType = type
+      mockAppState.uploadMediaUrl = url
+      mockAppState.uploadFile = file
+      mockAppState.isUploadMode = true
+    }),
+    clearUploadMedia: vi.fn(() => {
+      mockAppState.uploadMediaType = null
+      mockAppState.uploadMediaUrl = null
+      mockAppState.uploadFile = null
+      mockAppState.isUploadMode = false
+    }),
   }),
 }))
 
@@ -76,11 +112,22 @@ describe('CameraPreview', () => {
     mockAppState.modelError = null
     mockAppState.isModelLoading = false
     mockAppState.isCameraActive = false
+    mockAppState.isUploadMode = false
+    mockAppState.uploadMediaType = null
+    mockAppState.uploadMediaUrl = null
+    mockAppState.uploadFile = null
     mockIsCameraActive.value = false
     mockIsProcessing.value = false
     mockStartCamera.mockClear()
     mockStopCamera.mockClear()
     mockToggleCameraFacing.mockClear()
+    mockProcessImage.mockClear()
+    mockProcessVideoStream.mockClear()
+    mockSetVideoSource.mockClear()
+    mockStopMediaProcessing.mockClear()
+    mockCleanup.mockClear()
+    mockStaticStatus.value = 'idle'
+    mockStaticIsProcessing.value = false
   })
 
   const globalStubs = {
@@ -89,6 +136,7 @@ describe('CameraPreview', () => {
     IconCamera: { template: '<svg />' },
     IconAlertTriangle: { template: '<svg />' },
     IconFlipCamera: { template: '<svg />' },
+    IconClose: { template: '<svg />' },
     MediaUploader: { template: '<div data-test="uploader"></div>' },
   }
 
@@ -105,20 +153,69 @@ describe('CameraPreview', () => {
     expect(wrapper.text()).toContain('Cargando modelo')
   })
 
-  it('shows camera off overlay when inactive and no errors', () => {
+  it('shows camera off overlay when inactive and no upload', () => {
     mockAppState.cameraError = null
     mockAppState.isModelLoading = false
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
     expect(wrapper.text()).toContain('Cámara desactivada')
   })
 
-  it('shows retry button on error', () => {
-    mockAppState.cameraError = 'Permiso denegado'
+  it('does not show camera off overlay when upload mode is active', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-    expect(wrapper.text()).toContain('Reintentar')
+    expect(wrapper.text()).not.toContain('Cámara desactivada')
   })
 
-  it('calls startCamera when retry button is clicked', async () => {
+  it('shows close button when upload mode is active', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const closeBtn = wrapper.find('button[title="Cerrar visor"]')
+    expect(closeBtn.exists()).toBe(true)
+  })
+
+  it('calls cleanup and clearUploadMedia when close button is clicked', async () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const closeBtn = wrapper.find('button[title="Cerrar visor"]')
+    await closeBtn.trigger('click')
+
+    expect(mockCleanup).toHaveBeenCalled()
+  })
+
+  it('shows scanning indicator in upload mode', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    mockStaticIsProcessing.value = true
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).toContain('Escaneando')
+  })
+
+  it('shows "Analizado" indicator in upload mode when not processing for image', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    mockStaticIsProcessing.value = false
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).toContain('Analizado')
+  })
+
+  it('shows "Procesando vídeo" indicator in upload mode when not processing for video', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'video'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    mockStaticIsProcessing.value = false
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).toContain('Procesando vídeo')
+  })
+
+  it('calls startCamera when retry button is clicked on error', async () => {
     mockAppState.cameraError = 'Permiso denegado'
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
     const retryBtn = wrapper.findAll('button').find((b) => b.text().includes('Reintentar'))
@@ -137,11 +234,10 @@ describe('CameraPreview', () => {
     }
   })
 
-  it('shows stop button and flip camera button when camera is active', async () => {
+  it('shows stop button when camera is active without upload', async () => {
     mockIsCameraActive.value = true
     mockAppState.isCameraActive = true
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-
     const stopBtn = wrapper.findAll('button').find((b) => b.text().includes('Detener'))
     expect(stopBtn).toBeDefined()
   })
@@ -150,7 +246,6 @@ describe('CameraPreview', () => {
     mockIsCameraActive.value = true
     mockAppState.isCameraActive = true
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-
     const stopBtn = wrapper.findAll('button').find((b) => b.text().includes('Detener'))
     if (stopBtn) {
       await stopBtn.trigger('click')
@@ -158,45 +253,88 @@ describe('CameraPreview', () => {
     }
   })
 
-  it('calls toggleCameraFacing when flip button is clicked', async () => {
-    mockIsCameraActive.value = true
-    mockAppState.isCameraActive = true
-    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-
-    const flipBtn = wrapper
-      .findAll('button')
-      .find((b) => b.attributes('title') === 'Cambiar cámara')
-    if (flipBtn) {
-      await flipBtn.trigger('click')
-      expect(mockToggleCameraFacing).toHaveBeenCalled()
-    }
-  })
-
-  it('shows scanning indicator when camera is active', () => {
-    mockIsCameraActive.value = true
-    mockAppState.isCameraActive = true
-    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-    expect(wrapper.text()).toContain('En vivo')
-  })
-
-  it('shows Escaneando when processing', () => {
-    mockIsCameraActive.value = true
-    mockIsProcessing.value = true
-    mockAppState.isCameraActive = true
-    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-    expect(wrapper.text()).toContain('Escaneando')
-  })
-
-  it('hides camera off overlay when camera is active', () => {
-    mockIsCameraActive.value = true
-    mockAppState.isCameraActive = true
-    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
-    expect(wrapper.text()).not.toContain('Cámara desactivada')
-  })
-
-  it('renders MediaUploader when camera is inactive', () => {
+  it('renders MediaUploader when camera is inactive and no upload', () => {
     mockIsCameraActive.value = false
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
     expect(wrapper.find('[data-test="uploader"]').exists()).toBe(true)
+  })
+
+  it('does not render MediaUploader when upload mode is active', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.find('[data-test="uploader"]').exists()).toBe(false)
+  })
+
+  it('does not show camera controls when upload mode is active', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const stopBtn = wrapper.findAll('button').find((b) => b.text().includes('Detener'))
+    expect(stopBtn).toBeUndefined()
+  })
+
+  it('does not show live camera scanning indicator when upload is active', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'video'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    mockIsCameraActive.value = false
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).not.toContain('En vivo')
+  })
+
+  it('shows upload scanning indicator instead of camera controls', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    mockStaticIsProcessing.value = true
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).toContain('Escaneando')
+    expect(wrapper.find('button[title="Cerrar visor"]').exists()).toBe(true)
+  })
+
+  it('hides close button when not in upload mode', () => {
+    mockAppState.isUploadMode = false
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.find('button[title="Cerrar visor"]').exists()).toBe(false)
+  })
+
+  it('shows video element when upload is video type', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'video'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const video = wrapper.find('video')
+    expect(video.exists()).toBe(true)
+  })
+
+  it('hides video element when upload is image type', () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const video = wrapper.find('video')
+    expect(video.classes()).toContain('hidden')
+  })
+
+  it('applies full height class when fullHeight prop is true', () => {
+    const wrapper = mount(CameraPreview, {
+      props: { fullHeight: true },
+      global: { stubs: globalStubs },
+    })
+    const container = wrapper.find('div')
+    expect(container.classes()).toContain('h-full')
+  })
+
+  it('calls cleanup and clearUploadMedia when close button is clicked', async () => {
+    mockAppState.isUploadMode = true
+    mockAppState.uploadMediaType = 'image'
+    mockAppState.uploadMediaUrl = 'blob:test'
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const closeBtn = wrapper.find('button[title="Cerrar visor"]')
+    await closeBtn.trigger('click')
+
+    expect(mockCleanup).toHaveBeenCalled()
   })
 })

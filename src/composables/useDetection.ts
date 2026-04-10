@@ -105,11 +105,7 @@ export function useDetection() {
     }
   }
 
-  const drawBoxesAndUpdate = (
-    canvas: HTMLCanvasElement,
-    boxes: DetectionBox[],
-    stopCallback?: () => void,
-  ): void => {
+  const drawBoxesAndUpdate = (canvas: HTMLCanvasElement, boxes: DetectionBox[]): void => {
     if (!boxes?.length) return
 
     const ctx = canvas.getContext('2d')
@@ -136,31 +132,25 @@ export function useDetection() {
       ctx.fillText(label, x1 + 5, y1 - 6)
     }
 
-    const longestBox = bestBoxes.reduce(
-      (longest, box) => (box.plateText.text.length > longest.plateText.text.length ? box : longest),
-      bestBoxes[0],
-    )
+    for (const box of bestBoxes) {
+      const conf = box.plateText.confidence
+      const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+      const quality = evaluatePlateQuality({ ...box, confidenceMean: confMean })
+      if (!quality.isValid) continue
 
-    const conf = longestBox.plateText.confidence
-    const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+      const shouldStop = plateStore.addPlate({
+        id: `plate_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+        text: box.plateText.text,
+        confidence: confMean,
+        croppedImage: box.croppedImage ? markRaw(box.croppedImage) : null,
+        boundingBox: { x1: box.x1, y1: box.y1, x2: box.x2, y2: box.y2 },
+        plateText: box.plateText,
+        timestamp: new Date(),
+      })
 
-    const quality = evaluatePlateQuality({ ...longestBox, confidenceMean: confMean })
-    if (!quality.isValid) return
-
-    const shouldStop = plateStore.addPlate({
-      id: `plate_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
-      text: longestBox.plateText.text,
-      confidence: confMean,
-      croppedImage: longestBox.croppedImage ? markRaw(longestBox.croppedImage) : null,
-      boundingBox: { x1: longestBox.x1, y1: longestBox.y1, x2: longestBox.x2, y2: longestBox.y2 },
-      plateText: longestBox.plateText,
-      timestamp: new Date(),
-    })
-
-    if (shouldStop === true) {
-      if (useAppStore().feedbackEnabled) notifyDetection()
-      stopCallback?.()
-      return
+      if (shouldStop === true && useAppStore().feedbackEnabled) {
+        notifyDetection()
+      }
     }
   }
 

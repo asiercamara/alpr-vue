@@ -5,16 +5,28 @@
       'shadow-camera transition-all duration-500',
       fullHeight
         ? 'h-full rounded-none ring-0'
-        : isCameraActive
+        : isCameraActive || isUploadActive
           ? 'rounded-2xl ring-2 ring-brand-500/50 aspect-video lg:aspect-video'
           : 'rounded-2xl ring-1 ring-surface-200 dark:ring-surface-700 aspect-[3/4] sm:aspect-video',
     ]"
   >
-    <video ref="videoRef" class="w-full h-full object-cover" playsinline></video>
+    <video
+      ref="videoRef"
+      :class="[
+        'w-full h-full object-cover',
+        isUploadActive && appStore.uploadMediaType === 'image' ? 'hidden' : '',
+      ]"
+      playsinline
+    ></video>
 
     <canvas
       ref="canvasRef"
-      class="absolute top-0 left-0 w-full h-full pointer-events-none"
+      :class="[
+        'top-0 left-0 w-full h-full pointer-events-none',
+        isUploadActive && appStore.uploadMediaType === 'image'
+          ? 'relative block object-contain'
+          : 'absolute',
+      ]"
     ></canvas>
 
     <!-- Camera error -->
@@ -57,9 +69,38 @@
       <p class="text-white/60 text-xs mt-1">Detección de matrículas</p>
     </div>
 
-    <!-- Camera off -->
+    <!-- Upload mode: close button + scanning indicator -->
+    <template v-if="isUploadActive">
+      <button
+        class="absolute top-3 left-3 z-10 p-1.5 rounded-full bg-surface-950/70 backdrop-blur-sm text-white/70 hover:text-white transition-colors"
+        title="Cerrar visor"
+        @click="closeUploadViewer"
+      >
+        <IconClose class="w-5 h-5" />
+      </button>
+
+      <div
+        class="absolute top-3 right-3 flex items-center gap-1.5 bg-surface-950/70 backdrop-blur-sm rounded-full px-2.5 py-1"
+      >
+        <span
+          :class="[
+            'w-2 h-2 rounded-full',
+            staticMedia.isProcessing.value ? 'bg-brand-400 animate-pulse' : 'bg-emerald-400',
+          ]"
+        ></span>
+        <span class="text-xs text-white/80 font-medium">{{
+          staticMedia.isProcessing.value
+            ? 'Escaneando'
+            : appStore.uploadMediaType === 'video'
+              ? 'Procesando vídeo'
+              : 'Analizado'
+        }}</span>
+      </div>
+    </template>
+
+    <!-- Camera off (no upload) -->
     <div
-      v-else-if="!isCameraActive && !isProcessing"
+      v-else-if="!isCameraActive"
       class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-950 p-6"
     >
       <div class="w-16 h-16 rounded-2xl bg-surface-800 flex items-center justify-center">
@@ -81,9 +122,9 @@
       </div>
     </div>
 
-    <!-- Scanning indicator -->
+    <!-- Camera mode: scanning indicator -->
     <div
-      v-if="isCameraActive"
+      v-if="isCameraActive && !isUploadActive"
       class="absolute top-3 right-3 flex items-center gap-1.5 bg-surface-950/70 backdrop-blur-sm rounded-full px-2.5 py-1"
     >
       <span
@@ -97,10 +138,13 @@
       }}</span>
     </div>
 
-    <!-- Controls when camera is active -->
+    <!-- Camera controls -->
     <div
-      v-if="isCameraActive"
-      class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3"
+      v-if="isCameraActive && !isUploadActive"
+      :class="[
+        'absolute left-1/2 -translate-x-1/2 flex items-center gap-3',
+        fullHeight ? 'bottom-[96px]' : 'bottom-4',
+      ]"
     >
       <button
         class="flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm shadow-lg transition-all duration-200 active:scale-95 bg-red-500/90 hover:bg-red-500 text-white backdrop-blur-sm"
@@ -122,18 +166,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed, watch, onUnmounted } from 'vue'
 import { useCamera } from '@/composables/useCamera'
+import { useStaticMedia } from '@/composables/useStaticMedia'
 import { useAppStore } from '@/stores/appStore'
 import IconPlay from '@/components/icons/IconPlay.vue'
 import IconStop from '@/components/icons/IconStop.vue'
 import IconCamera from '@/components/icons/IconCamera.vue'
 import IconAlertTriangle from '@/components/icons/IconAlertTriangle.vue'
 import IconFlipCamera from '@/components/icons/IconFlipCamera.vue'
+import IconClose from '@/components/icons/IconClose.vue'
 import MediaUploader from './MediaUploader.vue'
 
 defineProps<{ fullHeight?: boolean }>()
 
 const appStore = useAppStore()
+const staticMedia = useStaticMedia()
 
 const {
   videoRef,
@@ -144,4 +192,54 @@ const {
   stopCamera,
   toggleCameraFacing,
 } = useCamera()
+
+const isUploadActive = computed(
+  () => appStore.isUploadMode && !appStore.cameraError && !appStore.isModelLoading,
+)
+
+watch(
+  () =>
+    [
+      appStore.isUploadMode,
+      appStore.uploadMediaUrl,
+      appStore.uploadMediaType,
+      appStore.uploadFile,
+    ] as const,
+  async ([isUpload, url, type, file]) => {
+    if (!isUpload || !url || !type) return
+
+    const video = videoRef.value
+    const canvas = canvasRef.value
+    if (!video || !canvas) return
+
+    await new Promise((r) => setTimeout(r, 50))
+
+    if (type === 'image' && file) {
+      await staticMedia.processImage(file, canvas)
+    } else if (type === 'video') {
+      staticMedia.setVideoSource(video, url)
+      video.play?.()?.catch?.(() => {})
+      staticMedia.processVideoStream(video, canvas)
+    }
+  },
+)
+
+const closeUploadViewer = () => {
+  staticMedia.cleanup()
+  const video = videoRef.value
+  if (video) {
+    video.pause()
+    video.removeAttribute('src')
+    video.load()
+  }
+  const ctx = canvasRef.value?.getContext('2d')
+  if (ctx && canvasRef.value) {
+    ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
+  }
+  appStore.clearUploadMedia()
+}
+
+onUnmounted(() => {
+  staticMedia.cleanup()
+})
 </script>

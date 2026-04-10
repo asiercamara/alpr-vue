@@ -7,22 +7,9 @@
       <div class="max-w-5xl mx-auto h-full flex justify-between items-center">
         <div class="flex items-center gap-3">
           <div
-            class="bg-gradient-to-br from-brand-500 to-brand-700 p-2 rounded-xl shadow-glow-brand"
+            class="bg-gradient-to-br from-brand-500 to-brand-700 p-1.5 rounded-xl shadow-glow-brand"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <img src="/android-chrome-192x192.png" alt="ALPR" class="w-7 h-7 rounded-lg" />
           </div>
           <div>
             <div class="flex items-baseline gap-1">
@@ -80,27 +67,27 @@
       </div>
     </header>
 
-    <!-- Mobile fullscreen layout (camera active on small screens) -->
-    <template v-if="isMobileCameraActive">
-      <div style="height: calc(100svh - 3.5rem)">
-        <CameraPreview :full-height="true" />
-      </div>
-      <BottomDrawer>
-        <PlateList />
-      </BottomDrawer>
-    </template>
-
-    <!-- Normal layout: inactive camera on any screen, or desktop with active camera -->
-    <main v-else class="max-w-5xl mx-auto px-4 pb-12">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div class="lg:col-span-2">
-          <CameraPreview />
+    <!-- Layout wrapper: fullscreen on mobile when active, grid otherwise -->
+    <div
+      :class="
+        isMobileCameraActive
+          ? 'fixed inset-x-0 top-14 bottom-0 z-10'
+          : 'max-w-5xl mx-auto px-4 pb-12'
+      "
+    >
+      <div :class="isMobileCameraActive ? 'h-full' : 'grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6'">
+        <div :class="isMobileCameraActive ? 'h-full' : 'lg:col-span-2'">
+          <CameraPreview :full-height="isMobileCameraActive" />
         </div>
-        <div class="lg:col-span-1">
+        <div v-if="!isMobileCameraActive" class="lg:col-span-1">
           <PlateList />
         </div>
       </div>
-    </main>
+    </div>
+
+    <BottomDrawer v-if="isMobileCameraActive">
+      <PlateList />
+    </BottomDrawer>
 
     <HelpSheet v-model="showHelp" />
     <ToastNotification />
@@ -132,7 +119,9 @@ onMounted(() => window.addEventListener('resize', onResize))
 onUnmounted(() => window.removeEventListener('resize', onResize))
 
 const isMobile = computed(() => windowWidth.value < LG_BREAKPOINT)
-const isMobileCameraActive = computed(() => isMobile.value && appStore.isCameraActive)
+const isMobileCameraActive = computed(
+  () => isMobile.value && (appStore.isCameraActive || appStore.isUploadMode),
+)
 
 const statusTitle = computed(() => {
   if (appStore.cameraError) return 'Error de cámara'
