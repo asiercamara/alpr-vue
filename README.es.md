@@ -8,14 +8,18 @@ Este proyecto implementa un sistema de reconocimiento automático de matrículas
 ## Características
 
 - Detección de matrículas en tiempo real mediante cámara web
-- Modelos de IA optimizados para navegador (ONNX Runtime Web)
-- Funciona completamente offline
+- **Subida de imágenes/vídeos** para detección offline
 - Agrupación inteligente de matrículas con similitud Levenshtein
 - Visualización de confianza carácter por carácter
+- **Edición del texto detectado** directamente en el modal de detalle
+- **Exportar detecciones a CSV** para análisis posterior
+- **Cambio de cámara** (frontal/trasera) en dispositivos móviles
+- **Instrucciones de ayuda en bottom sheet** accesibles desde la cabecera
 - Modo oscuro/claro
-- Diseño responsive para dispositivos móviles
+- Diseño responsive optimizado para dispositivos móviles
+- **Contraste mejorado** para legibilidad a plena luz del sol
 - Procesamiento en Web Workers para una interfaz fluida
-- Tests unitarios con Vitest
+- Tests unitarios con Vitest (cobertura 92%+)
 
 ## Requisitos
 
@@ -68,6 +72,13 @@ pnpm test:run      # Ejecución única
 pnpm test:coverage # Ejecutar con cobertura
 ```
 
+### Lint y formato
+
+```bash
+pnpm lint          # Ejecutar ESLint
+pnpm format        # Ejecutar Prettier
+```
+
 ## Estructura del Proyecto
 
 ```
@@ -80,36 +91,53 @@ alpr_vue/
 ├── tsconfig.app.json                   # Configuración TypeScript de la app
 ├── public/
 │   ├── favicon.ico                     # Favicon
+│   ├── android-chrome-*.png            # Iconos PWA
+│   ├── apple-touch-icon.png           # Apple touch icon
+│   ├── site.webmanifest               # Manifest PWA
 │   └── models/                         # Modelos ONNX pre-entrenados
 │       ├── european_mobile_vit_v2_ocr.onnx
 │       ├── european_mobile_vit_v2_ocr_config.yaml
 │       └── yolo-v9-t-384-license-plates-end2end.onnx
 └── src/
     ├── main.ts                         # Entrada de la app (crea Vue + Pinia)
-    ├── App.vue                         # Componente raíz (layout grid responsive)
+    ├── App.vue                         # Componente raíz (cabecera + cámara + historial)
     ├── assets/
     │   └── main.css                    # Import de Tailwind CSS v4
     ├── components/
     │   ├── icons/
+    │   │   ├── IconAlertTriangle.vue   # Icono de alerta
+    │   │   ├── IconCamera.vue          # Icono de cámara
+    │   │   ├── IconCopy.vue            # Icono de copiar al portapapeles
+    │   │   ├── IconDownload.vue        # Icono de descarga/exportación
+    │   │   ├── IconEdit.vue            # Icono de edición
+    │   │   ├── IconFlipCamera.vue      # Icono de cambio de cámara
     │   │   ├── IconPlay.vue            # Icono SVG de reproducción
-    │   │   └── IconStop.vue            # Icono SVG de parada
+    │   │   ├── IconStop.vue            # Icono SVG de parada
+    │   │   ├── IconTrash.vue           # Icono de eliminación
+    │   │   └── IconUpload.vue          # Icono de subida de archivo
     │   └── ui/
-    │       ├── CameraPreview.vue       # Video + canvas overlay, controles de cámara
-    │       ├── PlateList.vue           # Lista de matrículas detectadas con animaciones
-    │       └── PlateModal.vue          # Modal de detalle con barras de confianza
+    │       ├── CameraPreview.vue       # Video + canvas, controles de cámara y subida
+    │       ├── ConfidenceRing.vue      # Indicador circular de confianza
+    │       ├── HelpSheet.vue           # Bottom sheet con instrucciones de uso
+    │       ├── MediaUploader.vue       # Subida de imágenes/vídeos con barra de progreso
+    │       ├── PlateList.vue           # Lista de matrículas con exportación CSV
+    │       ├── PlateListItem.vue       # Tarjeta individual de matrícula con anillo de confianza
+    │       └── PlateModal.vue          # Modal de detalle con edición y barras de confianza
     ├── composables/
-    │   ├── useCamera.ts               # Ciclo de vida de cámara y captura de frames
-    │   └── useDetection.ts            # Comunicación con Web Worker y lógica de detección
+    │   ├── useCamera.ts               # Ciclo de vida de cámara, cambio de cámara y captura de frames
+    │   ├── useDetection.ts            # Comunicación con Web Worker y lógica de detección
+    │   └── useStaticMedia.ts          # Composable para procesar archivos de imagen/vídeo
     ├── models/
     │   └── european_mobile_vit_v2_ocr_config.json  # Config del modelo OCR
     ├── stores/
-    │   ├── appStore.ts                # Estado de la app (errores, carga de modelos)
-    │   └── plateStore.ts              # Estado de matrículas, agrupación y detección consecutiva
+    │   ├── appStore.ts                # Estado de la app (errores, carga, cámara activa)
+    │   └── plateStore.ts              # Estado de matrículas, agrupación, edición de texto y detección
     ├── types/
     │   └── detection.ts               # Interfaces y tipos TypeScript
     ├── utils/
-    │   ├── validation.ts              # Similitud Levenshtein y evaluación de calidad
-    │   └── feedback.ts                # Pitido de audio y vibración al confirmar una matrícula
+    │   ├── export.ts                  # Generación y descarga CSV
+    │   ├── feedback.ts                # Pitido de audio y vibración al confirmar matrícula
+    │   └── validation.ts              # Similitud Levenshtein y evaluación de calidad
     └── workers/
         ├── mainWorker.js              # Entrada del Worker: carga modelos y procesa frames
         ├── modelsLoader.js            # Cargador de modelos ONNX con calentamiento
@@ -127,7 +155,7 @@ alpr_vue/
 
 ### Flujo de Procesamiento
 
-1. **Captura de Cámara**: El usuario inicia la cámara web mediante el composable `useCamera`
+1. **Entrada**: El usuario inicia la cámara web mediante `useCamera` o sube una imagen/vídeo mediante `useStaticMedia`
 2. **Procesamiento de Frames**: Los frames se envían al Web Worker a ~50fps vía `postMessage`
 3. **Detección de Matrículas**: YOLOv9 identifica y localiza las matrículas
 4. **Extracción de Regiones**: Se recortan las áreas detectadas del frame
@@ -141,21 +169,46 @@ alpr_vue/
 
 La interfaz está construida con **Vue 3** usando `<script setup>` y TypeScript. La gestión de estado usa **Pinia** con dos stores:
 
-- **`appStore`**: Registra errores de cámara, estado de carga de modelos y errores de los mismos.
-- **`plateStore`**: Gestiona las matrículas detectadas, agrupa matrículas similares usando distancia Levenshtein (umbral 0.8) e implementa confirmación basada en tiempo: una matrícula se confirma tras 3 segundos de detección continua, o 1 segundo si la confianza media por carácter ≥ 0.8.
+- **`appStore`**: Registra errores de cámara, estado de carga de modelos, estado activo de la cámara y errores de los mismos.
+- **`plateStore`**: Gestiona las matrículas detectadas, agrupa matrículas similares usando distancia Levenshtein (umbral 0.8), implementa confirmación basada en tiempo, permite editar el texto de las matrículas y ordena las detecciones de más reciente a más antigua.
 
 #### Composables
 
-- **`useCamera`**: Gestiona el ciclo de vida de la cámara web (`startCamera`/`stopCamera`), captura frames vía `ImageBitmap` y coordina la detección mediante `useDetection`.
+- **`useCamera`**: Gestiona el ciclo de vida de la cámara web (`startCamera`/`stopCamera`), cambio de cámara frontal/trasera (`toggleCameraFacing`), captura frames vía `ImageBitmap`, coordina la detección mediante `useDetection` y sincroniza el estado con `appStore`.
 - **`useDetection`**: Gestiona el singleton del Web Worker, envía frames para procesamiento, recibe resultados de cajas delimitadoras mediante un patrón pub/sub (`onBoxes`) y valida la calidad de las matrículas antes de añadirlas al store.
+- **`useStaticMedia`**: Procesa archivos de imagen/vídeo subidos frame a frame a través del mismo pipeline de detección. Muestra progreso (loading/processing/done/error) y soporta cancelación.
 
 #### Componente CameraPreview
 
-Combina un elemento `<video>` con un `<canvas>` superpuesto para dibujar las cajas delimitadoras. Muestra overlays de error, carga y estado apagado. Incluye botones de alternancia Play/Stop.
+Combina un elemento `<video>` con un `<canvas>` superpuesto para dibujar las cajas delimitadoras. Muestra:
+
+- Overlay de error con botón de reintentar
+- Spinner de carga del modelo
+- Estado de cámara desactivada con botones **Iniciar cámara** y **Subir archivo** apilados verticalmente
+- Indicador de escaneo (Escaneando/En vivo) cuando la cámara está activa
+- Botones de Detener y cambiar cámara durante el escaneo
+
+#### Componente MediaUploader
+
+Proporciona subida de archivos de imagen y vídeo con overlay de progreso de procesamiento, botón de cancelar y texto de estado. Usa el composable `useStaticMedia` internamente.
+
+#### Componente HelpSheet
+
+Modal bottom sheet que muestra las instrucciones de uso, activado por el icono `?` en la cabecera. Reemplaza la sección de instrucciones en línea para ahorrar espacio vertical.
 
 #### PlateList y PlateModal
 
-`PlateList` muestra las detecciones agrupadas con transiciones animadas. `PlateModal` (teletransportado) muestra la confianza carácter por carácter con barras codificadas por color y una imagen recortada de la matrícula renderizada en canvas.
+`PlateList` muestra las detecciones agrupadas ordenadas de más reciente a más antigua, con botones **Exportar CSV** y **Limpiar**. `PlateModal` (teletransportado) muestra:
+
+- Confianza carácter por carácter con barras codificadas por color
+- Imagen recortada de la matrícula renderizada en canvas
+- **Botón de editar** para modificar el texto detectado de la matrícula
+- **Botón de copiar al portapapeles**
+- Metadatos de detección (fecha/hora, ID)
+
+#### Utilidad de Exportación
+
+`src/utils/export.ts` proporciona `generateCSV()` y `downloadCSV()` para exportar las matrículas detectadas como archivo CSV con columnas: Texto, Confianza, Fecha, ID. Escapa correctamente comas y comillas.
 
 #### Web Workers
 
@@ -169,6 +222,7 @@ Los modelos de IA se ejecutan en un Web Worker dedicado para evitar bloquear el 
 #### Validación de Calidad de Matrículas
 
 Las matrículas se evalúan según 4 criterios antes de ser aceptadas:
+
 - Longitud (4-10 caracteres)
 - Confianza media >= 0.7
 - Confianza mínima por carácter >= 0.5
@@ -190,6 +244,7 @@ Se requiere una puntuación combinada >= 0.7 para que una matrícula sea almacen
 YOLO es un algoritmo de detección de objetos en tiempo real que aplica una única red neuronal a la imagen completa. Esta red divide la imagen en regiones y predice cuadros delimitadores y probabilidades para cada región. Los cuadros delimitadores se ponderan por las probabilidades predichas.
 
 Características principales de YOLOv9:
+
 - **Detección en una sola pasada**: A diferencia de los sistemas de dos etapas, YOLO analiza toda la imagen en una sola pasada, lo que lo hace extremadamente rápido.
 - **Arquitectura optimizada**: YOLOv9-t es una versión compacta diseñada para ejecutarse en dispositivos con recursos limitados, ideal para aplicaciones web.
 - **Alta precisión**: A pesar de su tamaño reducido, el modelo alcanza un equilibrio óptimo entre velocidad y precisión para la detección de matrículas.
@@ -217,11 +272,11 @@ Si la matrícula consiste en un máximo de 9 caracteres (`max_plate_slots=9`), e
 
 Durante el entrenamiento, el modelo utiliza las siguientes métricas:
 
-* **plate_acc**: Calcula el número de **matrículas** que fueron **completamente clasificadas** correctamente. Para una matrícula individual, si la verdad fundamental es `ABC123` y la predicción también es `ABC123`, puntuaría 1. Sin embargo, si la predicción fuera `ABD123`, puntuaría 0, ya que **no todos los caracteres** fueron correctamente clasificados.
+- **plate_acc**: Calcula el número de **matrículas** que fueron **completamente clasificadas** correctamente. Para una matrícula individual, si la verdad fundamental es `ABC123` y la predicción también es `ABC123`, puntuaría 1. Sin embargo, si la predicción fuera `ABD123`, puntuaría 0, ya que **no todos los caracteres** fueron correctamente clasificados.
 
-* **cat_acc**: Calcula la precisión de **caracteres individuales** dentro de las matrículas. Por ejemplo, si la etiqueta correcta es `ABC123` y la predicción es `ABC133`, produciría una precisión del 83.3% (5 de 6 caracteres clasificados correctamente), en lugar de 0% como en plate_acc.
+- **cat_acc**: Calcula la precisión de **caracteres individuales** dentro de las matrículas. Por ejemplo, si la etiqueta correcta es `ABC123` y la predicción es `ABC133`, produciría una precisión del 83.3% (5 de 6 caracteres clasificados correctamente), en lugar de 0% como en plate_acc.
 
-* **top_3_k**: Calcula con qué frecuencia el carácter verdadero está incluido en las **3 predicciones principales** (las tres predicciones con mayor probabilidad).
+- **top_3_k**: Calcula con qué frecuencia el carácter verdadero está incluido en las **3 predicciones principales** (las tres predicciones con mayor probabilidad).
 
 En esta implementación web, el modelo ha sido convertido a formato ONNX para optimizar su rendimiento en el navegador, manteniendo un equilibrio entre precisión y velocidad de procesamiento.
 
@@ -232,7 +287,8 @@ En esta implementación web, el modelo ha sido convertido a formato ONNX para op
 - **Pinia** para gestión de estado
 - **Tailwind CSS v4** vía `@tailwindcss/vite`
 - **Vite** con `vue-tsc` para builds con comprobación de tipos
-- **Vitest** + `@vue/test-utils` para testing
+- **Vitest** + `@vue/test-utils` para testing (cobertura 92%+)
+- **ESLint** + **Prettier** + **Husky** para calidad de código
 - **ONNX Runtime Web** para inferencia de IA en el navegador
 
 ## Configuración Avanzada
@@ -246,10 +302,10 @@ Los umbrales de confianza para la detección y el OCR pueden ajustarse en los si
 
 ```javascript
 // Umbral de confianza para detección (detectionProcessor.js)
-const confThresh = 0.6;
+const confThresh = 0.6
 
 // Umbral IoU para NMS (boundingBoxUtils.js)
-const iouThreshold = 0.7;
+const iouThreshold = 0.7
 ```
 
 ### Umbral de Similitud para Agrupación
@@ -278,11 +334,13 @@ El proyecto utiliza Tailwind CSS v4, que puede personalizarse mediante `src/asse
 ## Uso de Inteligencia Artificial
 
 Este proyecto ha hecho uso extenso de inteligencia artificial para:
+
 - Conversiones de Python a JavaScript/TypeScript
 - Migración a Vue 3 Composition API y desarrollo de componentes
 - Diseño de patrones de composables y stores
 
 Las herramientas de IA utilizadas incluyen:
+
 - [Claude](https://claude.ai)
 - [ChatGPT](https://chat.openai.com)
 - [Google Gemini](https://gemini.google.com)

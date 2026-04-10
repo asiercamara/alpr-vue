@@ -8,14 +8,18 @@ This project implements an automatic license plate recognition (ALPR) system tha
 ## Features
 
 - Real-time license plate detection via webcam
-- AI models optimized for browser (ONNX Runtime Web)
-- Fully offline functionality
+- **Upload image/video files** for offline plate detection
 - Smart plate grouping with Levenshtein similarity
 - Character-by-character confidence visualization
+- **Edit detected plate text** directly in the detail modal
+- **Export detections to CSV** for further analysis
+- **Camera facing toggle** (front/back) on mobile devices
+- **Bottom sheet help instructions** accessible from the header
 - Dark/light mode
-- Responsive design for mobile devices
+- Responsive design optimized for mobile devices
+- **Improved contrast** for sunlight readability
 - Processing offloaded to Web Workers for smooth UI
-- Unit tests with Vitest
+- Unit tests with Vitest (92%+ coverage)
 
 ## Requirements
 
@@ -68,6 +72,13 @@ pnpm test:run      # Single run
 pnpm test:coverage # Run with coverage
 ```
 
+### Lint and format
+
+```bash
+pnpm lint          # Run ESLint
+pnpm format        # Run Prettier
+```
+
 ## Project Structure
 
 ```
@@ -80,36 +91,53 @@ alpr_vue/
 ├── tsconfig.app.json                   # TypeScript app config
 ├── public/
 │   ├── favicon.ico                     # Favicon
+│   ├── android-chrome-*.png            # PWA icons
+│   ├── apple-touch-icon.png           # Apple touch icon
+│   ├── site.webmanifest               # PWA manifest
 │   └── models/                         # Pre-trained ONNX models
 │       ├── european_mobile_vit_v2_ocr.onnx
 │       ├── european_mobile_vit_v2_ocr_config.yaml
 │       └── yolo-v9-t-384-license-plates-end2end.onnx
 └── src/
     ├── main.ts                         # App entry (creates Vue + Pinia)
-    ├── App.vue                         # Root component (responsive grid layout)
+    ├── App.vue                         # Root component (header + camera + history)
     ├── assets/
     │   └── main.css                    # Tailwind CSS v4 import
     ├── components/
     │   ├── icons/
-    │   │   ├── IconPlay.vue            # Play icon SVG
-    │   │   └── IconStop.vue            # Stop icon SVG
+    │   │   ├── IconAlertTriangle.vue   # Alert icon
+    │   │   ├── IconCamera.vue          # Camera icon
+    │   │   ├── IconCopy.vue            # Copy to clipboard icon
+    │   │   ├── IconDownload.vue        # Download/export icon
+    │   │   ├── IconEdit.vue            # Edit icon
+    │   │   ├── IconFlipCamera.vue      # Toggle camera facing icon
+    │   │   ├── IconPlay.vue            # Play icon
+    │   │   ├── IconStop.vue            # Stop icon
+    │   │   ├── IconTrash.vue           # Delete icon
+    │   │   └── IconUpload.vue          # Upload file icon
     │   └── ui/
-    │       ├── CameraPreview.vue       # Video + canvas overlay, camera controls
-    │       ├── PlateList.vue           # Detected plates list with animations
-    │       └── PlateModal.vue          # Plate detail modal with confidence bars
+    │       ├── CameraPreview.vue       # Video + canvas overlay, camera controls, upload
+    │       ├── ConfidenceRing.vue      # Circular confidence indicator
+    │       ├── HelpSheet.vue           # Bottom sheet with usage instructions
+    │       ├── MediaUploader.vue       # Image/video file upload with progress overlay
+    │       ├── PlateList.vue           # Detected plates list with export CSV
+    │       ├── PlateListItem.vue       # Single plate card with confidence ring
+    │       └── PlateModal.vue          # Plate detail modal with edit & confidence bars
     ├── composables/
-    │   ├── useCamera.ts               # Camera lifecycle & frame capture
-    │   └── useDetection.ts            # Web Worker communication & detection logic
+    │   ├── useCamera.ts               # Camera lifecycle, facing toggle & frame capture
+    │   ├── useDetection.ts            # Web Worker communication & detection logic
+    │   └── useStaticMedia.ts          # Image/video file processing composable
     ├── models/
     │   └── european_mobile_vit_v2_ocr_config.json  # OCR model config
     ├── stores/
-    │   ├── appStore.ts                # App state (errors, model loading)
-    │   └── plateStore.ts              # Plates state, grouping & consecutive detection
+    │   ├── appStore.ts                # App state (errors, model loading, camera active)
+    │   └── plateStore.ts              # Plates state, grouping, text editing & detection
     ├── types/
     │   └── detection.ts               # TypeScript interfaces & types
     ├── utils/
-    │   ├── validation.ts              # Levenshtein similarity & plate quality evaluation
-    │   └── feedback.ts                # Audio beep & vibration feedback on plate confirmation
+    │   ├── export.ts                  # CSV generation and download
+    │   ├── feedback.ts                # Audio beep & vibration feedback
+    │   └── validation.ts              # Levenshtein similarity & plate quality evaluation
     └── workers/
         ├── mainWorker.js              # Worker entry: loads models & processes frames
         ├── modelsLoader.js            # ONNX model loader with warmup
@@ -127,7 +155,7 @@ alpr_vue/
 
 ### Processing Flow
 
-1. **Camera Capture**: User starts webcam via `useCamera` composable
+1. **Input**: User starts webcam via `useCamera` or uploads an image/video via `useStaticMedia`
 2. **Frame Processing**: Frames sent to Web Worker at ~50fps via `postMessage`
 3. **License Plate Detection**: YOLOv9 identifies and locates plates
 4. **Region Extraction**: Detected plate regions are cropped from the frame
@@ -141,21 +169,46 @@ alpr_vue/
 
 The UI is built with **Vue 3** using `<script setup>` and TypeScript. State management uses **Pinia** with two stores:
 
-- **`appStore`**: Tracks camera errors, model loading state, and model errors.
-- **`plateStore`**: Manages detected plates, groups similar plates using Levenshtein distance (threshold 0.8), and implements time-based confirmation logic: a plate is confirmed after 3 seconds of continuous detection, or 1 second if mean character confidence ≥ 0.8.
+- **`appStore`**: Tracks camera errors, model loading state, camera active state, and model errors.
+- **`plateStore`**: Manages detected plates, groups similar plates using Levenshtein distance (threshold 0.8), implements time-based confirmation logic, and supports editing plate text. Plates are sorted chronologically (most recent first).
 
 #### Composables
 
-- **`useCamera`**: Manages webcam lifecycle (`startCamera`/`stopCamera`), captures frames via `ImageBitmap`, and coordinates detection via `useDetection`.
+- **`useCamera`**: Manages webcam lifecycle (`startCamera`/`stopCamera`), camera facing toggle (`toggleCameraFacing`), captures frames via `ImageBitmap`, and coordinates detection via `useDetection`. Syncs camera state with `appStore`.
 - **`useDetection`**: Manages the Web Worker singleton, sends frames for processing, receives bounding box results via a pub/sub pattern (`onBoxes`), and validates plate quality before adding to the store.
+- **`useStaticMedia`**: Processes uploaded image/video files frame-by-frame through the same detection pipeline. Shows progress (loading/processing/done/error) and supports cancellation.
 
 #### CameraPreview Component
 
-Combines a `<video>` element with a `<canvas>` overlay for drawing bounding boxes. Shows error, loading, and off-state overlays. Includes Play/Stop toggle buttons.
+Combines a `<video>` element with a `<canvas>` overlay for drawing bounding boxes. Displays:
+
+- Error overlay with retry button
+- Model loading spinner
+- Camera-off state with **Iniciar cámara** and **Subir archivo** buttons stacked vertically
+- Scanning indicator (Escaneando/En vivo) when camera is active
+- Stop and flip camera buttons during scanning
+
+#### MediaUploader Component
+
+Provides file upload for images and videos with a processing progress overlay, cancel button, and status text. Uses `useStaticMedia` composable internally.
+
+#### HelpSheet Component
+
+Bottom sheet modal showing usage instructions, triggered by the `?` icon in the header. Replaces the inline instructions section to save vertical space.
 
 #### PlateList & PlateModal
 
-`PlateList` displays grouped detections with animated transitions. `PlateModal` (teleported) shows character-by-character confidence with color-coded bars and a cropped plate image rendered on canvas.
+`PlateList` displays grouped detections sorted by most recent first, with **Export CSV** and **Clear** buttons. `PlateModal` (teleported) shows:
+
+- Character-by-character confidence with color-coded bars
+- Cropped plate image rendered on canvas
+- **Edit button** to modify detected plate text
+- **Copy to clipboard** button
+- Detection metadata (timestamp, ID)
+
+#### Export Utility
+
+`src/utils/export.ts` provides `generateCSV()` and `downloadCSV()` for exporting detected plates as a CSV file with columns: Texto, Confianza, Fecha, ID. Properly escapes commas and quotes.
 
 #### Web Workers
 
@@ -169,6 +222,7 @@ AI models run in a dedicated Web Worker to prevent blocking the main thread:
 #### Plate Quality Validation
 
 Plates are scored on 4 criteria before being accepted:
+
 - Length (4-10 characters)
 - Mean confidence >= 0.7
 - Min character confidence >= 0.5
@@ -190,6 +244,7 @@ A combined score >= 0.7 is required for a plate to be stored.
 YOLO is a real-time object detection algorithm that applies a single neural network to the entire image. This network divides the image into regions and predicts bounding boxes and probabilities for each region. Bounding boxes are weighted by predicted probabilities.
 
 Key features of YOLOv9:
+
 - **Single-pass detection**: Unlike two-stage systems, YOLO analyzes the entire image in a single pass, making it extremely fast.
 - **Optimized architecture**: YOLOv9-t is a compact version designed to run on resource-limited devices, ideal for web applications.
 - **High accuracy**: Despite its reduced size, the model achieves an optimal balance between speed and accuracy for license plate detection.
@@ -216,11 +271,11 @@ If the license plate contains a maximum of 9 characters (`max_plate_slots=9`), t
 
 During training, the model utilizes the following metrics:
 
-* **plate_acc**: Calculates the number of **plates** that were **fully classified** correctly. For an individual plate, if the ground truth is `ABC123` and the prediction is also `ABC123`, it would score 1. However, if the prediction were `ABD123`, it would score 0, as **not all characters** were correctly classified.
+- **plate_acc**: Calculates the number of **plates** that were **fully classified** correctly. For an individual plate, if the ground truth is `ABC123` and the prediction is also `ABC123`, it would score 1. However, if the prediction were `ABD123`, it would score 0, as **not all characters** were correctly classified.
 
-* **cat_acc**: Calculates the accuracy of **individual characters** within the plates. For example, if the correct label is `ABC123` and the prediction is `ABC133`, it would yield an accuracy of 83.3% (5 out of 6 characters correctly classified), instead of 0% as in plate_acc.
+- **cat_acc**: Calculates the accuracy of **individual characters** within the plates. For example, if the correct label is `ABC123` and the prediction is `ABC133`, it would yield an accuracy of 83.3% (5 out of 6 characters correctly classified), instead of 0% as in plate_acc.
 
-* **top_3_k**: Calculates how often the true character is included in the **top 3 predictions** (the three predictions with the highest probability).
+- **top_3_k**: Calculates how often the true character is included in the **top 3 predictions** (the three predictions with the highest probability).
 
 In this web implementation, the model has been converted to ONNX format to optimize its performance in the browser, maintaining a balance between accuracy and processing speed.
 
@@ -231,7 +286,8 @@ In this web implementation, the model has been converted to ONNX format to optim
 - **Pinia** for state management
 - **Tailwind CSS v4** via `@tailwindcss/vite`
 - **Vite** with `vue-tsc` for type-checked builds
-- **Vitest** + `@vue/test-utils` for testing
+- **Vitest** + `@vue/test-utils` for testing (92%+ coverage)
+- **ESLint** + **Prettier** + **Husky** for code quality
 - **ONNX Runtime Web** for in-browser AI inference
 
 ## Advanced Configuration
@@ -245,10 +301,10 @@ Confidence thresholds for detection and OCR can be adjusted in the following fil
 
 ```javascript
 // Detection confidence threshold (detectionProcessor.js)
-const confThresh = 0.6;
+const confThresh = 0.6
 
 // NMS IoU threshold (boundingBoxUtils.js)
-const iouThreshold = 0.7;
+const iouThreshold = 0.7
 ```
 
 ### Plate Grouping Similarity Threshold
@@ -277,11 +333,13 @@ The project uses Tailwind CSS v4, which can be customized via `src/assets/main.c
 ## Use of Artificial Intelligence
 
 This project has extensively used artificial intelligence for:
+
 - Python to JavaScript/TypeScript conversions
 - Vue 3 Composition API migration and component development
 - Composable and store design patterns
 
 The AI tools used include:
+
 - [Claude](https://claude.ai)
 - [ChatGPT](https://chat.openai.com)
 - [Google Gemini](https://gemini.google.com)
