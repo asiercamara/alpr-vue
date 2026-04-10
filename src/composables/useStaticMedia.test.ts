@@ -255,14 +255,16 @@ describe('useStaticMedia', () => {
       addEventListenerSpy.mockRestore()
     })
 
-    it('directly calls onLoaded when video readyState >= 2', () => {
+    it('directly calls onLoaded when video readyState >= 2', async () => {
       const media = useStaticMedia()
       const video = document.createElement('video')
       const canvas = document.createElement('canvas')
 
       Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
 
       media.processVideoStream(video, canvas)
+      await Promise.resolve()
 
       expect(rafSpy).toHaveBeenCalled()
     })
@@ -327,14 +329,16 @@ describe('useStaticMedia', () => {
       expect(cancelRafSpy).not.toHaveBeenCalled()
     })
 
-    it('cancels animation frame when previously set by processVideoStream', () => {
+    it('cancels animation frame when previously set by processVideoStream', async () => {
       const media = useStaticMedia()
       const video = document.createElement('video')
       const canvas = document.createElement('canvas')
 
       Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
 
       media.processVideoStream(video, canvas)
+      await Promise.resolve()
 
       media.stopMediaProcessing()
 
@@ -381,13 +385,15 @@ describe('useStaticMedia', () => {
       revokeSpy.mockRestore()
     })
 
-    it('cancels animation frame on cleanup', () => {
+    it('cancels animation frame on cleanup', async () => {
       const media = useStaticMedia()
       const video = document.createElement('video')
       const canvas = document.createElement('canvas')
       Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
 
       media.processVideoStream(video, canvas)
+      await Promise.resolve()
       media.cleanup()
 
       expect(cancelRafSpy).toHaveBeenCalled()

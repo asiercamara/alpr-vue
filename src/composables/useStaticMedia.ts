@@ -64,11 +64,18 @@ export function useStaticMedia() {
     plateStore.setMode('upload')
     stopMediaProcessing()
 
-    const onLoaded = () => {
+    const onLoaded = async () => {
+      try {
+        await video.play()
+      } catch {
+        status.value = 'error'
+        return
+      }
+
       status.value = 'processing'
 
       const loop = async () => {
-        if (video.paused || video.ended) {
+        if (video.ended) {
           status.value = 'done'
           return
         }

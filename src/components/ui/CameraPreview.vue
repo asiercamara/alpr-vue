@@ -17,6 +17,7 @@
         isUploadActive && appStore.uploadMediaType === 'image' ? 'hidden' : '',
       ]"
       playsinline
+      :muted="true"
     ></video>
 
     <canvas
@@ -218,7 +219,6 @@ watch(
       await staticMedia.processImage(file, canvas)
     } else if (type === 'video') {
       staticMedia.setVideoSource(video, url)
-      video.play?.()?.catch?.(() => {})
       staticMedia.processVideoStream(video, canvas)
     }
   },
