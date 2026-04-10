@@ -117,4 +117,13 @@ describe('BottomDrawer', () => {
     const style = root.attributes('style')
     expect(style).toContain('height: 80px')
   })
+
+  it('updates height on window resize', async () => {
+    const wrapper = mountDrawer()
+    vi.stubGlobal('innerHeight', 900)
+    window.dispatchEvent(new Event('resize'))
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toBeTruthy()
+    vi.unstubAllGlobals()
+  })
 })

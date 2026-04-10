@@ -12,6 +12,8 @@ export function useStaticMedia() {
   const status = ref<MediaProcessingStatus>('idle')
   let animationFrameId: number | null = null
   let videoUrl: string | null = null
+  let lastBoxes: DetectionBox[] = []
+  let unsubscribeBoxes: (() => void) | null = null
 
   const processImage = async (file: File, canvas: HTMLCanvasElement): Promise<DetectionBox[]> => {
     if (!modelReady.value) {
@@ -63,6 +65,14 @@ export function useStaticMedia() {
     status.value = 'loading'
     plateStore.setMode('upload')
     stopMediaProcessing()
+    lastBoxes = []
+
+    if (unsubscribeBoxes) {
+      unsubscribeBoxes()
+    }
+    unsubscribeBoxes = onBoxes((boxes: DetectionBox[]) => {
+      lastBoxes = boxes
+    })
 
     const onLoaded = async () => {
       try {
@@ -86,13 +96,16 @@ export function useStaticMedia() {
           const ctx = canvas.getContext('2d')
           if (ctx) {
             ctx.drawImage(video, 0, 0)
+            if (lastBoxes.length) {
+              drawBoxesAndUpdate(canvas, lastBoxes)
+            }
           }
         }
 
         if (!isProcessing.value && modelReady.value && video.readyState >= 2) {
           try {
             const bitmap = await createImageBitmap(video)
-            await processFrame(bitmap)
+            processFrame(bitmap)
           } catch {
             // skip frame
           }
@@ -131,6 +144,11 @@ export function useStaticMedia() {
 
   const cleanup = (): void => {
     stopMediaProcessing()
+    if (unsubscribeBoxes) {
+      unsubscribeBoxes()
+      unsubscribeBoxes = null
+    }
+    lastBoxes = []
     status.value = 'idle'
     if (videoUrl) {
       URL.revokeObjectURL(videoUrl)

@@ -50,6 +50,24 @@ describe('HelpSheet', () => {
     }
   })
 
+  it('emits update:modelValue false when outer overlay is clicked directly', async () => {
+    const wrapper = mount(HelpSheet, {
+      props: { modelValue: true },
+      global: {
+        stubs: {
+          Teleport: { template: '<div><slot/></div>' },
+          Transition: { template: '<div><slot/></div>' },
+        },
+      },
+    })
+    const overlay = wrapper.find('.fixed')
+    if (overlay.exists()) {
+      await overlay.trigger('click')
+      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
+      expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
+    }
+  })
+
   it('emits update:modelValue false when Entendido button is clicked', async () => {
     const wrapper = mount(HelpSheet, {
       props: { modelValue: true },

@@ -5,8 +5,13 @@ import { reactive, ref } from 'vue'
 const mockStartCamera = vi.fn()
 const mockStopCamera = vi.fn()
 const mockToggleCameraFacing = vi.fn()
+const mockZoomIn = vi.fn()
+const mockZoomOut = vi.fn()
 const mockIsCameraActive = ref(false)
 const mockIsProcessing = ref(false)
+const mockZoomLevel = ref(1)
+const mockMaxZoom = ref(5)
+const mockIsDigitalZoom = ref(false)
 
 vi.mock('@/composables/useCamera', () => ({
   useCamera: () => ({
@@ -19,6 +24,11 @@ vi.mock('@/composables/useCamera', () => ({
     startCamera: mockStartCamera,
     stopCamera: mockStopCamera,
     toggleCameraFacing: mockToggleCameraFacing,
+    zoomLevel: mockZoomLevel,
+    maxZoom: mockMaxZoom,
+    isDigitalZoom: mockIsDigitalZoom,
+    zoomIn: mockZoomIn,
+    zoomOut: mockZoomOut,
   }),
 }))
 
@@ -118,6 +128,8 @@ describe('CameraPreview', () => {
     mockAppState.uploadFile = null
     mockIsCameraActive.value = false
     mockIsProcessing.value = false
+    mockZoomLevel.value = 1
+    mockIsDigitalZoom.value = false
     mockStartCamera.mockClear()
     mockStopCamera.mockClear()
     mockToggleCameraFacing.mockClear()
@@ -126,6 +138,8 @@ describe('CameraPreview', () => {
     mockSetVideoSource.mockClear()
     mockStopMediaProcessing.mockClear()
     mockCleanup.mockClear()
+    mockZoomIn.mockClear()
+    mockZoomOut.mockClear()
     mockStaticStatus.value = 'idle'
     mockStaticIsProcessing.value = false
   })
@@ -137,6 +151,8 @@ describe('CameraPreview', () => {
     IconAlertTriangle: { template: '<svg />' },
     IconFlipCamera: { template: '<svg />' },
     IconClose: { template: '<svg />' },
+    IconZoomIn: { template: '<svg />' },
+    IconZoomOut: { template: '<svg />' },
     MediaUploader: { template: '<div data-test="uploader"></div>' },
   }
 
@@ -336,5 +352,87 @@ describe('CameraPreview', () => {
     await closeBtn.trigger('click')
 
     expect(mockCleanup).toHaveBeenCalled()
+  })
+
+  it('shows zoom controls when camera is active', async () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.find('button[title="Acercar"]').exists()).toBe(true)
+    expect(wrapper.find('button[title="Alejar"]').exists()).toBe(true)
+  })
+
+  it('calls zoomIn when zoom in button is clicked', async () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const zoomInBtn = wrapper.find('button[title="Acercar"]')
+    await zoomInBtn.trigger('click')
+    expect(mockZoomIn).toHaveBeenCalled()
+  })
+
+  it('calls zoomOut when zoom out button is clicked', async () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockZoomLevel.value = 2
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const zoomOutBtn = wrapper.find('button[title="Alejar"]')
+    await zoomOutBtn.trigger('click')
+    expect(mockZoomOut).toHaveBeenCalled()
+  })
+
+  it('disables zoom out button when zoom is at minimum', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockZoomLevel.value = 1
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const zoomOutBtn = wrapper.find('button[title="Alejar"]')
+    expect(zoomOutBtn.attributes('disabled')).toBeDefined()
+  })
+
+  it('disables zoom in button when zoom is at maximum', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockZoomLevel.value = 5
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const zoomInBtn = wrapper.find('button[title="Acercar"]')
+    expect(zoomInBtn.attributes('disabled')).toBeDefined()
+  })
+
+  it('shows zoom level indicator when zoomed in', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockZoomLevel.value = 2.5
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).toContain('2.5x')
+  })
+
+  it('hides zoom level indicator when at 1x', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockZoomLevel.value = 1
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    expect(wrapper.text()).not.toContain('1.0x')
+  })
+
+  it('applies digital zoom transform when isDigitalZoom and zoomLevel > 1', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockIsDigitalZoom.value = true
+    mockZoomLevel.value = 2
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const innerDiv = wrapper.find('div.w-full.h-full.transition-transform')
+    expect(innerDiv.exists()).toBe(true)
+    expect(innerDiv.attributes('style')).toContain('transform: scale(2)')
+  })
+
+  it('does not apply transform when not digital zoom', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockIsDigitalZoom.value = false
+    mockZoomLevel.value = 2
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+    const innerDiv = wrapper.find('div.w-full.h-full.transition-transform')
+    expect(innerDiv.attributes('style')).toBeUndefined()
   })
 })

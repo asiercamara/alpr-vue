@@ -268,6 +268,140 @@ describe('useStaticMedia', () => {
 
       expect(rafSpy).toHaveBeenCalled()
     })
+
+    it('sets status to error when video.play() fails', async () => {
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      vi.spyOn(video, 'play').mockRejectedValue(new Error('play failed'))
+
+      media.processVideoStream(video, canvas)
+      await Promise.resolve()
+
+      expect(media.status.value).toBe('error')
+    })
+
+    it('completes video processing loop with ended video', async () => {
+      rafSpy.mockRestore()
+      cancelRafSpy.mockRestore()
+
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      Object.defineProperty(video, 'ended', { value: true, configurable: true })
+      Object.defineProperty(video, 'videoWidth', { value: 100, configurable: true })
+      Object.defineProperty(video, 'videoHeight', { value: 100, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
+
+      media.processVideoStream(video, canvas)
+      await new Promise((r) => setTimeout(r, 50))
+
+      expect(media.status.value).toBe('done')
+
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1)
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
+    })
+
+    it('processes video frames in requestAnimationFrame loop', async () => {
+      rafSpy.mockRestore()
+      cancelRafSpy.mockRestore()
+
+      let rafCallback: (() => Promise<void>) | null = null
+      const rafSpyReal = vi
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((cb: FrameRequestCallback) => {
+          rafCallback = async () => {
+            cb(0)
+          }
+          return 1
+        })
+
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      Object.defineProperty(video, 'ended', { value: false, configurable: true })
+      Object.defineProperty(video, 'videoWidth', { value: 100, configurable: true })
+      Object.defineProperty(video, 'videoHeight', { value: 100, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
+
+      const mockCtx = {
+        drawImage: vi.fn(),
+        clearRect: vi.fn(),
+      }
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
+
+      vi.stubGlobal(
+        'createImageBitmap',
+        vi.fn().mockResolvedValue({ width: 100, height: 100, close: vi.fn() }),
+      )
+
+      media.processVideoStream(video, canvas)
+      await Promise.resolve()
+
+      expect(rafCallback).not.toBeNull()
+      await rafCallback!()
+
+      expect(mockCtx.drawImage).toHaveBeenCalled()
+      expect(mockProcessFrame).toHaveBeenCalled()
+
+      rafSpyReal.mockRestore()
+      vi.unstubAllGlobals()
+
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1)
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
+    })
+
+    it('skips frame when createImageBitmap fails in loop', async () => {
+      rafSpy.mockRestore()
+      cancelRafSpy.mockRestore()
+
+      let rafCallback: (() => Promise<void>) | null = null
+      const rafSpyReal = vi
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((cb: FrameRequestCallback) => {
+          rafCallback = async () => {
+            cb(0)
+          }
+          return 1
+        })
+
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      Object.defineProperty(video, 'ended', { value: false, configurable: true })
+      Object.defineProperty(video, 'videoWidth', { value: 100, configurable: true })
+      Object.defineProperty(video, 'videoHeight', { value: 100, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
+
+      const mockCtx = {
+        drawImage: vi.fn(),
+        clearRect: vi.fn(),
+      }
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
+
+      vi.stubGlobal('createImageBitmap', vi.fn().mockRejectedValue(new Error('bitmap error')))
+
+      media.processVideoStream(video, canvas)
+      await Promise.resolve()
+
+      await rafCallback!()
+
+      expect(media.status.value).not.toBe('error')
+
+      rafSpyReal.mockRestore()
+      vi.unstubAllGlobals()
+
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1)
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
+    })
   })
 
   describe('setVideoSource', () => {

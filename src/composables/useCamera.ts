@@ -4,6 +4,9 @@ import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
 import type { DetectionBox } from '@/types/detection'
 
+const ZOOM_STEP = 0.5
+const DIGITAL_ZOOM_MAX = 5
+
 export function useCamera(): {
   videoRef: Ref<HTMLVideoElement | null>
   canvasRef: Ref<HTMLCanvasElement | null>
@@ -11,16 +14,28 @@ export function useCamera(): {
   isProcessing: Ref<boolean>
   modelReady: Ref<boolean>
   facingMode: Ref<string>
+  zoomLevel: Ref<number>
+  maxZoom: Ref<number>
+  isZoomSupported: Ref<boolean>
+  isDigitalZoom: Ref<boolean>
   startCamera: () => Promise<void>
   stopCamera: () => void
   toggleCameraFacing: () => Promise<void>
+  zoomIn: () => Promise<void>
+  zoomOut: () => Promise<void>
+  resetZoom: () => void
 } {
   const videoRef = ref<HTMLVideoElement | null>(null)
   const canvasRef = ref<HTMLCanvasElement | null>(null)
   const isCameraActive = ref(false)
   const facingMode = ref('environment')
+  const zoomLevel = ref(1)
+  const maxZoom = ref(DIGITAL_ZOOM_MAX)
+  const isZoomSupported = ref(false)
+  const isDigitalZoom = ref(false)
 
   let stream: MediaStream | null = null
+  let videoTrack: MediaStreamTrack | null = null
   let intervalId: ReturnType<typeof setInterval> | null = null
   let lastBoxes: DetectionBox[] = []
 
@@ -33,6 +48,31 @@ export function useCamera(): {
     lastBoxes = boxes
   })
 
+  const detectZoomCapabilities = (): void => {
+    try {
+      videoTrack = stream?.getVideoTracks?.()?.[0] ?? null
+      if (!videoTrack) return
+
+      const capabilities = (
+        videoTrack as MediaStreamTrack & { getCapabilities?: () => MediaTrackCapabilities }
+      ).getCapabilities?.()
+      if (capabilities?.zoom) {
+        isZoomSupported.value = true
+        isDigitalZoom.value = false
+        maxZoom.value = (capabilities.zoom as { max?: number }).max ?? DIGITAL_ZOOM_MAX
+      } else {
+        isZoomSupported.value = false
+        isDigitalZoom.value = true
+        maxZoom.value = DIGITAL_ZOOM_MAX
+      }
+    } catch {
+      isZoomSupported.value = false
+      isDigitalZoom.value = false
+      maxZoom.value = DIGITAL_ZOOM_MAX
+    }
+    zoomLevel.value = 1
+  }
+
   const stopCamera = (): void => {
     if (intervalId !== null) {
       clearInterval(intervalId)
@@ -40,7 +80,11 @@ export function useCamera(): {
     }
     stream?.getTracks().forEach((t) => t.stop())
     stream = null
+    videoTrack = null
     isCameraActive.value = false
+    zoomLevel.value = 1
+    isZoomSupported.value = false
+    isDigitalZoom.value = false
     lastBoxes = []
     resetProcessing()
     plateStore.clearConsecutiveDetections()
@@ -65,6 +109,7 @@ export function useCamera(): {
       if (videoRef.value) {
         videoRef.value.srcObject = stream
         await videoRef.value.play()
+        detectZoomCapabilities()
         isCameraActive.value = true
         appStore.setCameraActive(true)
         plateStore.setMode('camera')
@@ -107,6 +152,56 @@ export function useCamera(): {
     }
   }
 
+  const applyNativeZoom = async (value: number): Promise<void> => {
+    if (!videoTrack || !isZoomSupported.value) return
+    try {
+      await videoTrack.applyConstraints({
+        advanced: [{ zoom: value }] as MediaTrackConstraintSet[],
+      })
+    } catch {
+      isZoomSupported.value = false
+      isDigitalZoom.value = true
+    }
+  }
+
+  const zoomIn = async (): Promise<void> => {
+    const next = Math.min(zoomLevel.value + ZOOM_STEP, maxZoom.value)
+    if (next === zoomLevel.value) return
+
+    if (isZoomSupported.value) {
+      await applyNativeZoom(next)
+    }
+
+    zoomLevel.value = next
+    if (!isZoomSupported.value) {
+      isDigitalZoom.value = true
+    }
+  }
+
+  const zoomOut = async (): Promise<void> => {
+    const next = Math.max(zoomLevel.value - ZOOM_STEP, 1)
+    if (next === zoomLevel.value) return
+
+    if (isZoomSupported.value) {
+      await applyNativeZoom(next)
+    }
+
+    zoomLevel.value = next
+    if (!isZoomSupported.value) {
+      isDigitalZoom.value = true
+    }
+  }
+
+  const resetZoom = (): void => {
+    if (isZoomSupported.value && videoTrack) {
+      videoTrack
+        .applyConstraints({ advanced: [{ zoom: 1 }] as MediaTrackConstraintSet[] })
+        .catch(() => {})
+    }
+    zoomLevel.value = 1
+    isDigitalZoom.value = false
+  }
+
   const toggleCameraFacing = async (): Promise<void> => {
     facingMode.value = facingMode.value === 'environment' ? 'user' : 'environment'
     if (isCameraActive.value) {
@@ -127,8 +222,15 @@ export function useCamera(): {
     isProcessing,
     modelReady,
     facingMode,
+    zoomLevel,
+    maxZoom,
+    isZoomSupported,
+    isDigitalZoom,
     startCamera,
     stopCamera,
     toggleCameraFacing,
+    zoomIn,
+    zoomOut,
+    resetZoom,
   }
 }

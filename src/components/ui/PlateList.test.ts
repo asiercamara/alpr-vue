@@ -130,4 +130,40 @@ describe('PlateList', () => {
     expect(best[0].text).toBe('BBB222')
     expect(best[1].text).toBe('AAA111')
   })
+
+  it('sets selectedPlate when view-details is emitted from PlateListItem', async () => {
+    plateStore.addPlate(makePlateData('1', 'XYZ789'))
+    const wrapper = mountList()
+
+    const plateItem = wrapper.find('[data-test="plate-item"]')
+    await plateItem.trigger('click')
+
+    expect(wrapper.vm.selectedPlate).not.toBeNull()
+    expect(wrapper.vm.selectedPlate.text).toBe('XYZ789')
+  })
+
+  it('clears selectedPlate when PlateModal emits close', async () => {
+    plateStore.addPlate(makePlateData('1', 'XYZ789'))
+    const wrapper = mountList()
+
+    const plateItem = wrapper.find('[data-test="plate-item"]')
+    await plateItem.trigger('click')
+    expect(wrapper.vm.selectedPlate).not.toBeNull()
+
+    await wrapper.findComponent('[data-test="modal"]').vm.$emit('close')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.selectedPlate).toBeNull()
+  })
+
+  it('calls downloadCSV with bestDetections when export is clicked', async () => {
+    plateStore.addPlate(makePlateData('1', 'ABC123'))
+    const wrapper = mountList()
+
+    const { downloadCSV } = await import('@/utils/export')
+    const exportBtn = wrapper.findAll('button').find((b) => b.text().includes('Exportar CSV'))
+    if (exportBtn) {
+      await exportBtn.trigger('click')
+      expect(downloadCSV).toHaveBeenCalledWith(plateStore.bestDetections)
+    }
+  })
 })

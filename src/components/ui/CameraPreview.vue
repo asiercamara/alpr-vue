@@ -4,31 +4,47 @@
       'relative w-full overflow-hidden bg-surface-950',
       'shadow-camera transition-all duration-500',
       fullHeight
-        ? 'h-full rounded-none ring-0'
+        ? isUploadActive
+          ? 'max-h-full mx-auto rounded-none ring-0 aspect-video'
+          : 'h-full rounded-none ring-0'
         : isCameraActive || isUploadActive
           ? 'rounded-2xl ring-2 ring-brand-500/50 aspect-video lg:aspect-video'
           : 'rounded-2xl ring-1 ring-surface-200 dark:ring-surface-700 aspect-[3/4] sm:aspect-video',
     ]"
   >
-    <video
-      ref="videoRef"
-      :class="[
-        'w-full h-full object-cover',
-        isUploadActive && appStore.uploadMediaType === 'image' ? 'hidden' : '',
-      ]"
-      playsinline
-      :muted="true"
-    ></video>
+    <div
+      :style="
+        isDigitalZoom && zoomLevel > 1
+          ? { transform: `scale(${zoomLevel})`, transformOrigin: 'center' }
+          : undefined
+      "
+      class="w-full h-full transition-transform duration-200"
+    >
+      <video
+        ref="videoRef"
+        :class="[
+          'w-full h-full',
+          isUploadActive && appStore.uploadMediaType === 'video'
+            ? 'object-contain'
+            : 'object-cover',
+          isUploadActive && appStore.uploadMediaType === 'image' ? 'hidden' : '',
+        ]"
+        playsinline
+        :muted="true"
+      ></video>
 
-    <canvas
-      ref="canvasRef"
-      :class="[
-        'top-0 left-0 w-full h-full pointer-events-none',
-        isUploadActive && appStore.uploadMediaType === 'image'
-          ? 'relative block object-contain'
-          : 'absolute',
-      ]"
-    ></canvas>
+      <canvas
+        ref="canvasRef"
+        :class="[
+          'top-0 left-0 w-full h-full pointer-events-none',
+          isUploadActive && appStore.uploadMediaType === 'image'
+            ? 'relative block object-contain'
+            : isUploadActive && appStore.uploadMediaType === 'video'
+              ? 'absolute object-contain'
+              : 'absolute',
+        ]"
+      ></canvas>
+    </div>
 
     <!-- Camera error -->
     <div
@@ -162,6 +178,43 @@
       >
         <IconFlipCamera class="w-4 h-4" />
       </button>
+
+      <div class="flex items-center gap-1.5">
+        <button
+          :class="[
+            'p-2 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm',
+            zoomLevel <= 1
+              ? 'bg-surface-800/40 text-white/20 cursor-not-allowed'
+              : 'bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white active:scale-95',
+          ]"
+          :disabled="zoomLevel <= 1"
+          title="Alejar"
+          @click="zoomOut()"
+        >
+          <IconZoomOut class="w-4 h-4" />
+        </button>
+
+        <span
+          v-if="zoomLevel > 1"
+          class="min-w-[2.5rem] text-center text-xs font-semibold text-white/80 bg-surface-800/70 backdrop-blur-sm rounded-full px-1.5 py-0.5"
+        >
+          {{ zoomLevel.toFixed(1) }}x
+        </span>
+
+        <button
+          :class="[
+            'p-2 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm',
+            zoomLevel >= maxZoom
+              ? 'bg-surface-800/40 text-white/20 cursor-not-allowed'
+              : 'bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white active:scale-95',
+          ]"
+          :disabled="zoomLevel >= maxZoom"
+          title="Acercar"
+          @click="zoomIn()"
+        >
+          <IconZoomIn class="w-4 h-4" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -177,6 +230,8 @@ import IconCamera from '@/components/icons/IconCamera.vue'
 import IconAlertTriangle from '@/components/icons/IconAlertTriangle.vue'
 import IconFlipCamera from '@/components/icons/IconFlipCamera.vue'
 import IconClose from '@/components/icons/IconClose.vue'
+import IconZoomIn from '@/components/icons/IconZoomIn.vue'
+import IconZoomOut from '@/components/icons/IconZoomOut.vue'
 import MediaUploader from './MediaUploader.vue'
 
 defineProps<{ fullHeight?: boolean }>()
@@ -192,6 +247,11 @@ const {
   startCamera,
   stopCamera,
   toggleCameraFacing,
+  zoomLevel,
+  maxZoom,
+  isDigitalZoom,
+  zoomIn,
+  zoomOut,
 } = useCamera()
 
 const isUploadActive = computed(
