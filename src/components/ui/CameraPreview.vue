@@ -1,11 +1,13 @@
 <template>
   <div
     :class="[
-      'relative w-full overflow-hidden rounded-2xl bg-surface-950',
+      'relative w-full overflow-hidden bg-surface-950',
       'shadow-camera transition-all duration-500',
-      isCameraActive
-        ? 'ring-2 ring-brand-500/50 aspect-video lg:aspect-video'
-        : 'ring-1 ring-surface-200 dark:ring-surface-700 aspect-[3/4] sm:aspect-video',
+      fullHeight
+        ? 'h-full rounded-none ring-0'
+        : isCameraActive
+          ? 'rounded-2xl ring-2 ring-brand-500/50 aspect-video lg:aspect-video'
+          : 'rounded-2xl ring-1 ring-surface-200 dark:ring-surface-700 aspect-[3/4] sm:aspect-video',
     ]"
   >
     <video ref="videoRef" class="w-full h-full object-cover" playsinline></video>
@@ -128,6 +130,8 @@ import IconCamera from '@/components/icons/IconCamera.vue'
 import IconAlertTriangle from '@/components/icons/IconAlertTriangle.vue'
 import IconFlipCamera from '@/components/icons/IconFlipCamera.vue'
 import MediaUploader from './MediaUploader.vue'
+
+defineProps<{ fullHeight?: boolean }>()
 
 const appStore = useAppStore()
 

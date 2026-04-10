@@ -6,6 +6,7 @@ export const useAppStore = defineStore('app', () => {
   const modelError = ref<string | null>(null)
   const isModelLoading = ref(true)
   const isCameraActive = ref(false)
+  const feedbackEnabled = ref(localStorage.getItem('alpr-feedback-enabled') !== 'false')
 
   function setCameraError(msg: string | null): void {
     cameraError.value = msg
@@ -24,14 +25,21 @@ export const useAppStore = defineStore('app', () => {
     isCameraActive.value = active
   }
 
+  function toggleFeedback(): void {
+    feedbackEnabled.value = !feedbackEnabled.value
+    localStorage.setItem('alpr-feedback-enabled', String(feedbackEnabled.value))
+  }
+
   return {
     cameraError,
     modelError,
     isModelLoading,
     isCameraActive,
+    feedbackEnabled,
     setCameraError,
     setModelError,
     setModelReady,
     setCameraActive,
+    toggleFeedback,
   }
 })

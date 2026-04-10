@@ -16,23 +16,28 @@ let _onBoxesCallbacks: Array<(data: DetectionBox[]) => void> = []
 function getWorker(): Worker {
   if (_worker) return _worker
 
-  _worker = new Worker(
-    new URL('../workers/mainWorker.js', import.meta.url),
-    { type: 'module' },
-  )
+  _worker = new Worker(new URL('../workers/mainWorker.js', import.meta.url), { type: 'module' })
 
   _worker.onmessage = (event: MessageEvent) => {
     const data = event.data
 
     if (data?.status === 'model_ready') {
       _modelReady.value = true
-      try { useAppStore().setModelReady() } catch { /* store puede no estar disponible fuera de componentes */ }
+      try {
+        useAppStore().setModelReady()
+      } catch {
+        /* store puede no estar disponible fuera de componentes */
+      }
       return
     }
 
     if (data?.status === 'model_failed') {
       _modelFailed.value = true
-      try { useAppStore().setModelError('No se pudo cargar el modelo de detección') } catch { /* store puede no estar disponible fuera de componentes */ }
+      try {
+        useAppStore().setModelError('No se pudo cargar el modelo de detección')
+      } catch {
+        /* store puede no estar disponible fuera de componentes */
+      }
       return
     }
 
@@ -44,7 +49,7 @@ function getWorker(): Worker {
 
     if (Array.isArray(data)) {
       _isProcessing.value = false
-      _onBoxesCallbacks.forEach(cb => cb(data))
+      _onBoxesCallbacks.forEach((cb) => cb(data))
     }
   }
 
@@ -52,7 +57,7 @@ function getWorker(): Worker {
 }
 
 function selectBestBoxes(boxes: DetectionBox[]): DetectionBox[] {
-  const validBoxes = boxes.filter(box => {
+  const validBoxes = boxes.filter((box) => {
     if (!box.plateText?.confidence?.length) return false
     const conf = box.plateText.confidence
     const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
@@ -66,8 +71,11 @@ function selectBestBoxes(boxes: DetectionBox[]): DetectionBox[] {
     if (!existing || box.plateText.text.length > existing.plateText.text.length) {
       grouped.set(key, box)
     } else if (box.plateText.text.length === existing.plateText.text.length) {
-      const existingConf = existing.plateText.confidence.reduce((a, b) => a + b, 0) / existing.plateText.confidence.length
-      const boxConf = box.plateText.confidence.reduce((a, b) => a + b, 0) / box.plateText.confidence.length
+      const existingConf =
+        existing.plateText.confidence.reduce((a, b) => a + b, 0) /
+        existing.plateText.confidence.length
+      const boxConf =
+        box.plateText.confidence.reduce((a, b) => a + b, 0) / box.plateText.confidence.length
       if (boxConf > existingConf) {
         grouped.set(key, box)
       }
@@ -90,9 +98,11 @@ export function useDetection() {
     worker.postMessage({ imageBitmap }, [imageBitmap])
   }
 
-  const onBoxes = (callback: (data: DetectionBox[]) => void): () => void => {
+  const onBoxes = (callback: (data: DetectionBox[]) => void): (() => void) => {
     _onBoxesCallbacks.push(callback)
-    return () => { _onBoxesCallbacks = _onBoxesCallbacks.filter(cb => cb !== callback) }
+    return () => {
+      _onBoxesCallbacks = _onBoxesCallbacks.filter((cb) => cb !== callback)
+    }
   }
 
   const drawBoxesAndUpdate = (
@@ -126,9 +136,10 @@ export function useDetection() {
       ctx.fillText(label, x1 + 5, y1 - 6)
     }
 
-    const longestBox = bestBoxes.reduce((longest, box) =>
-      box.plateText.text.length > longest.plateText.text.length ? box : longest
-    , bestBoxes[0])
+    const longestBox = bestBoxes.reduce(
+      (longest, box) => (box.plateText.text.length > longest.plateText.text.length ? box : longest),
+      bestBoxes[0],
+    )
 
     const conf = longestBox.plateText.confidence
     const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
@@ -147,7 +158,7 @@ export function useDetection() {
     })
 
     if (shouldStop === true) {
-      notifyDetection()
+      if (useAppStore().feedbackEnabled) notifyDetection()
       stopCallback?.()
       return
     }
