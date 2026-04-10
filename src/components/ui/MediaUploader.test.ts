@@ -15,10 +15,6 @@ vi.mock('@/stores/appStore', () => ({
   }),
 }))
 
-vi.mock('@/components/icons/IconUpload.vue', () => ({
-  default: { template: '<svg data-test="icon-upload" />' },
-}))
-
 import MediaUploader from '@/components/ui/MediaUploader.vue'
 
 describe('MediaUploader', () => {
@@ -32,13 +28,26 @@ describe('MediaUploader', () => {
   const mountComponent = () =>
     mount(MediaUploader, {
       global: {
-        stubs: { IconUpload: { template: '<svg />' } },
+        stubs: {
+          IconUpload: { template: '<svg />' },
+          IconImage: { template: '<svg />' },
+          SampleGallery: {
+            template: '<div data-test="gallery"></div>',
+            props: ['modelValue'],
+            emits: ['select'],
+          },
+        },
       },
     })
 
   it('renders the upload button', () => {
     const wrapper = mountComponent()
     expect(wrapper.text()).toContain('Subir archivo')
+  })
+
+  it('renders the sample gallery toggle button', () => {
+    const wrapper = mountComponent()
+    expect(wrapper.text()).toContain('prueba con una muestra')
   })
 
   it('renders hidden file input with accept attribute', () => {
@@ -131,7 +140,7 @@ describe('MediaUploader', () => {
     expect(mockSetUploadMedia).not.toHaveBeenCalled()
   })
 
-  it('triggers file input when button is clicked', async () => {
+  it('triggers file input when upload button is clicked', async () => {
     const wrapper = mountComponent()
     const input = wrapper.find('input[type="file"]')
     const clickSpy = vi.fn()
@@ -142,5 +151,129 @@ describe('MediaUploader', () => {
       await uploadBtn.trigger('click')
       expect(clickSpy).toHaveBeenCalled()
     }
+  })
+
+  it('toggles gallery when sample button is clicked', async () => {
+    const wrapper = mountComponent()
+    const sampleBtn = wrapper.findAll('button').find((b) => b.text().includes('muestra'))
+    if (!sampleBtn) return
+
+    expect(wrapper.vm.showGallery).toBe(false)
+    await sampleBtn.trigger('click')
+    expect(wrapper.vm.showGallery).toBe(true)
+    await sampleBtn.trigger('click')
+    expect(wrapper.vm.showGallery).toBe(false)
+  })
+
+  it('closes gallery when upload button is clicked', async () => {
+    const wrapper = mountComponent()
+    wrapper.vm.showGallery = true
+    await wrapper.vm.$nextTick()
+
+    const uploadBtn = wrapper.findAll('button').find((b) => b.text().includes('Subir archivo'))
+    if (uploadBtn) {
+      await uploadBtn.trigger('click')
+      expect(wrapper.vm.showGallery).toBe(false)
+    }
+  })
+
+  it('fetches and loads sample image when handleSampleSelect is called', async () => {
+    const blob = new Blob(['image data'], { type: 'image/jpeg' })
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(blob),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const createObjectURLSpy = vi.fn(() => 'blob:sample-url')
+    vi.stubGlobal('URL', {
+      createObjectURL: createObjectURLSpy,
+      revokeObjectURL: vi.fn(),
+    })
+
+    const wrapper = mountComponent()
+    const testMedia = { file: '/test/600.jpg', label: 'SEAT 600', type: 'image' as const }
+
+    await wrapper.vm.handleSampleSelect(testMedia)
+
+    expect(mockFetch).toHaveBeenCalledWith('/test/600.jpg')
+    expect(mockSetUploadMedia).toHaveBeenCalledWith('image', 'blob:sample-url', expect.any(File))
+
+    vi.unstubAllGlobals()
+  })
+
+  it('fetches and loads sample video when handleSampleSelect is called', async () => {
+    const blob = new Blob(['video data'], { type: 'video/mp4' })
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(blob),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const createObjectURLSpy = vi.fn(() => 'blob:video-sample-url')
+    vi.stubGlobal('URL', {
+      createObjectURL: createObjectURLSpy,
+      revokeObjectURL: vi.fn(),
+    })
+
+    const wrapper = mountComponent()
+    const testMedia = { file: '/test/sample.mp4', label: 'Tráfico urbano', type: 'video' as const }
+
+    await wrapper.vm.handleSampleSelect(testMedia)
+
+    expect(mockFetch).toHaveBeenCalledWith('/test/sample.mp4')
+    expect(mockSetUploadMedia).toHaveBeenCalledWith(
+      'video',
+      'blob:video-sample-url',
+      expect.any(File),
+    )
+
+    vi.unstubAllGlobals()
+  })
+
+  it('does nothing when fetch fails', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: false })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const createObjectURLSpy = vi.fn(() => 'blob:fail-url')
+    vi.stubGlobal('URL', {
+      createObjectURL: createObjectURLSpy,
+      revokeObjectURL: vi.fn(),
+    })
+
+    const wrapper = mountComponent()
+    const testMedia = { file: '/test/missing.jpg', label: 'Missing', type: 'image' as const }
+
+    await wrapper.vm.handleSampleSelect(testMedia)
+
+    expect(mockSetUploadMedia).not.toHaveBeenCalled()
+
+    vi.unstubAllGlobals()
+  })
+
+  it('clears existing upload mode before setting sample media', async () => {
+    mockIsUploadMode.value = true
+    const blob = new Blob(['data'], { type: 'image/jpeg' })
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(blob),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const createObjectURLSpy = vi.fn(() => 'blob:sample-url')
+    vi.stubGlobal('URL', {
+      createObjectURL: createObjectURLSpy,
+      revokeObjectURL: vi.fn(),
+    })
+
+    const wrapper = mountComponent()
+    const testMedia = { file: '/test/600.jpg', label: 'SEAT 600', type: 'image' as const }
+
+    await wrapper.vm.handleSampleSelect(testMedia)
+
+    expect(mockClearUploadMedia).toHaveBeenCalled()
+    expect(mockSetUploadMedia).toHaveBeenCalled()
+
+    vi.unstubAllGlobals()
   })
 })
