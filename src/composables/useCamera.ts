@@ -2,6 +2,7 @@ import { ref, onUnmounted, type Ref } from 'vue'
 import { useDetection } from './useDetection'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 import type { DetectionBox } from '@/types/detection'
 
 const ZOOM_STEP = 0.5
@@ -41,6 +42,7 @@ export function useCamera(): {
 
   const plateStore = usePlateStore()
   const appStore = useAppStore()
+  const settingsStore = useSettingsStore()
   const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate, resetProcessing } =
     useDetection()
 
@@ -124,8 +126,14 @@ export function useCamera(): {
           const ctx = canvas.getContext('2d')
           if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+          let confirmedNewPlate = false
           if (lastBoxes.length) {
-            drawBoxesAndUpdate(canvas, lastBoxes)
+            confirmedNewPlate = drawBoxesAndUpdate(canvas, lastBoxes)
+          }
+
+          if (confirmedNewPlate && !settingsStore.continuousMode) {
+            stopCamera()
+            return
           }
 
           if (modelReady.value) {

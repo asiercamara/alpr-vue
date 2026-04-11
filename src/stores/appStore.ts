@@ -6,7 +6,6 @@ export const useAppStore = defineStore('app', () => {
   const modelError = ref<string | null>(null)
   const isModelLoading = ref(true)
   const isCameraActive = ref(false)
-  const feedbackEnabled = ref(localStorage.getItem('alpr-feedback-enabled') !== 'false')
 
   const uploadMediaType = ref<'image' | 'video' | null>(null)
   const uploadMediaUrl = ref<string | null>(null)
@@ -33,11 +32,6 @@ export const useAppStore = defineStore('app', () => {
     isCameraActive.value = active
   }
 
-  function toggleFeedback(): void {
-    feedbackEnabled.value = !feedbackEnabled.value
-    localStorage.setItem('alpr-feedback-enabled', String(feedbackEnabled.value))
-  }
-
   function setUploadMedia(type: 'image' | 'video', url: string, file: File): void {
     uploadMediaType.value = type
     uploadMediaUrl.value = url
@@ -58,7 +52,6 @@ export const useAppStore = defineStore('app', () => {
     modelError,
     isModelLoading,
     isCameraActive,
-    feedbackEnabled,
     uploadMediaType,
     uploadMediaUrl,
     uploadFile,
@@ -67,7 +60,6 @@ export const useAppStore = defineStore('app', () => {
     setModelError,
     setModelReady,
     setCameraActive,
-    toggleFeedback,
     setUploadMedia,
     clearUploadMedia,
   }

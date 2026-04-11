@@ -27,9 +27,31 @@ vi.mock('@/stores/appStore', () => ({
   useAppStore: vi.fn(() => ({
     setModelReady: mockSetModelReady,
     setModelError: mockSetModelError,
-    feedbackEnabled: true,
   })),
 }))
+
+vi.mock('@/stores/settingsStore', () => {
+  const store = {
+    feedbackEnabled: true,
+    confidenceThreshold: 0.7,
+    skipDuplicates: true,
+    continuousMode: true,
+    confirmationTimeMs: 3000,
+    fastConfirmationTimeMs: 1000,
+  }
+  return {
+    useSettingsStore: vi.fn(() => store),
+    DEFAULTS: {
+      feedbackEnabled: true,
+      confidenceThreshold: 0.7,
+      confirmationTime: 3,
+      fastConfirmationTime: 1,
+      continuousMode: true,
+      skipDuplicates: true,
+      theme: 'system',
+    },
+  }
+})
 
 vi.mock('@/utils/feedback', () => ({
   notifyDetection: mockNotifyDetection,
@@ -230,7 +252,8 @@ describe('useDetection', () => {
       const { useDetection } = await import('@/composables/useDetection')
       const detection = useDetection()
       const canvas = document.createElement('canvas')
-      detection.drawBoxesAndUpdate(canvas, [])
+      const result = detection.drawBoxesAndUpdate(canvas, [])
+      expect(result).toBe(false)
     })
 
     it('skips boxes without plateText confidence', async () => {
@@ -367,7 +390,7 @@ describe('useDetection', () => {
         })
       }
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
 
       const detection = useDetection()
       const canvas = document.createElement('canvas')
@@ -383,13 +406,28 @@ describe('useDetection', () => {
 
     it('does not notify when feedbackEnabled is false', async () => {
       vi.resetModules()
-      vi.doMock('@/stores/appStore', () => ({
-        useAppStore: vi.fn(() => ({
-          setModelReady: mockSetModelReady,
-          setModelError: mockSetModelError,
+      vi.doMock('@/stores/settingsStore', () => {
+        const store = {
           feedbackEnabled: false,
-        })),
-      }))
+          confidenceThreshold: 0.7,
+          skipDuplicates: true,
+          continuousMode: true,
+          confirmationTimeMs: 3000,
+          fastConfirmationTimeMs: 1000,
+        }
+        return {
+          useSettingsStore: vi.fn(() => store),
+          DEFAULTS: {
+            feedbackEnabled: true,
+            confidenceThreshold: 0.7,
+            confirmationTime: 3,
+            fastConfirmationTime: 1,
+            continuousMode: true,
+            skipDuplicates: true,
+            theme: 'system',
+          },
+        }
+      })
 
       const { useDetection: useDetectionFresh } = await import('@/composables/useDetection')
       const { usePlateStore } = await import('@/stores/plateStore')
@@ -408,7 +446,7 @@ describe('useDetection', () => {
         })
       }
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
 
       const detection = useDetectionFresh()
       const canvas = document.createElement('canvas')
@@ -421,7 +459,7 @@ describe('useDetection', () => {
 
       expect(mockNotifyDetection).not.toHaveBeenCalled()
 
-      vi.doUnmock('@/stores/appStore')
+      vi.doUnmock('@/stores/settingsStore')
       vi.restoreAllMocks()
     })
 
@@ -457,11 +495,219 @@ describe('useDetection', () => {
       const origGetContext = HTMLCanvasElement.prototype.getContext
       HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as any
 
-      detection.drawBoxesAndUpdate(canvas, [makeBox()])
+      const result = detection.drawBoxesAndUpdate(canvas, [makeBox()])
 
       expect(mockCtx.strokeRect).not.toHaveBeenCalled()
+      expect(result).toBe(false)
 
       HTMLCanvasElement.prototype.getContext = origGetContext
+    })
+
+    it('returns true when a plate is confirmed in camera mode', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+
+      for (let i = 0; i < 5; i++) {
+        store.addPlate({
+          id: `conf_${i}`,
+          text: 'CONF123',
+          confidence: 0.9,
+          plateText: { text: 'CONF123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        })
+      }
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
+
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const confirmedBox = makeBox({
+        text: 'CONF123',
+        plateText: { text: 'CONF123', confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.95] },
+        confidence: 0.95,
+      })
+
+      const result = detection.drawBoxesAndUpdate(canvas, [confirmedBox])
+      expect(result).toBe(true)
+
+      vi.restoreAllMocks()
+    })
+
+    it('returns false when no plate is confirmed', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const result = detection.drawBoxesAndUpdate(canvas, [])
+      expect(result).toBe(false)
+    })
+
+    it('does not notify when skipDuplicates is true and plate is duplicate', async () => {
+      vi.resetModules()
+      vi.doMock('@/stores/settingsStore', () => {
+        const store = {
+          feedbackEnabled: true,
+          confidenceThreshold: 0.7,
+          skipDuplicates: true,
+          continuousMode: true,
+          confirmationTimeMs: 3000,
+          fastConfirmationTimeMs: 1000,
+        }
+        return {
+          useSettingsStore: vi.fn(() => store),
+          DEFAULTS: {
+            feedbackEnabled: true,
+            confidenceThreshold: 0.7,
+            confirmationTime: 3,
+            fastConfirmationTime: 1,
+            continuousMode: true,
+            skipDuplicates: true,
+            theme: 'system',
+          },
+        }
+      })
+
+      const { useDetection: useDetectionFresh } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+
+      store.addPlate({
+        id: 'dup_existing',
+        text: 'DUP123',
+        confidence: 0.9,
+        plateText: { text: 'DUP123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        croppedImage: null,
+        boundingBox: null,
+      })
+
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      for (let i = 0; i < 5; i++) {
+        store.addPlate({
+          id: `dup_cam_${i}`,
+          text: 'DUP123',
+          confidence: 0.9,
+          plateText: { text: 'DUP123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        })
+      }
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
+
+      const detection = useDetectionFresh()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      detection.drawBoxesAndUpdate(canvas, [
+        makeBox({ plateText: { text: 'DUP123', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }),
+      ])
+
+      expect(mockNotifyDetection).not.toHaveBeenCalled()
+
+      vi.doUnmock('@/stores/settingsStore')
+      vi.restoreAllMocks()
+    })
+
+    it('notifies when skipDuplicates is false even for duplicate plate', async () => {
+      vi.resetModules()
+      vi.doMock('@/stores/settingsStore', () => {
+        const store = {
+          feedbackEnabled: true,
+          confidenceThreshold: 0.7,
+          skipDuplicates: false,
+          continuousMode: true,
+          confirmationTimeMs: 3000,
+          fastConfirmationTimeMs: 1000,
+        }
+        return {
+          useSettingsStore: vi.fn(() => store),
+          DEFAULTS: {
+            feedbackEnabled: true,
+            confidenceThreshold: 0.7,
+            confirmationTime: 3,
+            fastConfirmationTime: 1,
+            continuousMode: true,
+            skipDuplicates: true,
+            theme: 'system',
+          },
+        }
+      })
+
+      const { useDetection: useDetectionFresh } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+
+      store.addPlate({
+        id: 'dup_existing2',
+        text: 'DUP456',
+        confidence: 0.9,
+        plateText: { text: 'DUP456', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        croppedImage: null,
+        boundingBox: null,
+      })
+
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      for (let i = 0; i < 5; i++) {
+        store.addPlate({
+          id: `dup_cam2_${i}`,
+          text: 'DUP456',
+          confidence: 0.9,
+          plateText: { text: 'DUP456', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        })
+      }
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
+
+      const detection = useDetectionFresh()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      detection.drawBoxesAndUpdate(canvas, [
+        makeBox({ plateText: { text: 'DUP456', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }),
+      ])
+
+      expect(mockNotifyDetection).toHaveBeenCalled()
+
+      vi.doUnmock('@/stores/settingsStore')
+      vi.restoreAllMocks()
+    })
+
+    it('selects longer text over shorter text in selectBestBoxes', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const shortBox = makeBox({
+        plateText: { text: 'AB', confidence: [0.9, 0.9] },
+        x1: 10,
+      })
+      const longBox = makeBox({
+        plateText: { text: 'AB1234', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        x1: 150,
+      })
+
+      detection.drawBoxesAndUpdate(canvas, [shortBox, longBox])
+
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      expect(store.plates.length).toBe(1)
     })
   })
 })

@@ -38,23 +38,13 @@
               appStore.cameraError ? 'Error' : appStore.isCameraActive ? 'Escaneando' : 'Esperando'
             }}
           </span>
-          <!-- Feedback toggle -->
+          <!-- Settings -->
           <button
-            class="ml-1 w-6 h-6 rounded-full border flex items-center justify-center transition-colors"
-            :class="
-              appStore.feedbackEnabled
-                ? 'border-surface-300 dark:border-white/30 text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500'
-                : 'border-red-300 dark:border-red-700/60 text-red-400 hover:text-red-500'
-            "
-            :title="
-              appStore.feedbackEnabled
-                ? 'Silenciar sonido y vibración'
-                : 'Activar sonido y vibración'
-            "
-            @click="appStore.toggleFeedback()"
+            class="ml-1 w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors"
+            title="Configuración"
+            @click="showSettings = true"
           >
-            <IconVolumeOn v-if="appStore.feedbackEnabled" class="w-3 h-3" />
-            <IconVolumeOff v-else class="w-3 h-3" />
+            <IconSettings class="w-3 h-3" />
           </button>
           <button
             class="w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors text-xs font-bold"
@@ -90,6 +80,7 @@
     </BottomDrawer>
 
     <HelpSheet v-model="showHelp" />
+    <SettingsSheet v-model="showSettings" />
     <ToastNotification />
   </div>
 </template>
@@ -99,14 +90,18 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import CameraPreview from '@/components/ui/CameraPreview.vue'
 import PlateList from '@/components/ui/PlateList.vue'
 import HelpSheet from '@/components/ui/HelpSheet.vue'
+import SettingsSheet from '@/components/ui/SettingsSheet.vue'
 import BottomDrawer from '@/components/ui/BottomDrawer.vue'
 import ToastNotification from '@/components/ui/ToastNotification.vue'
-import IconVolumeOn from '@/components/icons/IconVolumeOn.vue'
-import IconVolumeOff from '@/components/icons/IconVolumeOff.vue'
+import IconSettings from '@/components/icons/IconSettings.vue'
 import { useAppStore } from '@/stores/appStore'
+import { useTheme } from '@/composables/useTheme'
 
 const appStore = useAppStore()
 const showHelp = ref(false)
+const showSettings = ref(false)
+
+useTheme()
 
 // Track viewport width to distinguish mobile vs desktop
 const windowWidth = ref(window.innerWidth)

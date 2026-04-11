@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
 
 const mockDrawBoxesAndUpdate = vi.fn()
 const mockProcessFrame = vi.fn()
@@ -35,6 +36,21 @@ vi.mock('@/stores/plateStore', () => ({
   }),
 }))
 
+vi.mock('@/stores/settingsStore', () => ({
+  useSettingsStore: vi.fn(() => ({
+    continuousMode: true,
+  })),
+  DEFAULTS: {
+    feedbackEnabled: true,
+    confidenceThreshold: 0.7,
+    confirmationTime: 3,
+    fastConfirmationTime: 1,
+    continuousMode: true,
+    skipDuplicates: true,
+    theme: 'system',
+  },
+}))
+
 const createAppStoreMock = () => {
   const state: { cameraError: string | null; cameraActive: boolean } = {
     cameraError: null,
@@ -67,6 +83,7 @@ import { useCamera } from '@/composables/useCamera'
 
 describe('useCamera', () => {
   beforeEach(() => {
+    setActivePinia(createPinia())
     appStoreMock = createAppStoreMock()
     mockSetMode.mockClear()
     mockDrawBoxesAndUpdate.mockClear()

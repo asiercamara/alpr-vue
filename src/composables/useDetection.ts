@@ -1,7 +1,9 @@
 import { ref, markRaw } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
-import { evaluatePlateQuality, PLATE_CONF_THRESHOLD } from '@/utils/validation'
+import { useSettingsStore } from '@/stores/settingsStore'
+import { evaluatePlateQuality } from '@/utils/validation'
+import { calculateTextSimilarity } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
 import type { DetectionBox } from '@/types/detection'
 
@@ -56,12 +58,12 @@ function getWorker(): Worker {
   return _worker
 }
 
-function selectBestBoxes(boxes: DetectionBox[]): DetectionBox[] {
+function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox[] {
   const validBoxes = boxes.filter((box) => {
     if (!box.plateText?.confidence?.length) return false
     const conf = box.plateText.confidence
     const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
-    return confMean >= PLATE_CONF_THRESHOLD
+    return confMean >= threshold
   })
 
   const grouped = new Map<string, DetectionBox>()
@@ -87,6 +89,7 @@ function selectBestBoxes(boxes: DetectionBox[]): DetectionBox[] {
 
 export function useDetection() {
   const plateStore = usePlateStore()
+  const settingsStore = useSettingsStore()
   const worker = getWorker()
 
   const processFrame = async (imageBitmap: ImageBitmap): Promise<void> => {
@@ -105,17 +108,18 @@ export function useDetection() {
     }
   }
 
-  const drawBoxesAndUpdate = (canvas: HTMLCanvasElement, boxes: DetectionBox[]): void => {
-    if (!boxes?.length) return
+  const drawBoxesAndUpdate = (canvas: HTMLCanvasElement, boxes: DetectionBox[]): boolean => {
+    let confirmedNew = false
+    if (!boxes?.length) return false
 
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    if (!ctx) return false
     ctx.strokeStyle = '#00FF00'
     ctx.lineWidth = 3
     ctx.font = '18px monospace'
 
-    const bestBoxes = selectBestBoxes(boxes)
-    if (!bestBoxes.length) return
+    const bestBoxes = selectBestBoxes(boxes, settingsStore.confidenceThreshold)
+    if (!bestBoxes.length) return false
 
     for (const box of bestBoxes) {
       const conf = box.plateText.confidence
@@ -138,6 +142,10 @@ export function useDetection() {
       const quality = evaluatePlateQuality({ ...box, confidenceMean: confMean })
       if (!quality.isValid) continue
 
+      const isDuplicateText = settingsStore.skipDuplicates
+        ? plateStore.plates.some((p) => calculateTextSimilarity(p.text, box.plateText.text) >= 0.8)
+        : false
+
       const shouldStop = plateStore.addPlate({
         id: `plate_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         text: box.plateText.text,
@@ -148,10 +156,16 @@ export function useDetection() {
         timestamp: new Date(),
       })
 
-      if (shouldStop === true && useAppStore().feedbackEnabled) {
-        notifyDetection()
+      if (shouldStop === true) {
+        confirmedNew = true
+
+        if (settingsStore.feedbackEnabled && !isDuplicateText) {
+          notifyDetection()
+        }
       }
     }
+
+    return confirmedNew
   }
 
   const resetProcessing = (): void => {

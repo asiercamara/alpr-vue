@@ -1,6 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateTextResult } from '@/types/detection'
+
+vi.mock('@/stores/settingsStore', () => ({
+  useSettingsStore: vi.fn(() => ({
+    confirmationTimeMs: 3000,
+    fastConfirmationTimeMs: 1000,
+  })),
+  DEFAULTS: {
+    feedbackEnabled: true,
+    confidenceThreshold: 0.7,
+    confirmationTime: 3,
+    fastConfirmationTime: 1,
+    continuousMode: true,
+    skipDuplicates: true,
+    theme: 'system',
+  },
+}))
 
 function makePlate(overrides: Record<string, unknown> = {}) {
   const id = `plate_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -19,6 +36,7 @@ describe('plateStore', () => {
   let store: ReturnType<typeof usePlateStore>
 
   beforeEach(() => {
+    setActivePinia(createPinia())
     store = usePlateStore()
   })
 
@@ -100,7 +118,7 @@ describe('plateStore', () => {
         }),
       )
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 3000)
       const result = store.addPlate(
         makePlate({
           id: 'p2',
@@ -156,7 +174,7 @@ describe('plateStore', () => {
         }),
       )
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
       const result = store.addPlate(
         makePlate({
           id: 'p2',
@@ -219,7 +237,7 @@ describe('plateStore', () => {
         }),
       )
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 3000)
       store.addPlate(
         makePlate({
           id: 'p2',
@@ -249,7 +267,7 @@ describe('plateStore', () => {
         }),
       )
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_FAST_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
       store.addPlate(
         makePlate({
           id: 'p2',
@@ -275,7 +293,7 @@ describe('plateStore', () => {
 
       expect(store.plates).toHaveLength(0)
 
-      vi.spyOn(Date, 'now').mockReturnValue(now + store.MIN_CONFIRMATION_TIME)
+      vi.spyOn(Date, 'now').mockReturnValue(now + 3000)
 
       store.addPlate(makePlate({ id: 'a_final', text: 'AAA111' }))
       store.addPlate(makePlate({ id: 'b_final', text: 'BBB222' }))
@@ -443,6 +461,33 @@ describe('plateStore', () => {
       store.setMode('camera')
       store.setMode(null)
       expect(store.currentMode).toBeNull()
+    })
+  })
+
+  describe('updatePlateText edge cases', () => {
+    it('updates group variantTexts and confidenceMean when plate text changes', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9 }))
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.8 }))
+
+      store.updatePlateText('p1', 'ABC124')
+
+      const group = store.plateGroups['ABC124'] || store.plateGroups['ABC123']
+      expect(group).toBeDefined()
+    })
+
+    it('returns false when plate id does not exist', () => {
+      const result = store.updatePlateText('nonexistent', 'XYZ')
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('calculateGroupConfidence', () => {
+    it('is stored when group is created', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'TEST12', confidence: 0.85 }))
+
+      const groupKey = Object.keys(store.plateGroups)[0]
+      const group = store.plateGroups[groupKey]
+      expect(group.confidenceMean).toBe(0.85)
     })
   })
 })

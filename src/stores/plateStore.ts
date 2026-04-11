@@ -5,6 +5,7 @@ import {
   PLATE_HIGH_CONF_MEAN,
   PLATE_CHAR_MIN_CONF,
 } from '@/utils/validation'
+import { useSettingsStore } from '@/stores/settingsStore'
 import type { PlateRecord, PlateTextResult } from '@/types/detection'
 
 interface VariantText {
@@ -29,8 +30,6 @@ interface ConsecutiveDetection {
 
 const SIMILARITY_THRESHOLD = 0.8
 const CONSECUTIVE_DETECTION_TIMEOUT = 5000
-const MIN_CONFIRMATION_TIME = 3000
-const MIN_FAST_CONFIRMATION_TIME = 1000
 const HIGH_CONFIDENCE_MEAN = PLATE_HIGH_CONF_MEAN
 const HIGH_CONFIDENCE_MIN_CHAR = PLATE_CHAR_MIN_CONF
 
@@ -99,6 +98,7 @@ export const usePlateStore = defineStore('plateStore', () => {
   }
 
   function processForCameraMode(detectionObj: PlateRecord): boolean {
+    const settingsStore = useSettingsStore()
     const text = detectionObj.text
     const now = Date.now()
 
@@ -128,7 +128,9 @@ export const usePlateStore = defineStore('plateStore', () => {
 
     const elapsed = current.firstTimestamp ? now - current.firstTimestamp : 0
     const highQuality = isHighQuality(detectionObj.plateText, detectionObj.confidence)
-    const minTime = highQuality ? MIN_FAST_CONFIRMATION_TIME : MIN_CONFIRMATION_TIME
+    const minTime = highQuality
+      ? settingsStore.fastConfirmationTimeMs
+      : settingsStore.confirmationTimeMs
 
     if (elapsed >= minTime) {
       detectionObj.confirmed = true
@@ -289,7 +291,5 @@ export const usePlateStore = defineStore('plateStore', () => {
     clearPlates,
     clearConsecutiveDetections,
     setMode,
-    MIN_CONFIRMATION_TIME,
-    MIN_FAST_CONFIRMATION_TIME,
   }
 })
