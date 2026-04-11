@@ -6,7 +6,7 @@
     >
       <div class="p-1.5">
         <div class="px-2 py-1.5 text-xs font-semibold text-white/50 uppercase tracking-wider">
-          Imágenes
+          {{ t('gallery.images') }}
         </div>
         <button
           v-for="item in imageItems"
@@ -19,12 +19,12 @@
           <span
             class="ml-auto flex-shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-brand-500/20 text-brand-400"
           >
-            IMG
+            {{ t('gallery.imgLabel') }}
           </span>
         </button>
 
         <div class="px-2 py-1.5 mt-1 text-xs font-semibold text-white/50 uppercase tracking-wider">
-          Vídeos
+          {{ t('gallery.videos') }}
         </div>
         <button
           v-for="item in videoItems"
@@ -37,7 +37,7 @@
           <span
             class="ml-auto flex-shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-emerald-500/20 text-emerald-400"
           >
-            VÍD
+            {{ t('gallery.vidLabel') }}
           </span>
         </button>
       </div>
@@ -47,9 +47,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { TEST_MEDIA, type TestMediaItem } from '@/data/testMedia'
 import IconImage from '@/components/icons/IconImage.vue'
 import IconVideo from '@/components/icons/IconVideo.vue'
+
+const { t } = useI18n()
 
 defineProps<{ modelValue: boolean }>()
 defineEmits<{

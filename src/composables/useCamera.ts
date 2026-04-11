@@ -8,6 +8,7 @@ import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { DetectionBox } from '@/types/detection'
+import { i18n } from '@/i18n'
 
 /** How much zoom changes per increment/decrement step. */
 const ZOOM_STEP = 0.5
@@ -180,12 +181,12 @@ export function useCamera(): {
       appStore.setCameraActive(false)
       console.error('Error accessing camera:', err)
       if (err instanceof DOMException) {
-        if (err.name === 'NotAllowedError') appStore.setCameraError('Permiso de cámara denegado')
-        else if (err.name === 'NotFoundError')
-          appStore.setCameraError('No se encontró cámara disponible')
+        const t = i18n.global.t
+        if (err.name === 'NotAllowedError') appStore.setCameraError(t('errors.camera.denied'))
+        else if (err.name === 'NotFoundError') appStore.setCameraError(t('errors.camera.notFound'))
         else appStore.setCameraError(err.message)
       } else {
-        appStore.setCameraError('Error inesperado al acceder a la cámara')
+        appStore.setCameraError(err instanceof Error ? err.message : String(err))
       }
     }
   }

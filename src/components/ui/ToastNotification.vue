@@ -12,7 +12,7 @@
           <span class="plate-text text-sm text-white font-semibold tracking-widest">
             {{ currentPlate }}
           </span>
-          <span class="text-xs text-white/60 shrink-0">detectada</span>
+          <span class="text-xs text-white/60 shrink-0">{{ t('toast.detected') }}</span>
         </div>
       </div>
     </Transition>
@@ -21,8 +21,10 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 
+const { t } = useI18n()
 const plateStore = usePlateStore()
 
 const visible = ref(false)

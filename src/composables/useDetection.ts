@@ -6,6 +6,7 @@ import { ref, markRaw } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { i18n } from '@/i18n'
 import { evaluatePlateQuality } from '@/utils/validation'
 import { calculateTextSimilarity } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
@@ -58,7 +59,7 @@ function getWorker(): Worker {
     if (data?.status === 'model_failed') {
       _modelFailed.value = true
       try {
-        useAppStore().setModelError('No se pudo cargar el modelo de detección')
+        useAppStore().setModelError(i18n.global.t('errors.model'))
       } catch {
         /* store puede no estar disponible fuera de componentes */
       }

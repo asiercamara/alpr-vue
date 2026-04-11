@@ -16,6 +16,7 @@ vi.mock('@/stores/settingsStore', () => ({
     continuousMode: true,
     skipDuplicates: true,
     theme: 'system',
+    language: 'auto',
   },
 }))
 

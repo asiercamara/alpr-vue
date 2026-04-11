@@ -35,20 +35,24 @@
           ></span>
           <span class="text-sm font-medium text-surface-500 dark:text-white/70">
             {{
-              appStore.cameraError ? 'Error' : appStore.isCameraActive ? 'Escaneando' : 'Esperando'
+              appStore.cameraError
+                ? t('app.status.error')
+                : appStore.isCameraActive
+                  ? t('app.status.scanning')
+                  : t('app.status.waiting')
             }}
           </span>
           <!-- Settings -->
           <button
             class="ml-1 w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors"
-            title="Configuración"
+            :title="t('app.nav.settings')"
             @click="showSettings = true"
           >
             <IconSettings class="w-3 h-3" />
           </button>
           <button
             class="w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors text-xs font-bold"
-            title="Cómo usar"
+            :title="t('app.nav.help')"
             @click="showHelp = true"
           >
             ?
@@ -87,6 +91,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CameraPreview from '@/components/ui/CameraPreview.vue'
 import PlateList from '@/components/ui/PlateList.vue'
 import HelpSheet from '@/components/ui/HelpSheet.vue'
@@ -96,12 +101,15 @@ import ToastNotification from '@/components/ui/ToastNotification.vue'
 import IconSettings from '@/components/icons/IconSettings.vue'
 import { useAppStore } from '@/stores/appStore'
 import { useTheme } from '@/composables/useTheme'
+import { useLocale } from '@/composables/useLocale'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const showHelp = ref(false)
 const showSettings = ref(false)
 
 useTheme()
+useLocale()
 
 // Track viewport width to distinguish mobile vs desktop
 const windowWidth = ref(window.innerWidth)
@@ -119,8 +127,8 @@ const isMobileCameraActive = computed(
 )
 
 const statusTitle = computed(() => {
-  if (appStore.cameraError) return 'Error de cámara'
-  if (appStore.isCameraActive) return 'Cámara activa, escaneando...'
-  return 'Esperando activación de cámara'
+  if (appStore.cameraError) return t('app.title.cameraError')
+  if (appStore.isCameraActive) return t('app.title.scanning')
+  return t('app.title.waiting')
 })
 </script>

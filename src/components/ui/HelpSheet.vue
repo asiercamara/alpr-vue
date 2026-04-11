@@ -17,7 +17,7 @@
             <h2
               class="heading-display text-sm font-semibold text-surface-700 dark:text-surface-200 uppercase tracking-wider"
             >
-              Cómo usar
+              {{ t('help.title') }}
             </h2>
           </div>
 
@@ -28,7 +28,7 @@
                 >1</span
               >
               <p class="text-sm text-surface-700 dark:text-white/70 leading-relaxed">
-                Activa la cámara para comenzar el escaneo en tiempo real.
+                {{ t('help.step1') }}
               </p>
             </div>
             <div class="flex gap-3 items-start">
@@ -37,7 +37,7 @@
                 >2</span
               >
               <p class="text-sm text-surface-700 dark:text-white/70 leading-relaxed">
-                Apunta la cámara directamente a la matrícula del vehículo.
+                {{ t('help.step2') }}
               </p>
             </div>
             <div class="flex gap-3 items-start">
@@ -46,7 +46,7 @@
                 >3</span
               >
               <p class="text-sm text-surface-700 dark:text-white/70 leading-relaxed">
-                El sistema detectará automáticamente el texto y lo guardará en el historial.
+                {{ t('help.step3') }}
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@
             class="w-full mt-6 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-white/70 font-medium text-sm hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
             @click="$emit('update:modelValue', false)"
           >
-            Entendido
+            {{ t('help.close') }}
           </button>
         </div>
       </div>
@@ -64,6 +64,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 defineProps<{
   modelValue: boolean
 }>()

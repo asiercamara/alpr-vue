@@ -72,12 +72,70 @@ Defined in `src/assets/main.css` under `@theme`. Never use raw hex values in com
 
 `useSettingsStore` (`src/stores/settingsStore.ts`) is the single location for all user-configurable settings, persisted to `localStorage` under key `'alpr-settings'` on every change.
 
-- **Always use the setter** (`setTheme`, `setConfidenceThreshold`, etc.) — never mutate `ref` values directly from outside the store.
-- **Each setting has a matching reset** (`resetTheme`, `resetAll`, etc.) that restores to `DEFAULTS`.
+- **Always use the setter** (`setTheme`, `setLanguage`, `setConfidenceThreshold`, etc.) — never mutate `ref` values directly from outside the store.
+- **Each setting has a matching reset** (`resetTheme`, `resetLanguage`, `resetAll`, etc.) that restores to `DEFAULTS`.
 - **`confirmationTimeMs` / `fastConfirmationTimeMs`** are computed (seconds → ms). Use these in timing logic, not the raw `ref` values.
 - **`theme`** is type `ThemeMode = 'light' | 'dark' | 'system'`. Import this type from the store.
+- **`language`** is type `LocaleMode = 'auto' | 'es' | 'en'`. Import this type from the store. `'auto'` means detect from `navigator.language` at runtime.
 - **Legacy migration**: `loadSettings()` automatically migrates the old `'alpr-feedback-enabled'` key on first load. Do not reference that key anywhere else.
 - All stores follow the **Setup Store** style (`defineStore('id', () => { ... })`). Follow this pattern for any new stores.
+
+## Internationalization (i18n)
+
+The app is fully internationalized with **vue-i18n v9+** in Composition API mode (`legacy: false`). **All user-visible text must go through i18n. Never hardcode literal strings in components or composables.**
+
+### Architecture
+
+- **Locales**: `src/i18n/locales/en.ts` and `src/i18n/locales/es.ts` — all keys must exist in both files.
+- **i18n instance**: `src/i18n/index.ts` — exports the singleton `i18n`. Locale is resolved at module load time (before Pinia) via `getInitialLocale()`, which reads `localStorage['alpr-settings'].language` first, then falls back to `navigator.language`.
+- **Runtime switching**: `useLocale` composable (`src/composables/useLocale.ts`) watches `settingsStore.language` and updates `i18n.global.locale.value`. Call it once in `App.vue`, mirroring `useTheme`.
+- **Supported languages**: `'es'` (Spanish) and `'en'` (English). Default `'auto'` detects from `navigator.language` at runtime.
+
+### Using translations
+
+**In components** (`<script setup>`):
+
+```typescript
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+// In template: {{ t('some.key') }}
+// With interpolation: {{ t('modal.confidence', { value: '85%' }) }}
+```
+
+**In composables** (outside component context):
+
+```typescript
+import { i18n } from '@/i18n'
+// Call directly:
+i18n.global.t('errors.camera.denied')
+```
+
+### Key structure
+
+```
+app.status.{error, scanning, waiting}
+app.title.{cameraError, scanning, waiting}
+app.nav.{settings, help}
+camera.{error, retry, loading, detection, closeViewer, scanning, processingVideo, analyzed, inactive, hint, start, stop, switchCamera, zoomOut, zoomIn, live}
+plates.{title, export, clear, empty, emptyHint}
+modal.{noImage, save, cancel, copy, edit, confidence, average, charConfidence, detected, close}
+uploader.{upload, sample}
+gallery.{images, imgLabel, videos, vidLabel}
+toast.detected
+drawer.{plates, noDetections}   ← uses vue-i18n pluralization: '{n} plate | {n} plates'
+settings.{title, sound.{title,desc}, confidence.{title,desc}, confirmTime.{title,desc}, fastConfirm.{title,desc}, continuousScan.{title,desc}, skipDuplicates.{title,desc}, theme.{title,desc}, language.{title,desc}, buttons.{light,dark,system,auto,close,resetAll}, resetDefault}
+help.{title, step1, step2, step3, close}
+errors.camera.{denied, notFound, unexpected}
+errors.model
+```
+
+### Rules
+
+- **Never add hardcoded text** to any `.vue` component or `.ts` composable — every user-visible string must reference a translation key.
+- When adding a new key, add it to **both** `en.ts` and `es.ts` simultaneously.
+- Use **interpolation** (`t('key', { param })`) for strings with dynamic values; never concatenate translated strings.
+- For pluralization, use vue-i18n's pipe syntax: `'{ n } item | { n } items'` and call `t('key', count)`.
+- Tests that mount components with translated text must include the i18n plugin. The global setup (`src/tests/setup.ts`) already registers it with Spanish locale so existing text assertions keep working. For tests that use `vi.resetModules()` with dynamic imports, re-import `i18n` and force the locale: `(i18n.global.locale as { value: string }).value = 'es'`.
 
 ## TSDoc/JSDoc Documentation Standards
 

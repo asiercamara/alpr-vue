@@ -17,7 +17,7 @@
             <h2
               class="heading-display text-sm font-semibold text-surface-700 dark:text-surface-200 uppercase tracking-wider"
             >
-              Configuración
+              {{ t('settings.title') }}
             </h2>
           </div>
 
@@ -27,17 +27,17 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    Sonido y vibración
+                    {{ t('settings.sound.title') }}
                   </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    Alertar al detectar una matrícula
+                    {{ t('settings.sound.desc') }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
                   <button
                     v-if="settingsStore.feedbackEnabled !== defaults.feedbackEnabled"
                     class="reset-btn"
-                    title="Restaurar valor por defecto"
+                    :title="t('settings.resetDefault')"
                     @click="settingsStore.resetFeedbackEnabled()"
                   >
                     <IconReset class="w-3.5 h-3.5" />
@@ -69,10 +69,10 @@
               <div class="flex items-center justify-between mb-2">
                 <div>
                   <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    Umbral de confianza
+                    {{ t('settings.confidence.title') }}
                   </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    Confianza mínima para aceptar detecciones
+                    {{ t('settings.confidence.desc') }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -84,7 +84,7 @@
                   <button
                     v-if="settingsStore.confidenceThreshold !== defaults.confidenceThreshold"
                     class="reset-btn"
-                    title="Restaurar valor por defecto"
+                    :title="t('settings.resetDefault')"
                     @click="settingsStore.resetConfidenceThreshold()"
                   >
                     <IconReset class="w-3.5 h-3.5" />
@@ -111,10 +111,10 @@
               <div class="flex items-center justify-between mb-2">
                 <div>
                   <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    Tiempo de confirmación
+                    {{ t('settings.confirmTime.title') }}
                   </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    Detección sostenida para confirmar matrícula
+                    {{ t('settings.confirmTime.desc') }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -126,7 +126,7 @@
                   <button
                     v-if="settingsStore.confirmationTime !== defaults.confirmationTime"
                     class="reset-btn"
-                    title="Restaurar valor por defecto"
+                    :title="t('settings.resetDefault')"
                     @click="settingsStore.resetConfirmationTime()"
                   >
                     <IconReset class="w-3.5 h-3.5" />
@@ -153,10 +153,10 @@
               <div class="flex items-center justify-between mb-2">
                 <div>
                   <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    Confirmación rápida
+                    {{ t('settings.fastConfirm.title') }}
                   </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    En detecciones de alta confianza
+                    {{ t('settings.fastConfirm.desc') }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -168,7 +168,7 @@
                   <button
                     v-if="settingsStore.fastConfirmationTime !== defaults.fastConfirmationTime"
                     class="reset-btn"
-                    title="Restaurar valor por defecto"
+                    :title="t('settings.resetDefault')"
                     @click="settingsStore.resetFastConfirmationTime()"
                   >
                     <IconReset class="w-3.5 h-3.5" />
@@ -197,17 +197,17 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    Escaneo continuo
+                    {{ t('settings.continuousScan.title') }}
                   </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    Si se desactiva, la cámara se detiene al detectar
+                    {{ t('settings.continuousScan.desc') }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
                   <button
                     v-if="settingsStore.continuousMode !== defaults.continuousMode"
                     class="reset-btn"
-                    title="Restaurar valor por defecto"
+                    :title="t('settings.resetDefault')"
                     @click="settingsStore.resetContinuousMode()"
                   >
                     <IconReset class="w-3.5 h-3.5" />
@@ -237,17 +237,17 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    No alertar duplicados
+                    {{ t('settings.skipDuplicates.title') }}
                   </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    No pitar ni vibrar si la matrícula ya fue leída
+                    {{ t('settings.skipDuplicates.desc') }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
                   <button
                     v-if="settingsStore.skipDuplicates !== defaults.skipDuplicates"
                     class="reset-btn"
-                    title="Restaurar valor por defecto"
+                    :title="t('settings.resetDefault')"
                     @click="settingsStore.resetSkipDuplicates()"
                   >
                     <IconReset class="w-3.5 h-3.5" />
@@ -278,15 +278,17 @@
             <section>
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">Apariencia</p>
+                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
+                    {{ t('settings.theme.title') }}
+                  </p>
                   <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    Modo claro, oscuro o automático
+                    {{ t('settings.theme.desc') }}
                   </p>
                 </div>
                 <button
                   v-if="settingsStore.theme !== defaults.theme"
                   class="reset-btn"
-                  title="Restaurar valor por defecto"
+                  :title="t('settings.resetDefault')"
                   @click="settingsStore.resetTheme()"
                 >
                   <IconReset class="w-3.5 h-3.5" />
@@ -303,7 +305,7 @@
                   @click="settingsStore.setTheme('light')"
                 >
                   <IconSun class="w-4 h-4 mx-auto mb-0.5" />
-                  Claro
+                  {{ t('settings.buttons.light') }}
                 </button>
                 <button
                   :class="[
@@ -315,7 +317,7 @@
                   @click="settingsStore.setTheme('dark')"
                 >
                   <IconMoon class="w-4 h-4 mx-auto mb-0.5" />
-                  Oscuro
+                  {{ t('settings.buttons.dark') }}
                 </button>
                 <button
                   :class="[
@@ -327,7 +329,69 @@
                   @click="settingsStore.setTheme('system')"
                 >
                   <IconMonitor class="w-4 h-4 mx-auto mb-0.5" />
-                  Sistema
+                  {{ t('settings.buttons.system') }}
+                </button>
+              </div>
+            </section>
+
+            <div class="border-t border-surface-200 dark:border-surface-700"></div>
+
+            <!-- Idioma -->
+            <section>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
+                    {{ t('settings.language.title') }}
+                  </p>
+                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
+                    {{ t('settings.language.desc') }}
+                  </p>
+                </div>
+                <button
+                  v-if="settingsStore.language !== defaults.language"
+                  class="reset-btn"
+                  :title="t('settings.resetDefault')"
+                  @click="settingsStore.resetLanguage()"
+                >
+                  <IconReset class="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <button
+                  :class="[
+                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                    settingsStore.language === 'auto'
+                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                  ]"
+                  @click="settingsStore.setLanguage('auto')"
+                >
+                  <IconMonitor class="w-4 h-4 mx-auto mb-0.5" />
+                  {{ t('settings.buttons.auto') }}
+                </button>
+                <button
+                  :class="[
+                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                    settingsStore.language === 'en'
+                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                  ]"
+                  @click="settingsStore.setLanguage('en')"
+                >
+                  <span class="block text-base leading-none mb-0.5">🇬🇧</span>
+                  EN
+                </button>
+                <button
+                  :class="[
+                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                    settingsStore.language === 'es'
+                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                  ]"
+                  @click="settingsStore.setLanguage('es')"
+                >
+                  <span class="block text-base leading-none mb-0.5">🇪🇸</span>
+                  ES
                 </button>
               </div>
             </section>
@@ -338,13 +402,13 @@
               class="flex-1 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-white/70 font-medium text-sm hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
               @click="$emit('update:modelValue', false)"
             >
-              Cerrar
+              {{ t('settings.buttons.close') }}
             </button>
             <button
               class="py-2.5 px-4 rounded-xl border border-surface-200 dark:border-surface-600 text-surface-500 dark:text-white/50 text-sm font-medium hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
               @click="settingsStore.resetAll()"
             >
-              Restaurar todo
+              {{ t('settings.buttons.resetAll') }}
             </button>
           </div>
         </div>
@@ -354,6 +418,7 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useSettingsStore, DEFAULTS } from '@/stores/settingsStore'
 import IconReset from '@/components/icons/IconReset.vue'
 import IconSun from '@/components/icons/IconSun.vue'
@@ -368,6 +433,7 @@ defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
+const { t } = useI18n()
 const settingsStore = useSettingsStore()
 const defaults = DEFAULTS
 </script>

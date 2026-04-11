@@ -16,6 +16,14 @@ const LEGACY_FEEDBACK_KEY = 'alpr-feedback-enabled'
  */
 export type ThemeMode = 'light' | 'dark' | 'system'
 
+/**
+ * Language preference.
+ * - `'en'` — always use English.
+ * - `'es'` — always use Spanish.
+ * - `'auto'` — detect from `navigator.language` on load.
+ */
+export type LocaleMode = 'auto' | 'en' | 'es'
+
 /** Shape of the settings object stored in localStorage and used by the store. */
 interface SettingsConfig {
   /** Whether audio/haptic feedback fires on plate confirmation. */
@@ -32,6 +40,8 @@ interface SettingsConfig {
   skipDuplicates: boolean
   /** Active theme mode; drives the `dark` class on `<html>` via `useTheme`. */
   theme: ThemeMode
+  /** Active locale; drives the i18n locale via `useLocale`. */
+  language: LocaleMode
 }
 
 /** Default values applied on first run or after `resetAll()`. */
@@ -43,6 +53,7 @@ export const DEFAULTS: SettingsConfig = {
   continuousMode: true,
   skipDuplicates: true,
   theme: 'system',
+  language: 'auto',
 }
 
 /**
@@ -104,6 +115,8 @@ export const useSettingsStore = defineStore('settings', () => {
   const skipDuplicates = ref(loaded.skipDuplicates)
   /** Active theme preference; `useTheme` reacts to this value. */
   const theme = ref<ThemeMode>(loaded.theme)
+  /** Active locale preference; `useLocale` reacts to this value. */
+  const language = ref<LocaleMode>(loaded.language)
 
   /** Millisecond equivalent of `confirmationTime`. Use in `setTimeout` and timing logic. */
   const confirmationTimeMs = computed(() => confirmationTime.value * 1000)
@@ -124,6 +137,7 @@ export const useSettingsStore = defineStore('settings', () => {
       continuousMode: continuousMode.value,
       skipDuplicates: skipDuplicates.value,
       theme: theme.value,
+      language: language.value,
     })
   }
 
@@ -167,6 +181,11 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  function setLanguage(value: LocaleMode): void {
+    language.value = value
+    persist()
+  }
+
   function resetFeedbackEnabled(): void {
     feedbackEnabled.value = DEFAULTS.feedbackEnabled
     persist()
@@ -202,8 +221,13 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  function resetLanguage(): void {
+    language.value = DEFAULTS.language
+    persist()
+  }
+
   /**
-   * Resets all 7 settings to `DEFAULTS` with a single `persist()` call.
+   * Resets all 8 settings to `DEFAULTS` with a single `persist()` call.
    */
   function resetAll(): void {
     feedbackEnabled.value = DEFAULTS.feedbackEnabled
@@ -213,6 +237,7 @@ export const useSettingsStore = defineStore('settings', () => {
     continuousMode.value = DEFAULTS.continuousMode
     skipDuplicates.value = DEFAULTS.skipDuplicates
     theme.value = DEFAULTS.theme
+    language.value = DEFAULTS.language
     persist()
   }
 
@@ -224,6 +249,7 @@ export const useSettingsStore = defineStore('settings', () => {
     continuousMode,
     skipDuplicates,
     theme,
+    language,
     confirmationTimeMs,
     fastConfirmationTimeMs,
     defaults: DEFAULTS,
@@ -235,6 +261,7 @@ export const useSettingsStore = defineStore('settings', () => {
     setContinuousMode,
     setSkipDuplicates,
     setTheme,
+    setLanguage,
     resetFeedbackEnabled,
     resetConfidenceThreshold,
     resetConfirmationTime,
@@ -242,6 +269,7 @@ export const useSettingsStore = defineStore('settings', () => {
     resetContinuousMode,
     resetSkipDuplicates,
     resetTheme,
+    resetLanguage,
     resetAll,
   }
 })

@@ -17,13 +17,14 @@ Este proyecto implementa un sistema de reconocimiento automático de matrículas
 - **Instrucciones de ayuda en bottom sheet** accesibles desde la cabecera
 - **Panel de ajustes** (icono de engranaje) con controles de confianza, temporización y modo
 - **Tres modos de tema**: claro, oscuro, sistema (sigue la preferencia del SO con prevención de FOUC)
+- **Soporte multilenguaje** (inglés / español) con detección automática del idioma del navegador y cambio manual desde el panel de ajustes
 - **Controles de zoom** (zoom nativo por hardware con respaldo digital)
 - **Notificaciones emergentes** al confirmar matrículas
 - **Sistema tipográfico personalizado**: Inter (UI), Space Grotesk (display), JetBrains Mono (texto de matrícula)
 - Diseño responsive optimizado para dispositivos móviles
 - **Contraste mejorado** para legibilidad a plena luz del sol
 - Procesamiento en Web Workers para una interfaz fluida
-- Tests unitarios con Vitest (cobertura 92%+)
+- Tests unitarios con Vitest (cobertura 95%+)
 
 ## Requisitos
 
@@ -145,9 +146,15 @@ alpr_vue/
     │       ├── SampleGallery.vue       # Galería de imágenes/vídeos de muestra para demo
     │       ├── SettingsSheet.vue       # Panel de ajustes en bottom sheet
     │       └── ToastNotification.vue   # Notificación emergente de confirmación
+    ├── i18n/
+    │   ├── index.ts                   # Instancia vue-i18n con detección automática de locale
+    │   └── locales/
+    │       ├── en.ts                  # Traducciones en inglés
+    │       └── es.ts                  # Traducciones en español
     ├── composables/
     │   ├── useCamera.ts               # Ciclo de vida de cámara, cambio de cámara y captura de frames
     │   ├── useDetection.ts            # Comunicación con Web Worker y lógica de detección
+    │   ├── useLocale.ts               # Cambio reactivo de locale desde settingsStore.language
     │   ├── useStaticMedia.ts          # Composable para procesar archivos de imagen/vídeo
     │   └── useTheme.ts                # Gestión del tema oscuro/claro/sistema
     ├── models/
@@ -195,7 +202,7 @@ La interfaz está construida con **Vue 3** usando `<script setup>` y TypeScript.
 
 - **`appStore`**: Registra errores de cámara, estado de carga de modelos, estado activo de la cámara y errores de los mismos.
 - **`plateStore`**: Gestiona las matrículas detectadas, agrupa matrículas similares usando distancia Levenshtein (umbral 0.8), implementa confirmación basada en tiempo, permite editar el texto de las matrículas y ordena las detecciones de más reciente a más antigua.
-- **`settingsStore`**: Persiste los 7 ajustes en localStorage bajo `'alpr-settings'`. Proporciona setters tipados y funciones de reset por ajuste. `useTheme` consume `settingsStore.theme` para gestionar la clase dark en `<html>`.
+- **`settingsStore`**: Persiste los 8 ajustes en localStorage bajo `'alpr-settings'`. Proporciona setters tipados y funciones de reset por ajuste. `useTheme` consume `settingsStore.theme` para gestionar la clase dark en `<html>`; `useLocale` consume `settingsStore.language` para cambiar el locale de i18n de forma reactiva.
 
 #### Composables
 
@@ -203,6 +210,7 @@ La interfaz está construida con **Vue 3** usando `<script setup>` y TypeScript.
 - **`useDetection`**: Gestiona el singleton del Web Worker, envía frames para procesamiento, recibe resultados de cajas delimitadoras mediante un patrón pub/sub (`onBoxes`) y valida la calidad de las matrículas antes de añadirlas al store.
 - **`useStaticMedia`**: Procesa archivos de imagen/vídeo subidos frame a frame a través del mismo pipeline de detección. Muestra progreso (loading/processing/done/error) y soporta cancelación.
 - **`useTheme`**: Observa `settingsStore.theme`, alterna la clase `dark` en `document.documentElement` y escucha cambios de `prefers-color-scheme` del SO en modo `'system'`. Se llama una sola vez en `App.vue`.
+- **`useLocale`**: Observa `settingsStore.language` y actualiza el locale de vue-i18n. `'auto'` detecta el idioma desde `navigator.language`; `'es'`/`'en'` lo fuerzan explícitamente. Se llama una sola vez en `App.vue`.
 
 #### Componente CameraPreview
 
@@ -224,7 +232,7 @@ Modal bottom sheet que muestra las instrucciones de uso, activado por el icono `
 
 #### Componente SettingsSheet
 
-Bottom sheet con selector de tema (claro/oscuro/sistema), toggle de audio/háptico, slider de confianza, sliders de tiempo de confirmación, toggles de modo continuo y omitir duplicados, y botones de reset por ajuste.
+Bottom sheet con selector de tema (claro/oscuro/sistema), selector de idioma (Auto/EN/ES), toggle de audio/háptico, slider de confianza, sliders de tiempo de confirmación, toggles de modo continuo y omitir duplicados, y botones de reset por ajuste.
 
 #### PlateList y PlateModal
 
@@ -317,7 +325,8 @@ En esta implementación web, el modelo ha sido convertido a formato ONNX para op
 - **Pinia** para gestión de estado
 - **Tailwind CSS v4** vía `@tailwindcss/vite`
 - **Vite** con `vue-tsc` para builds con comprobación de tipos
-- **Vitest** + `@vue/test-utils` para testing (cobertura 92%+)
+- **vue-i18n** v9+ para internacionalización (inglés / español)
+- **Vitest** + `@vue/test-utils` para testing (cobertura 95%+)
 - **ESLint** + **Prettier** + **Husky** para calidad de código
 - **ONNX Runtime Web** para inferencia de IA en el navegador
 

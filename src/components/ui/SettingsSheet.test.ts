@@ -212,4 +212,82 @@ describe('SettingsSheet', () => {
 
     expect(settingsStore.fastConfirmationTime).toBe(2)
   })
+
+  it('renders the three language selector buttons', () => {
+    const wrapper = mountSheet()
+    expect(wrapper.text()).toContain('Auto')
+    expect(wrapper.text()).toContain('EN')
+    expect(wrapper.text()).toContain('ES')
+  })
+
+  it('sets language to en when EN button is clicked', async () => {
+    const wrapper = mountSheet()
+    const settingsStore = useSettingsStore()
+
+    const enBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().replace(/\s+/g, ' ').trim().endsWith('EN'))
+    expect(enBtn).toBeDefined()
+    await enBtn!.trigger('click')
+
+    expect(settingsStore.language).toBe('en')
+  })
+
+  it('sets language to es when ES button is clicked', async () => {
+    const wrapper = mountSheet()
+    const settingsStore = useSettingsStore()
+
+    const esBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().replace(/\s+/g, ' ').trim().endsWith('ES'))
+    expect(esBtn).toBeDefined()
+    await esBtn!.trigger('click')
+
+    expect(settingsStore.language).toBe('es')
+  })
+
+  it('sets language to auto when Auto button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setLanguage('en')
+
+    const wrapper = mountSheet()
+    const autoBtn = wrapper.findAll('button').find((b) => b.text().includes('Auto'))
+    expect(autoBtn).toBeDefined()
+    await autoBtn!.trigger('click')
+
+    expect(settingsStore.language).toBe('auto')
+  })
+
+  it('shows reset language button when language differs from default', () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setLanguage('en')
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns.length).toBeGreaterThan(0)
+  })
+
+  it('resets language when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setLanguage('en')
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    // Last reset button corresponds to language section
+    await resetBtns[resetBtns.length - 1].trigger('click')
+
+    expect(settingsStore.language).toBe('auto')
+  })
+
+  it('resets theme when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setTheme('dark')
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns.length).toBeGreaterThan(0)
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.theme).toBe('system')
+  })
 })

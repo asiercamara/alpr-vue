@@ -13,14 +13,14 @@
         @click="triggerFileSelect"
       >
         <IconUpload class="w-4 h-4" />
-        <span>Subir archivo</span>
+        <span>{{ t('uploader.upload') }}</span>
       </button>
       <button
         class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-white/50 hover:text-white/80 transition-colors"
         @click="toggleGallery"
       >
         <IconImage class="w-3.5 h-3.5" />
-        <span>O prueba con una muestra</span>
+        <span>{{ t('uploader.sample') }}</span>
         <svg
           :class="['w-3 h-3 transition-transform duration-200', showGallery ? 'rotate-180' : '']"
           viewBox="0 0 12 12"
@@ -40,12 +40,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/appStore'
 import { type TestMediaItem } from '@/data/testMedia'
 import IconUpload from '@/components/icons/IconUpload.vue'
 import IconImage from '@/components/icons/IconImage.vue'
 import SampleGallery from './SampleGallery.vue'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const showGallery = ref(false)

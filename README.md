@@ -17,13 +17,14 @@ This project implements an automatic license plate recognition (ALPR) system tha
 - **Bottom sheet help instructions** accessible from the header
 - **Configurable settings panel** (gear icon) with confidence, timing, and mode controls
 - **Three theme modes**: light, dark, system (follows OS preference with FOUC prevention)
+- **Multilanguage support** (English / Spanish) with automatic browser language detection and manual switching from the settings panel
 - **Zoom controls** (native hardware zoom with digital fallback)
 - **Toast notifications** for plate confirmations
 - **Custom font system**: Inter (UI), Space Grotesk (display), JetBrains Mono (plate text)
 - Responsive design optimized for mobile devices
 - **Improved contrast** for sunlight readability
 - Processing offloaded to Web Workers for smooth UI
-- Unit tests with Vitest (92%+ coverage)
+- Unit tests with Vitest (95%+ coverage)
 
 ## Requirements
 
@@ -145,9 +146,15 @@ alpr_vue/
     │       ├── SampleGallery.vue       # Built-in sample images/videos for demo
     │       ├── SettingsSheet.vue       # Bottom sheet settings panel
     │       └── ToastNotification.vue   # Transient confirmation toast
+    ├── i18n/
+    │   ├── index.ts                   # vue-i18n instance with automatic locale detection
+    │   └── locales/
+    │       ├── en.ts                  # English translations
+    │       └── es.ts                  # Spanish translations
     ├── composables/
     │   ├── useCamera.ts               # Camera lifecycle, facing toggle & frame capture
     │   ├── useDetection.ts            # Web Worker communication & detection logic
+    │   ├── useLocale.ts               # Reactive locale switching from settingsStore.language
     │   ├── useStaticMedia.ts          # Image/video file processing composable
     │   └── useTheme.ts                # Dark/light/system theme management
     ├── models/
@@ -195,7 +202,7 @@ The UI is built with **Vue 3** using `<script setup>` and TypeScript. State mana
 
 - **`appStore`**: Tracks camera errors, model loading state, camera active state, and model errors.
 - **`plateStore`**: Manages detected plates, groups similar plates using Levenshtein distance (threshold 0.8), implements time-based confirmation logic, and supports editing plate text. Plates are sorted chronologically (most recent first).
-- **`settingsStore`**: Persists all 7 settings to localStorage under `'alpr-settings'`. Provides typed setters and per-setting reset functions. `useTheme` consumes `settingsStore.theme` to drive the dark class on `<html>`.
+- **`settingsStore`**: Persists all 8 settings to localStorage under `'alpr-settings'`. Provides typed setters and per-setting reset functions. `useTheme` consumes `settingsStore.theme` to drive the dark class on `<html>`; `useLocale` consumes `settingsStore.language` to switch the i18n locale reactively.
 
 #### Composables
 
@@ -203,6 +210,7 @@ The UI is built with **Vue 3** using `<script setup>` and TypeScript. State mana
 - **`useDetection`**: Manages the Web Worker singleton, sends frames for processing, receives bounding box results via a pub/sub pattern (`onBoxes`), and validates plate quality before adding to the store.
 - **`useStaticMedia`**: Processes uploaded image/video files frame-by-frame through the same detection pipeline. Shows progress (loading/processing/done/error) and supports cancellation.
 - **`useTheme`**: Watches `settingsStore.theme`, toggles the `dark` class on `document.documentElement`, and listens to OS `prefers-color-scheme` changes in `'system'` mode. Called once in `App.vue`.
+- **`useLocale`**: Watches `settingsStore.language` and updates the vue-i18n locale. `'auto'` detects from `navigator.language`; explicit `'es'`/`'en'` override it. Called once in `App.vue`.
 
 #### CameraPreview Component
 
@@ -224,7 +232,7 @@ Bottom sheet modal showing usage instructions, triggered by the `?` icon in the 
 
 #### SettingsSheet Component
 
-Bottom sheet with theme selector (light/dark/system), audio/haptic toggle, confidence slider, confirmation time sliders, continuous mode and skip-duplicates toggles, and per-setting reset buttons.
+Bottom sheet with theme selector (light/dark/system), language selector (Auto/EN/ES), audio/haptic toggle, confidence slider, confirmation time sliders, continuous mode and skip-duplicates toggles, and per-setting reset buttons.
 
 #### PlateList & PlateModal
 
@@ -316,7 +324,8 @@ In this web implementation, the model has been converted to ONNX format to optim
 - **Pinia** for state management
 - **Tailwind CSS v4** via `@tailwindcss/vite`
 - **Vite** with `vue-tsc` for type-checked builds
-- **Vitest** + `@vue/test-utils` for testing (92%+ coverage)
+- **vue-i18n** v9+ for internationalization (English / Spanish)
+- **Vitest** + `@vue/test-utils` for testing (95%+ coverage)
 - **ESLint** + **Prettier** + **Husky** for code quality
 - **ONNX Runtime Web** for in-browser AI inference
 

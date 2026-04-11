@@ -15,6 +15,7 @@ describe('settingsStore', () => {
     expect(store.continuousMode).toBe(true)
     expect(store.skipDuplicates).toBe(true)
     expect(store.theme).toBe('system')
+    expect(store.language).toBe('auto')
   })
 
   it('loads settings from localStorage', () => {
@@ -154,7 +155,28 @@ describe('settingsStore', () => {
     expect(store.theme).toBe(DEFAULTS.theme)
   })
 
-  it('resetAll restores all defaults', () => {
+  it('setLanguage persists', () => {
+    const store = useSettingsStore()
+    store.setLanguage('en')
+    expect(store.language).toBe('en')
+    const stored = JSON.parse(localStorage.getItem('alpr-settings')!)
+    expect(stored.language).toBe('en')
+  })
+
+  it('resetLanguage restores default', () => {
+    const store = useSettingsStore()
+    store.setLanguage('es')
+    store.resetLanguage()
+    expect(store.language).toBe(DEFAULTS.language)
+  })
+
+  it('loads language from localStorage', () => {
+    localStorage.setItem('alpr-settings', JSON.stringify({ language: 'en' }))
+    const store = useSettingsStore()
+    expect(store.language).toBe('en')
+  })
+
+  it('resetAll restores all defaults including language', () => {
     const store = useSettingsStore()
     store.setFeedbackEnabled(false)
     store.setConfidenceThreshold(0.5)
@@ -163,6 +185,7 @@ describe('settingsStore', () => {
     store.setContinuousMode(false)
     store.setSkipDuplicates(false)
     store.setTheme('dark')
+    store.setLanguage('en')
 
     store.resetAll()
 
@@ -173,6 +196,7 @@ describe('settingsStore', () => {
     expect(store.continuousMode).toBe(DEFAULTS.continuousMode)
     expect(store.skipDuplicates).toBe(DEFAULTS.skipDuplicates)
     expect(store.theme).toBe(DEFAULTS.theme)
+    expect(store.language).toBe(DEFAULTS.language)
   })
 
   it('handles corrupted localStorage gracefully', () => {

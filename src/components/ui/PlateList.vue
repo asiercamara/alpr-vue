@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2.5">
         <h2 class="heading-display text-base font-semibold text-surface-900 dark:text-white">
-          Matrículas Detectadas
+          {{ t('plates.title') }}
         </h2>
         <span
           v-if="plateStore.bestDetections.length > 0"
@@ -18,14 +18,14 @@
           @click="handleExport"
         >
           <IconDownload class="w-3.5 h-3.5" />
-          Exportar CSV
+          {{ t('plates.export') }}
         </button>
         <button
           class="btn-ghost flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
           @click="plateStore.clearPlates()"
         >
           <IconTrash class="w-3.5 h-3.5" />
-          Limpiar
+          {{ t('plates.clear') }}
         </button>
       </div>
     </div>
@@ -53,9 +53,9 @@
           class="absolute inset-x-0 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-brand-400 to-transparent opacity-60 animate-pulse"
         ></div>
       </div>
-      <p class="text-sm font-medium text-surface-600 dark:text-white/70">Sin detecciones</p>
+      <p class="text-sm font-medium text-surface-600 dark:text-white/70">{{ t('plates.empty') }}</p>
       <p class="text-xs text-surface-400 dark:text-white/50 mt-1 text-center">
-        Activa la cámara o sube una imagen
+        {{ t('plates.emptyHint') }}
       </p>
     </div>
 
@@ -74,6 +74,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 import { downloadCSV } from '@/utils/export'
 import type { PlateRecord } from '@/types/detection'
@@ -82,6 +83,7 @@ import PlateListItem from './PlateListItem.vue'
 import IconTrash from '@/components/icons/IconTrash.vue'
 import IconDownload from '@/components/icons/IconDownload.vue'
 
+const { t } = useI18n()
 const plateStore = usePlateStore()
 const selectedPlate = ref<PlateRecord | null>(null)
 

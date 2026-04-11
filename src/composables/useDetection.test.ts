@@ -49,6 +49,7 @@ vi.mock('@/stores/settingsStore', () => {
       continuousMode: true,
       skipDuplicates: true,
       theme: 'system',
+      language: 'auto',
     },
   }
 })
@@ -120,6 +121,8 @@ describe('useDetection', () => {
     })
 
     it('model_failed message sets modelFailed true and calls appStore.setModelError', async () => {
+      const { i18n } = await import('@/i18n')
+      ;(i18n.global.locale as { value: string }).value = 'es'
       const { useDetection } = await import('@/composables/useDetection')
       const detection = useDetection()
 

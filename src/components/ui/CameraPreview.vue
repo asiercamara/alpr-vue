@@ -56,14 +56,14 @@
       >
         <IconAlertTriangle class="w-7 h-7 text-red-400" />
       </div>
-      <p class="text-white/90 font-semibold text-lg mb-1">Error de cámara</p>
+      <p class="text-white/90 font-semibold text-lg mb-1">{{ t('camera.error') }}</p>
       <p class="text-white/60 text-sm mb-6">{{ appStore.cameraError }}</p>
       <button
         class="w-full max-w-xs flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm bg-brand-600 hover:bg-brand-500 text-white transition-all duration-200 active:scale-95"
         @click="startCamera()"
       >
         <IconPlay class="w-4 h-4" />
-        Reintentar
+        {{ t('camera.retry') }}
       </button>
     </div>
 
@@ -82,15 +82,15 @@
           style="animation-duration: 1.5s"
         ></div>
       </div>
-      <p class="text-white/90 font-medium text-sm">Cargando modelo</p>
-      <p class="text-white/60 text-xs mt-1">Detección de matrículas</p>
+      <p class="text-white/90 font-medium text-sm">{{ t('camera.loading') }}</p>
+      <p class="text-white/60 text-xs mt-1">{{ t('camera.detection') }}</p>
     </div>
 
     <!-- Upload mode: close button + scanning indicator -->
     <template v-if="isUploadActive">
       <button
         class="absolute top-3 left-3 z-10 p-1.5 rounded-full bg-surface-950/70 backdrop-blur-sm text-white/70 hover:text-white transition-colors"
-        title="Cerrar visor"
+        :title="t('camera.closeViewer')"
         @click="closeUploadViewer"
       >
         <IconClose class="w-5 h-5" />
@@ -107,10 +107,10 @@
         ></span>
         <span class="text-xs text-white/80 font-medium">{{
           staticMedia.isProcessing.value
-            ? 'Escaneando'
+            ? t('camera.scanning')
             : appStore.uploadMediaType === 'video'
-              ? 'Procesando vídeo'
-              : 'Analizado'
+              ? t('camera.processingVideo')
+              : t('camera.analyzed')
         }}</span>
       </div>
     </template>
@@ -124,8 +124,8 @@
         <IconCamera class="w-8 h-8 text-surface-400" />
       </div>
       <div class="text-center">
-        <p class="text-white/90 font-medium">Cámara desactivada</p>
-        <p class="text-white/60 text-sm mt-1">Pulsa Iniciar o sube un archivo</p>
+        <p class="text-white/90 font-medium">{{ t('camera.inactive') }}</p>
+        <p class="text-white/60 text-sm mt-1">{{ t('camera.hint') }}</p>
       </div>
       <div class="w-full max-w-xs flex flex-col gap-4 mt-2">
         <button
@@ -133,7 +133,7 @@
           @click="startCamera()"
         >
           <IconPlay class="w-4 h-4" />
-          <span>Iniciar cámara</span>
+          <span>{{ t('camera.start') }}</span>
         </button>
         <MediaUploader />
       </div>
@@ -151,7 +151,7 @@
         ]"
       ></span>
       <span class="text-xs text-white/80 font-medium">{{
-        isProcessing ? 'Escaneando' : 'En vivo'
+        isProcessing ? t('camera.scanning') : t('camera.live')
       }}</span>
     </div>
 
@@ -168,12 +168,12 @@
         @click="stopCamera()"
       >
         <IconStop class="w-4 h-4" />
-        <span>Detener</span>
+        <span>{{ t('camera.stop') }}</span>
       </button>
 
       <button
         class="p-2.5 rounded-full bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white shadow-lg transition-all duration-200 backdrop-blur-sm"
-        title="Cambiar cámara"
+        :title="t('camera.switchCamera')"
         @click="toggleCameraFacing()"
       >
         <IconFlipCamera class="w-4 h-4" />
@@ -188,7 +188,7 @@
               : 'bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white active:scale-95',
           ]"
           :disabled="zoomLevel <= 1"
-          title="Alejar"
+          :title="t('camera.zoomOut')"
           @click="zoomOut()"
         >
           <IconZoomOut class="w-4 h-4" />
@@ -209,7 +209,7 @@
               : 'bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white active:scale-95',
           ]"
           :disabled="zoomLevel >= maxZoom"
-          title="Acercar"
+          :title="t('camera.zoomIn')"
           @click="zoomIn()"
         >
           <IconZoomIn class="w-4 h-4" />
@@ -221,6 +221,7 @@
 
 <script setup lang="ts">
 import { computed, watch, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCamera } from '@/composables/useCamera'
 import { useStaticMedia } from '@/composables/useStaticMedia'
 import { useAppStore } from '@/stores/appStore'
@@ -236,6 +237,7 @@ import MediaUploader from './MediaUploader.vue'
 
 defineProps<{ fullHeight?: boolean }>()
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const staticMedia = useStaticMedia()
 

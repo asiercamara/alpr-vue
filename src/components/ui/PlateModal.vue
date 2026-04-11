@@ -10,7 +10,7 @@
           <div class="bg-surface-950 rounded-t-modal overflow-hidden">
             <canvas ref="cropCanvas" class="w-full max-h-32 object-contain" />
             <div v-if="!plate?.croppedImage" class="h-24 flex items-center justify-center">
-              <p class="text-surface-500 dark:text-surface-200 text-xs">Sin imagen disponible</p>
+              <p class="text-surface-500 dark:text-surface-200 text-xs">{{ t('modal.noImage') }}</p>
             </div>
           </div>
 
@@ -44,7 +44,7 @@
                 />
                 <button
                   class="p-1.5 rounded-md text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
-                  title="Guardar"
+                  :title="t('modal.save')"
                   @click="saveEdit"
                 >
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,7 +58,7 @@
                 </button>
                 <button
                   class="p-1.5 rounded-md text-surface-400 dark:text-surface-200 hover:text-red-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
-                  title="Cancelar"
+                  :title="t('modal.cancel')"
                   @click="cancelEdit"
                 >
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,14 +77,14 @@
                 </p>
                 <button
                   class="p-1.5 rounded-md text-surface-400 dark:text-surface-200 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
-                  title="Copiar"
+                  :title="t('modal.copy')"
                   @click="copyToClipboard"
                 >
                   <IconCopy class="w-4 h-4" />
                 </button>
                 <button
                   class="p-1.5 rounded-md text-surface-400 dark:text-surface-200 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
-                  title="Editar"
+                  :title="t('modal.edit')"
                   @click="startEdit"
                 >
                   <IconEdit class="w-4 h-4" />
@@ -97,9 +97,11 @@
               <ConfidenceRing :value="plate.confidence" />
               <div class="text-sm">
                 <p class="font-semibold text-surface-800 dark:text-surface-200">
-                  {{ (plate.confidence * 100).toFixed(1) }}% confianza
+                  {{ t('modal.confidence', { value: (plate.confidence * 100).toFixed(1) }) }}
                 </p>
-                <p class="text-xs text-surface-500 dark:text-surface-300">Promedio general</p>
+                <p class="text-xs text-surface-500 dark:text-surface-300">
+                  {{ t('modal.average') }}
+                </p>
               </div>
             </div>
 
@@ -108,7 +110,7 @@
               <p
                 class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wider mb-3"
               >
-                Confianza por carácter
+                {{ t('modal.charConfidence') }}
               </p>
               <div class="flex gap-1.5 justify-center flex-wrap">
                 <div
@@ -145,7 +147,9 @@
             <!-- Metadata -->
             <div class="grid grid-cols-2 gap-2 text-xs mb-5">
               <div class="bg-surface-50 dark:bg-surface-800 rounded-lg p-3">
-                <p class="text-surface-500 dark:text-surface-300 mb-0.5">Detectado</p>
+                <p class="text-surface-500 dark:text-surface-300 mb-0.5">
+                  {{ t('modal.detected') }}
+                </p>
                 <p class="font-medium text-surface-700 dark:text-surface-300">
                   {{ new Date(plate.timestamp).toLocaleString() }}
                 </p>
@@ -159,7 +163,9 @@
             </div>
 
             <!-- Close button -->
-            <button class="btn-primary w-full text-sm" @click="$emit('close')">Cerrar</button>
+            <button class="btn-primary w-full text-sm" @click="$emit('close')">
+              {{ t('modal.close') }}
+            </button>
           </div>
         </div>
       </div>
@@ -169,6 +175,7 @@
 
 <script setup lang="ts">
 import { ref, nextTick, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateRecord } from '@/types/detection'
 import ConfidenceRing from './ConfidenceRing.vue'
@@ -184,6 +191,7 @@ const props = defineProps<{
   plate: PlateRecord | null
 }>()
 
+const { t } = useI18n()
 const plateStore = usePlateStore()
 const cropCanvas = ref<HTMLCanvasElement | null>(null)
 const isEditing = ref(false)

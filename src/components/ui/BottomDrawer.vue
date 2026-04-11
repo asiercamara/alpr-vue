@@ -16,7 +16,7 @@
     <Transition name="fade">
       <div v-if="isCollapsed" class="flex items-center gap-2 px-4 pb-3 overflow-hidden">
         <span class="text-xs font-semibold text-surface-600 dark:text-white/70 shrink-0">
-          {{ count > 0 ? `${count} matrícula${count !== 1 ? 's' : ''}` : 'Sin detecciones' }}
+          {{ count > 0 ? t('drawer.plates', count) : t('drawer.noDetections') }}
         </span>
         <div v-if="lastPlates.length > 0" class="flex gap-1.5 overflow-hidden">
           <span
@@ -32,7 +32,7 @@
           class="ml-auto shrink-0 text-xs text-brand-600 dark:text-brand-400 font-medium"
           @click.stop="snapTo('half')"
         >
-          Ver todas ↑
+          {{ t('drawer.viewAll') }}
         </button>
       </div>
     </Transition>
@@ -49,8 +49,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 
+const { t } = useI18n()
 const plateStore = usePlateStore()
 
 const SNAP_COLLAPSED = 80

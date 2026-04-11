@@ -48,6 +48,7 @@ vi.mock('@/stores/settingsStore', () => ({
     continuousMode: true,
     skipDuplicates: true,
     theme: 'system',
+    language: 'auto',
   },
 }))
 
@@ -79,6 +80,8 @@ vi.mock('@/stores/appStore', () => ({
   useAppStore: () => appStoreMock,
 }))
 
+import { defineComponent } from 'vue'
+import { mount } from '@vue/test-utils'
 import { useCamera } from '@/composables/useCamera'
 
 describe('useCamera', () => {
@@ -156,9 +159,7 @@ describe('useCamera', () => {
     const camera = useCamera()
     await camera.startCamera()
 
-    expect(appStoreMock.setCameraError).toHaveBeenCalledWith(
-      'Error inesperado al acceder a la cámara',
-    )
+    expect(appStoreMock.setCameraError).toHaveBeenCalledWith('unknown')
   })
 
   it('starts camera successfully and calls plateStore.setMode', async () => {
@@ -636,6 +637,59 @@ describe('useCamera', () => {
       const camera = useCamera()
       await camera.zoomOut()
       expect(camera.zoomLevel.value).toBe(1)
+    })
+  })
+
+  describe('onUnmounted cleanup', () => {
+    it('calls unsubscribe and stopCamera when component is unmounted', async () => {
+      const unsubscribeSpy = vi.fn()
+      mockOnBoxes.mockReturnValueOnce(unsubscribeSpy)
+
+      const mockTrack = { stop: vi.fn() }
+      const mockStream = { getTracks: () => [mockTrack], getVideoTracks: () => [mockTrack] }
+      vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
+
+      const TestComponent = defineComponent({
+        setup() {
+          const cam = useCamera()
+          // Expose videoRef so we can assign it before startCamera
+          return { cam }
+        },
+        template: '<div></div>',
+      })
+
+      const wrapper = mount(TestComponent)
+      const { cam } = wrapper.vm as { cam: ReturnType<typeof useCamera> }
+
+      const mockVideo = document.createElement('video')
+      mockVideo.play = vi.fn().mockResolvedValue(undefined)
+      Object.defineProperty(cam.videoRef, 'value', { value: mockVideo, writable: true })
+
+      await cam.startCamera()
+      expect(cam.isCameraActive.value).toBe(true)
+
+      wrapper.unmount()
+
+      expect(unsubscribeSpy).toHaveBeenCalled()
+      expect(cam.isCameraActive.value).toBe(false)
+    })
+
+    it('unsubscribes boxes subscription on unmount even without active camera', () => {
+      const unsubscribeSpy = vi.fn()
+      mockOnBoxes.mockReturnValueOnce(unsubscribeSpy)
+
+      const TestComponent = defineComponent({
+        setup() {
+          useCamera()
+          return {}
+        },
+        template: '<div></div>',
+      })
+
+      const wrapper = mount(TestComponent)
+      wrapper.unmount()
+
+      expect(unsubscribeSpy).toHaveBeenCalled()
     })
   })
 })
