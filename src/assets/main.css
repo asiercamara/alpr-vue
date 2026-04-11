@@ -18,6 +18,10 @@
   --color-surface-50: #f8f7ff;
   --color-surface-100: #f1f0fa;
   --color-surface-200: #e4e2f5;
+  --color-surface-300: #d0cde8;
+  --color-surface-400: #9b97b8;
+  --color-surface-500: #6b688a;
+  --color-surface-600: #524f73;
   --color-surface-700: #3d3a5c;
   --color-surface-800: #27243f;
   --color-surface-850: #1e1b33;
@@ -76,7 +80,7 @@
   }
   .plate-text {
     font-family: var(--font-mono);
-    @apply font-semibold tracking-widest;
+    @apply font-semibold tracking-widest text-surface-900 dark:text-white;
   }
   .heading-display {
     font-family: var(--font-display);

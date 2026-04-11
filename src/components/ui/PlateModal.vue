@@ -10,13 +10,13 @@
           <div class="bg-surface-950 rounded-t-modal overflow-hidden">
             <canvas ref="cropCanvas" class="w-full max-h-32 object-contain" />
             <div v-if="!plate?.croppedImage" class="h-24 flex items-center justify-center">
-              <p class="text-surface-400 text-xs">Sin imagen disponible</p>
+              <p class="text-surface-500 dark:text-surface-200 text-xs">Sin imagen disponible</p>
             </div>
           </div>
 
           <!-- Close button -->
           <button
-            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-surface-400 hover:text-surface-700 dark:hover:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors z-10"
+            class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-surface-400 dark:text-surface-200 hover:text-surface-700 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors z-10"
             @click="$emit('close')"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -37,7 +37,7 @@
                 <input
                   ref="editInputRef"
                   v-model="editText"
-                  class="plate-text text-4xl text-surface-900 dark:text-white tracking-[0.2em] bg-surface-100 dark:bg-surface-700 rounded-lg px-3 py-1 w-full text-center border-2 border-brand-500 outline-none"
+                  class="plate-text text-4xl tracking-[0.2em] bg-surface-100 dark:bg-surface-700 rounded-lg px-3 py-1 w-full text-center border-2 border-brand-500 outline-none"
                   maxlength="12"
                   @keydown.enter="saveEdit"
                   @keydown.escape="cancelEdit"
@@ -57,7 +57,7 @@
                   </svg>
                 </button>
                 <button
-                  class="p-1.5 rounded-md text-surface-400 hover:text-red-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                  class="p-1.5 rounded-md text-surface-400 dark:text-surface-200 hover:text-red-500 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
                   title="Cancelar"
                   @click="cancelEdit"
                 >
@@ -72,18 +72,18 @@
                 </button>
               </template>
               <template v-else>
-                <p class="plate-text text-4xl text-surface-900 dark:text-white tracking-[0.2em]">
+                <p class="plate-text text-4xl tracking-[0.2em]">
                   {{ plate.plateText.text }}
                 </p>
                 <button
-                  class="p-1.5 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
+                  class="p-1.5 rounded-md text-surface-400 dark:text-surface-200 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
                   title="Copiar"
                   @click="copyToClipboard"
                 >
                   <IconCopy class="w-4 h-4" />
                 </button>
                 <button
-                  class="p-1.5 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
+                  class="p-1.5 rounded-md text-surface-400 dark:text-surface-200 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors"
                   title="Editar"
                   @click="startEdit"
                 >
@@ -99,7 +99,7 @@
                 <p class="font-semibold text-surface-800 dark:text-surface-200">
                   {{ (plate.confidence * 100).toFixed(1) }}% confianza
                 </p>
-                <p class="text-xs text-surface-400">Promedio general</p>
+                <p class="text-xs text-surface-500 dark:text-surface-300">Promedio general</p>
               </div>
             </div>
 
@@ -130,12 +130,12 @@
                   </div>
 
                   <!-- character label -->
-                  <span class="plate-text text-sm text-surface-800 dark:text-surface-200">
+                  <span class="plate-text text-sm">
                     {{ plate.plateText.text[i] }}
                   </span>
 
                   <!-- confidence number -->
-                  <span class="text-[10px] tabular-nums text-surface-400">{{
+                  <span class="text-[10px] tabular-nums text-surface-500 dark:text-surface-300">{{
                     Math.round(conf * 100)
                   }}</span>
                 </div>
@@ -145,13 +145,13 @@
             <!-- Metadata -->
             <div class="grid grid-cols-2 gap-2 text-xs mb-5">
               <div class="bg-surface-50 dark:bg-surface-800 rounded-lg p-3">
-                <p class="text-surface-400 mb-0.5">Detectado</p>
+                <p class="text-surface-500 dark:text-surface-300 mb-0.5">Detectado</p>
                 <p class="font-medium text-surface-700 dark:text-surface-300">
                   {{ new Date(plate.timestamp).toLocaleString() }}
                 </p>
               </div>
               <div class="bg-surface-50 dark:bg-surface-800 rounded-lg p-3">
-                <p class="text-surface-400 mb-0.5">ID</p>
+                <p class="text-surface-500 dark:text-surface-300 mb-0.5">ID</p>
                 <p class="font-mono text-surface-700 dark:text-surface-300 truncate">
                   {{ plate.id.slice(-8) }}
                 </p>

@@ -9,7 +9,7 @@
 
       <!-- Plate text + metadata -->
       <div class="flex-1 min-w-0">
-        <div class="plate-text text-lg text-surface-900 dark:text-white tracking-[0.15em]">
+        <div class="plate-text text-lg tracking-[0.15em]">
           {{ plate.plateText.text }}
         </div>
         <div class="flex items-center gap-2 mt-0.5">
