@@ -241,6 +241,79 @@ describe('useStaticMedia', () => {
       expect(mockSetMode).toHaveBeenCalledWith('upload')
     })
 
+    it('unsubscribes previous subscription when called a second time', () => {
+      const unsubscribeSpy = vi.fn()
+      mockOnBoxes.mockReturnValueOnce(unsubscribeSpy)
+
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      media.processVideoStream(video, canvas)
+      expect(unsubscribeSpy).not.toHaveBeenCalled()
+
+      // Second call should unsubscribe the first subscription
+      media.processVideoStream(video, canvas)
+      expect(unsubscribeSpy).toHaveBeenCalled()
+    })
+
+    it('calls drawBoxesAndUpdate in loop when lastBoxes is non-empty', async () => {
+      rafSpy.mockRestore()
+      cancelRafSpy.mockRestore()
+
+      let capturedBoxesCallback: ((boxes: DetectionBox[]) => void) | null = null
+      mockOnBoxes.mockImplementation((cb: (boxes: DetectionBox[]) => void) => {
+        capturedBoxesCallback = cb
+        return vi.fn()
+      })
+
+      let rafCallback: FrameRequestCallback | null = null
+      const rafSpyReal = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        rafCallback = cb
+        return 1
+      })
+
+      const media = useStaticMedia()
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+
+      Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+      Object.defineProperty(video, 'ended', { value: false, configurable: true })
+      Object.defineProperty(video, 'videoWidth', { value: 100, configurable: true })
+      Object.defineProperty(video, 'videoHeight', { value: 100, configurable: true })
+      vi.spyOn(video, 'play').mockResolvedValue(undefined)
+
+      const mockCtx = { drawImage: vi.fn(), clearRect: vi.fn() }
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
+
+      media.processVideoStream(video, canvas)
+      await Promise.resolve()
+
+      // Simulate boxes arriving via the onBoxes subscription
+      const fakeBox = {
+        x1: 0,
+        y1: 0,
+        x2: 100,
+        y2: 50,
+        plateText: { text: 'AB12', confidence: [0.9, 0.9, 0.9, 0.9] },
+        croppedImage: null as any,
+        confidence: 0.9,
+        area: 5000,
+      }
+      capturedBoxesCallback!([fakeBox])
+
+      // Run the RAF loop
+      expect(rafCallback).not.toBeNull()
+      rafCallback!(0)
+      await Promise.resolve()
+
+      expect(mockDrawBoxesAndUpdate).toHaveBeenCalledWith(canvas, [fakeBox])
+
+      rafSpyReal.mockRestore()
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1)
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
+    })
+
     it('registers loadeddata listener when video not ready', () => {
       const media = useStaticMedia()
       const video = document.createElement('video')

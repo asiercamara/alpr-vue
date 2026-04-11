@@ -36,6 +36,19 @@ describe('appStore', () => {
     expect(store.modelError).toBe('Model failed')
   })
 
+  it('setCameraActive sets isCameraActive to true', () => {
+    const store = useAppStore()
+    store.setCameraActive(true)
+    expect(store.isCameraActive).toBe(true)
+  })
+
+  it('setCameraActive sets isCameraActive to false', () => {
+    const store = useAppStore()
+    store.setCameraActive(true)
+    store.setCameraActive(false)
+    expect(store.isCameraActive).toBe(false)
+  })
+
   it('setModelReady sets isModelLoading false and clears modelError', () => {
     const store = useAppStore()
     store.setModelError('some error')

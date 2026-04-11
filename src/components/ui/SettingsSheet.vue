@@ -23,378 +23,260 @@
 
           <div class="flex flex-col gap-5">
             <!-- Sonido y vibración -->
-            <section>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.sound.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.sound.desc') }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button
-                    v-if="settingsStore.feedbackEnabled !== defaults.feedbackEnabled"
-                    class="reset-btn"
-                    :title="t('settings.resetDefault')"
-                    @click="settingsStore.resetFeedbackEnabled()"
-                  >
-                    <IconReset class="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    :class="[
-                      'toggle-track',
-                      settingsStore.feedbackEnabled ? 'toggle-track-on' : 'toggle-track-off',
-                    ]"
-                    role="switch"
-                    :aria-checked="settingsStore.feedbackEnabled"
-                    @click="settingsStore.toggleFeedback()"
-                  >
-                    <span
-                      :class="[
-                        'toggle-thumb',
-                        settingsStore.feedbackEnabled ? 'toggle-thumb-on' : 'toggle-thumb-off',
-                      ]"
-                    ></span>
-                  </button>
-                </div>
-              </div>
-            </section>
+            <SettingsRow
+              :title="t('settings.sound.title')"
+              :description="t('settings.sound.desc')"
+              :is-dirty="settingsStore.feedbackEnabled !== defaults.feedbackEnabled"
+              @reset="settingsStore.resetFeedbackEnabled()"
+            >
+              <button
+                :class="[
+                  'toggle-track',
+                  settingsStore.feedbackEnabled ? 'toggle-track-on' : 'toggle-track-off',
+                ]"
+                role="switch"
+                :aria-checked="settingsStore.feedbackEnabled"
+                @click="settingsStore.toggleFeedback()"
+              >
+                <span
+                  :class="[
+                    'toggle-thumb',
+                    settingsStore.feedbackEnabled ? 'toggle-thumb-on' : 'toggle-thumb-off',
+                  ]"
+                ></span>
+              </button>
+            </SettingsRow>
 
             <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
             <!-- Umbral de confianza -->
-            <section>
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.confidence.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.confidence.desc') }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span
-                    class="text-xs font-semibold text-brand-600 dark:text-brand-400 tabular-nums"
-                  >
-                    {{ (settingsStore.confidenceThreshold * 100).toFixed(0) }}%
-                  </span>
-                  <button
-                    v-if="settingsStore.confidenceThreshold !== defaults.confidenceThreshold"
-                    class="reset-btn"
-                    :title="t('settings.resetDefault')"
-                    @click="settingsStore.resetConfidenceThreshold()"
-                  >
-                    <IconReset class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-              <input
-                type="range"
-                :min="0.5"
-                :max="0.95"
-                :step="0.05"
-                :value="settingsStore.confidenceThreshold"
-                class="range-input"
-                @input="
-                  settingsStore.setConfidenceThreshold(
-                    Number(($event.target as HTMLInputElement).value),
-                  )
-                "
-              />
-            </section>
+            <SettingsRow
+              :title="t('settings.confidence.title')"
+              :description="t('settings.confidence.desc')"
+              :display-value="`${(settingsStore.confidenceThreshold * 100).toFixed(0)}%`"
+              :is-dirty="settingsStore.confidenceThreshold !== defaults.confidenceThreshold"
+              @reset="settingsStore.resetConfidenceThreshold()"
+            >
+              <template #below>
+                <input
+                  type="range"
+                  :min="0.5"
+                  :max="0.95"
+                  :step="0.05"
+                  :value="settingsStore.confidenceThreshold"
+                  class="range-input"
+                  @input="
+                    settingsStore.setConfidenceThreshold(
+                      Number(($event.target as HTMLInputElement).value),
+                    )
+                  "
+                />
+              </template>
+            </SettingsRow>
 
             <!-- Tiempo de confirmación -->
-            <section>
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.confirmTime.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.confirmTime.desc') }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span
-                    class="text-xs font-semibold text-brand-600 dark:text-brand-400 tabular-nums"
-                  >
-                    {{ settingsStore.confirmationTime }}s
-                  </span>
-                  <button
-                    v-if="settingsStore.confirmationTime !== defaults.confirmationTime"
-                    class="reset-btn"
-                    :title="t('settings.resetDefault')"
-                    @click="settingsStore.resetConfirmationTime()"
-                  >
-                    <IconReset class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-              <input
-                type="range"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :value="settingsStore.confirmationTime"
-                class="range-input"
-                @input="
-                  settingsStore.setConfirmationTime(
-                    Number(($event.target as HTMLInputElement).value),
-                  )
-                "
-              />
-            </section>
+            <SettingsRow
+              :title="t('settings.confirmTime.title')"
+              :description="t('settings.confirmTime.desc')"
+              :display-value="`${settingsStore.confirmationTime}s`"
+              :is-dirty="settingsStore.confirmationTime !== defaults.confirmationTime"
+              @reset="settingsStore.resetConfirmationTime()"
+            >
+              <template #below>
+                <input
+                  type="range"
+                  :min="1"
+                  :max="10"
+                  :step="0.5"
+                  :value="settingsStore.confirmationTime"
+                  class="range-input"
+                  @input="
+                    settingsStore.setConfirmationTime(
+                      Number(($event.target as HTMLInputElement).value),
+                    )
+                  "
+                />
+              </template>
+            </SettingsRow>
 
             <!-- Confirmación rápida -->
-            <section>
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.fastConfirm.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.fastConfirm.desc') }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span
-                    class="text-xs font-semibold text-brand-600 dark:text-brand-400 tabular-nums"
-                  >
-                    {{ settingsStore.fastConfirmationTime }}s
-                  </span>
-                  <button
-                    v-if="settingsStore.fastConfirmationTime !== defaults.fastConfirmationTime"
-                    class="reset-btn"
-                    :title="t('settings.resetDefault')"
-                    @click="settingsStore.resetFastConfirmationTime()"
-                  >
-                    <IconReset class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-              <input
-                type="range"
-                :min="0.5"
-                :max="5"
-                :step="0.5"
-                :value="settingsStore.fastConfirmationTime"
-                class="range-input"
-                @input="
-                  settingsStore.setFastConfirmationTime(
-                    Number(($event.target as HTMLInputElement).value),
-                  )
-                "
-              />
-            </section>
+            <SettingsRow
+              :title="t('settings.fastConfirm.title')"
+              :description="t('settings.fastConfirm.desc')"
+              :display-value="`${settingsStore.fastConfirmationTime}s`"
+              :is-dirty="settingsStore.fastConfirmationTime !== defaults.fastConfirmationTime"
+              @reset="settingsStore.resetFastConfirmationTime()"
+            >
+              <template #below>
+                <input
+                  type="range"
+                  :min="0.5"
+                  :max="5"
+                  :step="0.5"
+                  :value="settingsStore.fastConfirmationTime"
+                  class="range-input"
+                  @input="
+                    settingsStore.setFastConfirmationTime(
+                      Number(($event.target as HTMLInputElement).value),
+                    )
+                  "
+                />
+              </template>
+            </SettingsRow>
 
             <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
             <!-- Escaneo continuo -->
-            <section>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.continuousScan.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.continuousScan.desc') }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button
-                    v-if="settingsStore.continuousMode !== defaults.continuousMode"
-                    class="reset-btn"
-                    :title="t('settings.resetDefault')"
-                    @click="settingsStore.resetContinuousMode()"
-                  >
-                    <IconReset class="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    :class="[
-                      'toggle-track',
-                      settingsStore.continuousMode ? 'toggle-track-on' : 'toggle-track-off',
-                    ]"
-                    role="switch"
-                    :aria-checked="settingsStore.continuousMode"
-                    @click="settingsStore.setContinuousMode(!settingsStore.continuousMode)"
-                  >
-                    <span
-                      :class="[
-                        'toggle-thumb',
-                        settingsStore.continuousMode ? 'toggle-thumb-on' : 'toggle-thumb-off',
-                      ]"
-                    ></span>
-                  </button>
-                </div>
-              </div>
-            </section>
+            <SettingsRow
+              :title="t('settings.continuousScan.title')"
+              :description="t('settings.continuousScan.desc')"
+              :is-dirty="settingsStore.continuousMode !== defaults.continuousMode"
+              @reset="settingsStore.resetContinuousMode()"
+            >
+              <button
+                :class="[
+                  'toggle-track',
+                  settingsStore.continuousMode ? 'toggle-track-on' : 'toggle-track-off',
+                ]"
+                role="switch"
+                :aria-checked="settingsStore.continuousMode"
+                @click="settingsStore.setContinuousMode(!settingsStore.continuousMode)"
+              >
+                <span
+                  :class="[
+                    'toggle-thumb',
+                    settingsStore.continuousMode ? 'toggle-thumb-on' : 'toggle-thumb-off',
+                  ]"
+                ></span>
+              </button>
+            </SettingsRow>
 
             <!-- No alertar duplicados -->
-            <section>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.skipDuplicates.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.skipDuplicates.desc') }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button
-                    v-if="settingsStore.skipDuplicates !== defaults.skipDuplicates"
-                    class="reset-btn"
-                    :title="t('settings.resetDefault')"
-                    @click="settingsStore.resetSkipDuplicates()"
-                  >
-                    <IconReset class="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    :class="[
-                      'toggle-track',
-                      settingsStore.skipDuplicates ? 'toggle-track-on' : 'toggle-track-off',
-                    ]"
-                    role="switch"
-                    :aria-checked="settingsStore.skipDuplicates"
-                    @click="settingsStore.setSkipDuplicates(!settingsStore.skipDuplicates)"
-                  >
-                    <span
-                      :class="[
-                        'toggle-thumb',
-                        settingsStore.skipDuplicates ? 'toggle-thumb-on' : 'toggle-thumb-off',
-                      ]"
-                    ></span>
-                  </button>
-                </div>
-              </div>
-            </section>
+            <SettingsRow
+              :title="t('settings.skipDuplicates.title')"
+              :description="t('settings.skipDuplicates.desc')"
+              :is-dirty="settingsStore.skipDuplicates !== defaults.skipDuplicates"
+              @reset="settingsStore.resetSkipDuplicates()"
+            >
+              <button
+                :class="[
+                  'toggle-track',
+                  settingsStore.skipDuplicates ? 'toggle-track-on' : 'toggle-track-off',
+                ]"
+                role="switch"
+                :aria-checked="settingsStore.skipDuplicates"
+                @click="settingsStore.setSkipDuplicates(!settingsStore.skipDuplicates)"
+              >
+                <span
+                  :class="[
+                    'toggle-thumb',
+                    settingsStore.skipDuplicates ? 'toggle-thumb-on' : 'toggle-thumb-off',
+                  ]"
+                ></span>
+              </button>
+            </SettingsRow>
 
             <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
             <!-- Tema -->
-            <section>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.theme.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.theme.desc') }}
-                  </p>
+            <SettingsRow
+              :title="t('settings.theme.title')"
+              :description="t('settings.theme.desc')"
+              :is-dirty="settingsStore.theme !== defaults.theme"
+              @reset="settingsStore.resetTheme()"
+            >
+              <template #below>
+                <div class="flex gap-2 mt-3">
+                  <button
+                    :class="[
+                      'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                      settingsStore.theme === 'light'
+                        ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                        : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                    ]"
+                    @click="settingsStore.setTheme('light')"
+                  >
+                    <IconSun class="w-4 h-4 mx-auto mb-0.5" />
+                    {{ t('settings.buttons.light') }}
+                  </button>
+                  <button
+                    :class="[
+                      'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                      settingsStore.theme === 'dark'
+                        ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                        : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                    ]"
+                    @click="settingsStore.setTheme('dark')"
+                  >
+                    <IconMoon class="w-4 h-4 mx-auto mb-0.5" />
+                    {{ t('settings.buttons.dark') }}
+                  </button>
+                  <button
+                    :class="[
+                      'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                      settingsStore.theme === 'system'
+                        ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                        : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                    ]"
+                    @click="settingsStore.setTheme('system')"
+                  >
+                    <IconMonitor class="w-4 h-4 mx-auto mb-0.5" />
+                    {{ t('settings.buttons.system') }}
+                  </button>
                 </div>
-                <button
-                  v-if="settingsStore.theme !== defaults.theme"
-                  class="reset-btn"
-                  :title="t('settings.resetDefault')"
-                  @click="settingsStore.resetTheme()"
-                >
-                  <IconReset class="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div class="flex gap-2 mt-3">
-                <button
-                  :class="[
-                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
-                    settingsStore.theme === 'light'
-                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
-                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
-                  ]"
-                  @click="settingsStore.setTheme('light')"
-                >
-                  <IconSun class="w-4 h-4 mx-auto mb-0.5" />
-                  {{ t('settings.buttons.light') }}
-                </button>
-                <button
-                  :class="[
-                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
-                    settingsStore.theme === 'dark'
-                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
-                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
-                  ]"
-                  @click="settingsStore.setTheme('dark')"
-                >
-                  <IconMoon class="w-4 h-4 mx-auto mb-0.5" />
-                  {{ t('settings.buttons.dark') }}
-                </button>
-                <button
-                  :class="[
-                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
-                    settingsStore.theme === 'system'
-                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
-                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
-                  ]"
-                  @click="settingsStore.setTheme('system')"
-                >
-                  <IconMonitor class="w-4 h-4 mx-auto mb-0.5" />
-                  {{ t('settings.buttons.system') }}
-                </button>
-              </div>
-            </section>
+              </template>
+            </SettingsRow>
 
             <div class="border-t border-surface-200 dark:border-surface-700"></div>
 
             <!-- Idioma -->
-            <section>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-sm font-medium text-surface-800 dark:text-white/90">
-                    {{ t('settings.language.title') }}
-                  </p>
-                  <p class="text-xs text-surface-500 dark:text-white/50 mt-0.5">
-                    {{ t('settings.language.desc') }}
-                  </p>
+            <SettingsRow
+              :title="t('settings.language.title')"
+              :description="t('settings.language.desc')"
+              :is-dirty="settingsStore.language !== defaults.language"
+              @reset="settingsStore.resetLanguage()"
+            >
+              <template #below>
+                <div class="flex gap-2 mt-3">
+                  <button
+                    :class="[
+                      'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                      settingsStore.language === 'auto'
+                        ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                        : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                    ]"
+                    @click="settingsStore.setLanguage('auto')"
+                  >
+                    <IconMonitor class="w-4 h-4 mx-auto mb-0.5" />
+                    {{ t('settings.buttons.auto') }}
+                  </button>
+                  <button
+                    :class="[
+                      'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                      settingsStore.language === 'en'
+                        ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                        : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                    ]"
+                    @click="settingsStore.setLanguage('en')"
+                  >
+                    <span class="block text-base leading-none mb-0.5">🇬🇧</span>
+                    EN
+                  </button>
+                  <button
+                    :class="[
+                      'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
+                      settingsStore.language === 'es'
+                        ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
+                        : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
+                    ]"
+                    @click="settingsStore.setLanguage('es')"
+                  >
+                    <span class="block text-base leading-none mb-0.5">🇪🇸</span>
+                    ES
+                  </button>
                 </div>
-                <button
-                  v-if="settingsStore.language !== defaults.language"
-                  class="reset-btn"
-                  :title="t('settings.resetDefault')"
-                  @click="settingsStore.resetLanguage()"
-                >
-                  <IconReset class="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div class="flex gap-2 mt-3">
-                <button
-                  :class="[
-                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
-                    settingsStore.language === 'auto'
-                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
-                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
-                  ]"
-                  @click="settingsStore.setLanguage('auto')"
-                >
-                  <IconMonitor class="w-4 h-4 mx-auto mb-0.5" />
-                  {{ t('settings.buttons.auto') }}
-                </button>
-                <button
-                  :class="[
-                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
-                    settingsStore.language === 'en'
-                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
-                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
-                  ]"
-                  @click="settingsStore.setLanguage('en')"
-                >
-                  <span class="block text-base leading-none mb-0.5">🇬🇧</span>
-                  EN
-                </button>
-                <button
-                  :class="[
-                    'flex-1 py-2 rounded-lg text-xs font-medium transition-colors border',
-                    settingsStore.language === 'es'
-                      ? 'bg-brand-50 dark:bg-brand-900/40 border-brand-500 text-brand-700 dark:text-brand-400'
-                      : 'bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 text-surface-600 dark:text-white/60 hover:border-surface-300 dark:hover:border-surface-600',
-                  ]"
-                  @click="settingsStore.setLanguage('es')"
-                >
-                  <span class="block text-base leading-none mb-0.5">🇪🇸</span>
-                  ES
-                </button>
-              </div>
-            </section>
+              </template>
+            </SettingsRow>
           </div>
 
           <div class="flex gap-3 mt-6">
@@ -420,7 +302,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore, DEFAULTS } from '@/stores/settingsStore'
-import IconReset from '@/components/icons/IconReset.vue'
+import SettingsRow from '@/components/ui/SettingsRow.vue'
 import IconSun from '@/components/icons/IconSun.vue'
 import IconMoon from '@/components/icons/IconMoon.vue'
 import IconMonitor from '@/components/icons/IconMonitor.vue'
@@ -498,36 +380,6 @@ const defaults = DEFAULTS
 }
 .toggle-thumb-off {
   left: 2px;
-}
-
-.reset-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px solid var(--color-surface-300);
-  color: var(--color-surface-400);
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.15s;
-  padding: 0;
-  flex-shrink: 0;
-}
-:root.dark .reset-btn {
-  border-color: var(--color-surface-600);
-  color: var(--color-surface-400);
-}
-.reset-btn:hover {
-  border-color: var(--color-brand-500);
-  color: var(--color-brand-600);
-  background: var(--color-brand-50);
-}
-:root.dark .reset-btn:hover {
-  border-color: var(--color-brand-500);
-  color: var(--color-brand-400);
-  background: rgba(139, 92, 246, 0.15);
 }
 
 .range-input {

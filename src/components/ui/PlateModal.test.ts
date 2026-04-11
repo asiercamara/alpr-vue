@@ -54,9 +54,9 @@ describe('PlateModal', () => {
     Transition: { template: '<div><slot/></div>' },
   }
 
-  it('does not render when plate is null', () => {
+  it('does not render when modelValue is null', () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: null },
+      props: { modelValue: null },
       global: { stubs: globalStubs },
     })
     expect(wrapper.find('.fixed').exists()).toBe(false)
@@ -64,7 +64,7 @@ describe('PlateModal', () => {
 
   it('renders plate text and confidence when plate exists', () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: makePlate() },
+      props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
     expect(wrapper.text()).toContain('ABC123')
@@ -73,7 +73,7 @@ describe('PlateModal', () => {
 
   it('renders plate ID and detection time', () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: makePlate() },
+      props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
     expect(wrapper.text()).toContain('ate_test')
@@ -81,7 +81,7 @@ describe('PlateModal', () => {
 
   it('renders character confidence bars', () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: makePlate() },
+      props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
     expect(wrapper.text()).toContain('95')
@@ -90,33 +90,35 @@ describe('PlateModal', () => {
 
   it('shows Sin imagen disponible when croppedImage is null', () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: makePlate({ croppedImage: null }) },
+      props: { modelValue: makePlate({ croppedImage: null }) },
       global: { stubs: globalStubs },
     })
     expect(wrapper.text()).toContain('Sin imagen disponible')
   })
 
-  it('emits close event when close button is clicked', async () => {
+  it('emits update:modelValue null when close button is clicked', async () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: makePlate() },
+      props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
     const closeBtn = wrapper.findAll('button').find((b) => b.text().includes('Cerrar'))
     if (closeBtn) {
       await closeBtn.trigger('click')
-      expect(wrapper.emitted('close')).toBeTruthy()
+      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
+      expect(wrapper.emitted('update:modelValue')![0]).toEqual([null])
     }
   })
 
-  it('emits close event when backdrop is clicked', async () => {
+  it('emits update:modelValue null when backdrop is clicked', async () => {
     const wrapper = mount(PlateModal, {
-      props: { plate: makePlate() },
+      props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
     const backdrop = wrapper.find('.absolute.inset-0')
     if (backdrop.exists()) {
       await backdrop.trigger('click')
-      expect(wrapper.emitted('close')).toBeTruthy()
+      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
+      expect(wrapper.emitted('update:modelValue')![0]).toEqual([null])
     }
   })
 
@@ -129,7 +131,7 @@ describe('PlateModal', () => {
     const plate = makePlate({ croppedImage: mockBitmap })
 
     const wrapper = mount(PlateModal, {
-      props: { plate },
+      props: { modelValue: plate },
       global: { stubs: globalStubs },
     })
 
@@ -145,7 +147,7 @@ describe('PlateModal', () => {
     HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as any
 
     mount(PlateModal, {
-      props: { plate: makePlate() },
+      props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
 
@@ -157,7 +159,7 @@ describe('PlateModal', () => {
   describe('edit mode', () => {
     it('enters edit mode when edit button is clicked', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
       expect(wrapper.find('input').exists()).toBe(false)
@@ -172,7 +174,7 @@ describe('PlateModal', () => {
 
     it('saves edit when save button is clicked', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
 
@@ -188,15 +190,13 @@ describe('PlateModal', () => {
       if (saveBtn) {
         await saveBtn.trigger('click')
         expect(mockUpdatePlateText).toHaveBeenCalledWith('plate_test', 'XYZ789')
-        expect(wrapper.emitted('edited')).toBeTruthy()
-        expect(wrapper.emitted('edited')![0]).toEqual(['plate_test', 'XYZ789'])
         expect(wrapper.find('input').exists()).toBe(false)
       }
     })
 
     it('cancels edit when cancel button is clicked', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
 
@@ -216,7 +216,7 @@ describe('PlateModal', () => {
 
     it('saves edit on Enter key', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
 
@@ -234,7 +234,7 @@ describe('PlateModal', () => {
 
     it('cancels edit on Escape key', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
 
@@ -250,7 +250,7 @@ describe('PlateModal', () => {
 
     it('does not save if edit text is empty or whitespace', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
 
@@ -270,7 +270,7 @@ describe('PlateModal', () => {
   describe('copy to clipboard', () => {
     it('calls clipboard API when copy button is clicked', async () => {
       const wrapper = mount(PlateModal, {
-        props: { plate: makePlate() },
+        props: { modelValue: makePlate() },
         global: { stubs: globalStubs },
       })
 
@@ -286,7 +286,7 @@ describe('PlateModal', () => {
     it('computes ring colors for different confidence levels', async () => {
       const wrapper = mount(PlateModal, {
         props: {
-          plate: makePlate({
+          modelValue: makePlate({
             plateText: {
               text: 'ABCDE',
               confidence: [0.95, 0.8, 0.65, 0.5, 0.3],

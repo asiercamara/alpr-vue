@@ -7,16 +7,18 @@ import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { i18n } from '@/i18n'
+import { logger } from '@/utils/logger'
 import { evaluatePlateQuality } from '@/utils/validation'
 import { calculateTextSimilarity } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
 import type { DetectionBox } from '@/types/detection'
+import type { DetectionWorker, WorkerInput } from '@/types/worker'
 
 /**
  * The single Worker instance shared across the application.
  * `null` until the first `getWorker()` call.
  */
-let _worker: Worker | null = null
+let _worker: DetectionWorker | null = null
 /** `true` once the Worker has sent `{ status: 'model_ready' }`. */
 const _modelReady = ref(false)
 /** `true` if the Worker failed to load the model. */
@@ -41,9 +43,11 @@ let _onBoxesCallbacks: Array<(data: DetectionBox[]) => void> = []
 function getWorker(): Worker {
   if (_worker) return _worker
 
-  _worker = new Worker(new URL('../workers/mainWorker.js', import.meta.url), { type: 'module' })
+  _worker = new Worker(new URL('../workers/mainWorker.ts', import.meta.url), {
+    type: 'module',
+  }) as DetectionWorker
 
-  _worker.onmessage = (event: MessageEvent) => {
+  _worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
     const data = event.data
 
     if (data?.status === 'model_ready') {
@@ -67,7 +71,7 @@ function getWorker(): Worker {
     }
 
     if (data?.error) {
-      console.error('Worker error:', data.error)
+      logger.error('Worker error:', data.error)
       _isProcessing.value = false
       return
     }
@@ -121,6 +125,12 @@ function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox
   return Array.from(grouped.values())
 }
 
+/** Optional store overrides for testing and isolated use. */
+interface UseDetectionOptions {
+  plateStore?: ReturnType<typeof usePlateStore>
+  settingsStore?: ReturnType<typeof useSettingsStore>
+}
+
 /**
  * Composable that exposes the shared detection Worker and pipeline utilities.
  *
@@ -131,9 +141,9 @@ function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox
  * - `drawBoxesAndUpdate` — draw bounding boxes and commit valid detections.
  * - `resetProcessing` — release the processing lock after an aborted pipeline.
  */
-export function useDetection() {
-  const plateStore = usePlateStore()
-  const settingsStore = useSettingsStore()
+export function useDetection(options?: UseDetectionOptions) {
+  const plateStore = options?.plateStore ?? usePlateStore()
+  const settingsStore = options?.settingsStore ?? useSettingsStore()
   const worker = getWorker()
 
   /**
@@ -150,7 +160,8 @@ export function useDetection() {
       return
     }
     _isProcessing.value = true
-    worker.postMessage({ imageBitmap }, [imageBitmap])
+    const message: WorkerInput = { imageBitmap }
+    worker.postMessage(message, [imageBitmap])
   }
 
   /**

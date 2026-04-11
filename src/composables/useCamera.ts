@@ -9,13 +9,21 @@ import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { DetectionBox } from '@/types/detection'
 import { i18n } from '@/i18n'
+import { logger } from '@/utils/logger'
 
 /** How much zoom changes per increment/decrement step. */
 const ZOOM_STEP = 0.5
 /** Maximum zoom level allowed in digital (CSS transform) fallback mode. */
 const DIGITAL_ZOOM_MAX = 5
 
-export function useCamera(): {
+/** Optional store overrides for testing and isolated use. */
+interface UseCameraOptions {
+  plateStore?: ReturnType<typeof usePlateStore>
+  appStore?: ReturnType<typeof useAppStore>
+  settingsStore?: ReturnType<typeof useSettingsStore>
+}
+
+export function useCamera(options?: UseCameraOptions): {
   videoRef: Ref<HTMLVideoElement | null>
   canvasRef: Ref<HTMLCanvasElement | null>
   isCameraActive: Ref<boolean>
@@ -47,9 +55,9 @@ export function useCamera(): {
   let intervalId: ReturnType<typeof setInterval> | null = null
   let lastBoxes: DetectionBox[] = []
 
-  const plateStore = usePlateStore()
-  const appStore = useAppStore()
-  const settingsStore = useSettingsStore()
+  const plateStore = options?.plateStore ?? usePlateStore()
+  const appStore = options?.appStore ?? useAppStore()
+  const settingsStore = options?.settingsStore ?? useSettingsStore()
   const { modelReady, isProcessing, processFrame, onBoxes, drawBoxesAndUpdate, resetProcessing } =
     useDetection()
 
@@ -172,14 +180,14 @@ export function useCamera(): {
               const bitmap = await createImageBitmap(video)
               await processFrame(bitmap)
             } catch (err) {
-              console.error('Error in processFrame:', err)
+              logger.error('Error in processFrame:', err)
             }
           }
         }, 20)
       }
     } catch (err) {
       appStore.setCameraActive(false)
-      console.error('Error accessing camera:', err)
+      logger.error('Error accessing camera:', err)
       if (err instanceof DOMException) {
         const t = i18n.global.t
         if (err.name === 'NotAllowedError') appStore.setCameraError(t('errors.camera.denied'))

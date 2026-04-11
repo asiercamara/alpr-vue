@@ -68,7 +68,7 @@
       />
     </transition-group>
 
-    <PlateModal :plate="selectedPlate" @close="selectedPlate = null" />
+    <PlateModal v-model="selectedPlate" />
   </div>
 </template>
 

@@ -290,4 +290,65 @@ describe('SettingsSheet', () => {
 
     expect(settingsStore.theme).toBe('system')
   })
+
+  it('resets confidence threshold when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setConfidenceThreshold(0.9)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns.length).toBeGreaterThan(0)
+    // Find the reset button next to the confidence display
+    const confidenceReset = resetBtns.find((_b, i) => i === 0)
+    await confidenceReset!.trigger('click')
+
+    expect(settingsStore.confidenceThreshold).toBe(0.7)
+  })
+
+  it('resets confirmation time when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setConfirmationTime(8)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    // Click any reset btn — all should reset their own setting
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.confirmationTime).toBe(3)
+  })
+
+  it('resets fast confirmation time when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setFastConfirmationTime(4)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.fastConfirmationTime).toBe(1)
+  })
+
+  it('resets continuousMode when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setContinuousMode(false)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns.length).toBeGreaterThan(0)
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.continuousMode).toBe(true)
+  })
+
+  it('resets skipDuplicates when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setSkipDuplicates(false)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns.length).toBeGreaterThan(0)
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.skipDuplicates).toBe(true)
+  })
 })

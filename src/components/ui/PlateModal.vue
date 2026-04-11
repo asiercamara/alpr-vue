@@ -2,7 +2,7 @@
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="plate" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-surface-950/70 backdrop-blur-sm" @click="$emit('close')" />
+        <div class="absolute inset-0 bg-surface-950/70 backdrop-blur-sm" @click="plate = null" />
         <div
           class="modal-content relative bg-white dark:bg-surface-850 rounded-modal shadow-modal max-w-md w-full overflow-hidden"
         >
@@ -17,7 +17,7 @@
           <!-- Close button -->
           <button
             class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-surface-400 dark:text-surface-200 hover:text-surface-700 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors z-10"
-            @click="$emit('close')"
+            @click="plate = null"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -163,7 +163,7 @@
             </div>
 
             <!-- Close button -->
-            <button class="btn-primary w-full text-sm" @click="$emit('close')">
+            <button class="btn-primary w-full text-sm" @click="plate = null">
               {{ t('modal.close') }}
             </button>
           </div>
@@ -182,14 +182,7 @@ import ConfidenceRing from './ConfidenceRing.vue'
 import IconCopy from '@/components/icons/IconCopy.vue'
 import IconEdit from '@/components/icons/IconEdit.vue'
 
-const emit = defineEmits<{
-  close: []
-  edited: [plateId: string, newText: string]
-}>()
-
-const props = defineProps<{
-  plate: PlateRecord | null
-}>()
+const plate = defineModel<PlateRecord | null>({ default: null })
 
 const { t } = useI18n()
 const plateStore = usePlateStore()
@@ -199,18 +192,18 @@ const editText = ref('')
 const editInputRef = ref<HTMLInputElement | null>(null)
 
 watchEffect(() => {
-  if (props.plate?.croppedImage && cropCanvas.value) {
+  if (plate.value?.croppedImage && cropCanvas.value) {
     const canvas = cropCanvas.value
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const width = props.plate.croppedImage.width
-    const height = props.plate.croppedImage.height
+    const width = plate.value.croppedImage.width
+    const height = plate.value.croppedImage.height
 
     canvas.width = width
     canvas.height = height
 
-    ctx.drawImage(props.plate.croppedImage, 0, 0)
+    ctx.drawImage(plate.value.croppedImage, 0, 0)
   }
 })
 
@@ -223,14 +216,14 @@ function charColor(conf: number): string {
 }
 
 function copyToClipboard() {
-  if (props.plate) {
-    navigator.clipboard?.writeText(props.plate.plateText.text)
+  if (plate.value) {
+    navigator.clipboard?.writeText(plate.value.plateText.text)
   }
 }
 
 function startEdit() {
-  if (!props.plate) return
-  editText.value = props.plate.plateText.text
+  if (!plate.value) return
+  editText.value = plate.value.plateText.text
   isEditing.value = true
   nextTick(() => {
     editInputRef.value?.focus()
@@ -239,12 +232,11 @@ function startEdit() {
 }
 
 function saveEdit() {
-  if (!props.plate) return
+  if (!plate.value) return
   const trimmed = editText.value.trim()
   if (!trimmed) return
 
-  plateStore.updatePlateText(props.plate.id, trimmed)
-  emit('edited', props.plate.id, trimmed)
+  plateStore.updatePlateText(plate.value.id, trimmed)
   isEditing.value = false
 }
 

@@ -39,7 +39,8 @@ describe('PlateList', () => {
         stubs: {
           PlateModal: {
             template: '<div data-test="modal"></div>',
-            props: ['plate'],
+            props: ['modelValue'],
+            emits: ['update:modelValue'],
           },
           PlateListItem: {
             template:
@@ -142,7 +143,7 @@ describe('PlateList', () => {
     expect(wrapper.vm.selectedPlate.text).toBe('XYZ789')
   })
 
-  it('clears selectedPlate when PlateModal emits close', async () => {
+  it('clears selectedPlate when PlateModal emits update:modelValue null', async () => {
     plateStore.addPlate(makePlateData('1', 'XYZ789'))
     const wrapper = mountList()
 
@@ -150,7 +151,7 @@ describe('PlateList', () => {
     await plateItem.trigger('click')
     expect(wrapper.vm.selectedPlate).not.toBeNull()
 
-    await wrapper.findComponent('[data-test="modal"]').vm.$emit('close')
+    await wrapper.findComponent('[data-test="modal"]').vm.$emit('update:modelValue', null)
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.selectedPlate).toBeNull()
   })

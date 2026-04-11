@@ -95,7 +95,7 @@ The application will be available at: http://localhost:5173/
 pnpm build
 ```
 
-This runs type checking (`vue-tsc`) followed by the Vite build, generating an optimized version in the `dist/` folder.
+This runs type checking (`vue-tsc --noEmit` for the app, `tsc -p tsconfig.workers.json --noEmit` for the workers) followed by the Vite build, generating an optimized version in the `dist/` folder.
 
 ### Preview production build
 
@@ -122,24 +122,29 @@ pnpm format        # Run Prettier
 
 ```
 alpr_vue/
+├── .github/workflows/
+│   └── ci.yml                          # CI pipeline (lint, type check, tests)
 ├── index.html                          # Main HTML entry point
 ├── package.json                        # Dependencies and scripts
 ├── vite.config.ts                      # Vite configuration
 ├── vitest.config.ts                    # Test configuration
 ├── tsconfig.json                       # TypeScript project references
 ├── tsconfig.app.json                   # TypeScript app config
+├── tsconfig.workers.json               # TypeScript config for Web Workers (WebWorker lib)
 ├── scripts/
 │   └── deploy-surge.sh                 # Surge.sh deployment script
 ├── public/
 │   ├── favicon.ico                     # Favicon
 │   ├── android-chrome-*.png            # PWA icons
 │   ├── apple-touch-icon.png           # Apple touch icon
-│   ├── site.webmanifest               # PWA manifest
+│   ├── site.webmanifest               # PWA manifest (name, start_url, theme_color)
 │   └── models/                         # Pre-trained ONNX models
 │       ├── european_mobile_vit_v2_ocr.onnx
 │       ├── european_mobile_vit_v2_ocr_config.yaml
 │       └── yolo-v9-t-384-license-plates-end2end.onnx
 └── src/
+    ├── __test-utils__/
+    │   └── factories.ts                # Typed mock factories for tests
     ├── main.ts                         # App entry (creates Vue + Pinia)
     ├── App.vue                         # Root component (header + camera + history)
     ├── assets/
@@ -170,7 +175,9 @@ alpr_vue/
     │   │   └── IconZoomOut.vue         # Zoom out icon
     │   └── ui/
     │       ├── BottomDrawer.vue        # Reusable bottom sheet container
+    │       ├── CameraErrorOverlay.vue  # Error message with retry button (extracted)
     │       ├── CameraPreview.vue       # Video + canvas overlay, camera controls, upload
+    │       ├── CameraZoomControls.vue  # Zoom in/out buttons (extracted)
     │       ├── ConfidenceRing.vue      # Circular confidence indicator
     │       ├── HelpSheet.vue           # Bottom sheet with usage instructions
     │       ├── MediaUploader.vue       # Image/video file upload with progress overlay
@@ -178,6 +185,7 @@ alpr_vue/
     │       ├── PlateListItem.vue       # Single plate card with confidence ring
     │       ├── PlateModal.vue          # Plate detail modal with edit & confidence bars
     │       ├── SampleGallery.vue       # Built-in sample images/videos for demo
+    │       ├── SettingsRow.vue         # Reusable label+control+reset row for settings
     │       ├── SettingsSheet.vue       # Bottom sheet settings panel
     │       └── ToastNotification.vue   # Transient confirmation toast
     ├── i18n/
@@ -198,22 +206,24 @@ alpr_vue/
     │   ├── plateStore.ts              # Plates state, grouping, text editing & detection
     │   └── settingsStore.ts           # User settings with localStorage persistence
     ├── types/
-    │   └── detection.ts               # TypeScript interfaces & types
+    │   ├── detection.ts               # TypeScript interfaces & types
+    │   └── worker.ts                  # Worker protocol types (WorkerInput, DetectionWorker)
     ├── utils/
     │   ├── export.ts                  # CSV generation and download
     │   ├── feedback.ts                # Audio beep & vibration feedback
+    │   ├── logger.ts                  # Centralized logger (no-op in production)
     │   └── validation.ts              # Levenshtein similarity & plate quality evaluation
     └── workers/
-        ├── mainWorker.js              # Worker entry: loads models & processes frames
-        ├── modelsLoader.js            # ONNX model loader with warmup
+        ├── mainWorker.ts              # Worker entry: loads models & processes frames
+        ├── modelsLoader.ts            # ONNX model loader with warmup
         ├── detector/detector/
-        │   ├── boundingBoxUtils.js    # NMS, IoU, intersection/union
-        │   ├── detectionProcessor.js  # YOLO inference & box processing
-        │   └── imageProcessor.js      # Image resize, normalize & crop
+        │   ├── boundingBoxUtils.ts    # NMS, IoU, intersection/union
+        │   ├── detectionProcessor.ts  # YOLO inference & box processing
+        │   └── imageProcessor.ts      # Image resize, normalize & crop
         └── ocr/ocr/
-            ├── imageProcessor.js      # Grayscale conversion & OCR preprocessing
-            ├── ocrProcessor.js        # OCR inference pipeline
-            └── textProcessor.js       # Argmax, alphabet mapping & text cleaning
+            ├── imageProcessor.ts      # Grayscale conversion & OCR preprocessing
+            ├── ocrProcessor.ts        # OCR inference pipeline
+            └── textProcessor.ts       # Argmax, alphabet mapping & text cleaning
 ```
 
 ## Architecture and Components
@@ -247,10 +257,10 @@ subgraph group_main["Main thread"]
 end
 
 subgraph group_worker["Inference layer"]
-  node_main_worker["main worker<br/>worker bridge<br/>[mainWorker.js]"]
-  node_models_loader["models loader<br/>worker init<br/>[modelsLoader.js]"]
+  node_main_worker["main worker<br/>worker bridge<br/>[mainWorker.ts]"]
+  node_models_loader["models loader<br/>worker init<br/>[modelsLoader.ts]"]
   node_detector_pipeline["detector pipeline<br/>plate detection"]
-  node_ocr_pipeline["ocr pipeline<br/>ocr stage<br/>[ocrProcessor.js]"]
+  node_ocr_pipeline["ocr pipeline<br/>ocr stage<br/>[ocrProcessor.ts]"]
 end
 
 subgraph group_assets["Assets"]
@@ -307,10 +317,10 @@ click node_i18n_core "https://github.com/asiercamara/alpr-vue/blob/main/src/i18n
 click node_validation "https://github.com/asiercamara/alpr-vue/blob/main/src/utils/validation.ts"
 click node_feedback "https://github.com/asiercamara/alpr-vue/blob/main/src/utils/feedback.ts"
 click node_export_csv "https://github.com/asiercamara/alpr-vue/blob/main/src/utils/export.ts"
-click node_main_worker "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/mainWorker.js"
-click node_models_loader "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/modelsLoader.js"
-click node_detector_pipeline "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/detector/detector/detectionProcessor.js"
-click node_ocr_pipeline "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/ocr/ocr/ocrProcessor.js"
+click node_main_worker "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/mainWorker.ts"
+click node_models_loader "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/modelsLoader.ts"
+click node_detector_pipeline "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/detector/detector/detectionProcessor.ts"
+click node_ocr_pipeline "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/ocr/ocr/ocrProcessor.ts"
 click node_models_bundle "https://github.com/asiercamara/alpr-vue/tree/main/public/models"
 click node_sample_media "https://github.com/asiercamara/alpr-vue/tree/main/public/test"
 
@@ -344,8 +354,8 @@ The UI is built with **Vue 3** using `<script setup>` and TypeScript. State mana
 
 #### Composables
 
-- **`useCamera`**: Manages webcam lifecycle (`startCamera`/`stopCamera`), camera facing toggle (`toggleCameraFacing`), captures frames via `ImageBitmap`, and coordinates detection via `useDetection`. Syncs camera state with `appStore`.
-- **`useDetection`**: Manages the Web Worker singleton, sends frames for processing, receives bounding box results via a pub/sub pattern (`onBoxes`), and validates plate quality before adding to the store.
+- **`useCamera`**: Manages webcam lifecycle (`startCamera`/`stopCamera`), camera facing toggle (`toggleCameraFacing`), captures frames via `ImageBitmap`, and coordinates detection via `useDetection`. Syncs camera state with `appStore`. Accepts an optional `options` object to inject stores directly — useful in unit tests.
+- **`useDetection`**: Manages the Web Worker singleton, sends frames for processing, receives bounding box results via a pub/sub pattern (`onBoxes`), and validates plate quality before adding to the store. Accepts an optional `options` object to inject stores directly.
 - **`useStaticMedia`**: Processes uploaded image/video files frame-by-frame through the same detection pipeline. Shows progress (loading/processing/done/error) and supports cancellation.
 - **`useTheme`**: Watches `settingsStore.theme`, toggles the `dark` class on `document.documentElement`, and listens to OS `prefers-color-scheme` changes in `'system'` mode. Called once in `App.vue`.
 - **`useLocale`**: Watches `settingsStore.language` and updates the vue-i18n locale. `'auto'` detects from `navigator.language`; explicit `'es'`/`'en'` override it. Called once in `App.vue`.
@@ -354,11 +364,13 @@ The UI is built with **Vue 3** using `<script setup>` and TypeScript. State mana
 
 Combines a `<video>` element with a `<canvas>` overlay for drawing bounding boxes. Displays:
 
-- Error overlay with retry button
+- Error overlay with retry button (rendered by `CameraErrorOverlay`)
 - Model loading spinner
 - Camera-off state with **Iniciar cámara** and **Subir archivo** buttons stacked vertically
 - Scanning indicator (Escaneando/En vivo) when camera is active
-- Stop and flip camera buttons during scanning
+- Stop, flip-camera, and zoom buttons during scanning (zoom rendered by `CameraZoomControls`)
+
+`CameraErrorOverlay` and `CameraZoomControls` are focused subcomponents extracted from `CameraPreview` to keep each component's responsibility clear.
 
 #### MediaUploader Component
 
@@ -388,12 +400,14 @@ Bottom sheet with theme selector (light/dark/system), language selector (Auto/EN
 
 #### Web Workers
 
-AI models run in a dedicated Web Worker to prevent blocking the main thread:
+AI models run in a dedicated Web Worker to prevent blocking the main thread. All worker files are written in **TypeScript** and compiled under a separate `tsconfig.workers.json` that targets the `WebWorker` lib (distinct from the browser DOM lib used by the app).
 
-- **`mainWorker`**: Entry point; loads models on init, processes incoming frames through the detection pipeline.
-- **`modelsLoader`**: Loads YOLO and OCR ONNX models with a warmup dummy inference.
+- **`mainWorker.ts`**: Entry point; loads models on init, processes incoming frames through the detection pipeline.
+- **`modelsLoader.ts`**: Loads YOLO and OCR ONNX models with a warmup dummy inference.
 - **Detection pipeline**: `prepare_input` (resize 384x384, normalize) -> `run_model` (YOLOv9 inference) -> `process_output_boxes` (NMS with IoU 0.7, confidence threshold 0.6, min area 5x5px) -> `cropImage`.
 - **OCR pipeline**: `preprocessImage` (grayscale, resize to model input size) -> `runOcrModel` -> `postprocessOutput` (argmax, alphabet mapping, padding removal).
+
+The worker communication protocol is formally typed in `src/types/worker.ts` (`WorkerInput`, `DetectionWorker`), so `postMessage` calls are type-checked end-to-end.
 
 #### Plate Quality Validation
 
@@ -458,13 +472,14 @@ In this web implementation, the model has been converted to ONNX format to optim
 ## Tech Stack
 
 - **Vue 3** with Composition API (`<script setup>`)
-- **TypeScript** for core logic (composables, stores, types, utils)
+- **TypeScript** throughout — app, workers (`tsconfig.workers.json`), and types
 - **Pinia** for state management
 - **Tailwind CSS v4** via `@tailwindcss/vite`
 - **Vite** with `vue-tsc` for type-checked builds
 - **vue-i18n** v9+ for internationalization (English / Spanish)
 - **Vitest** + `@vue/test-utils` for testing (95%+ coverage)
 - **ESLint** + **Prettier** + **Husky** for code quality
+- **GitHub Actions** CI pipeline (lint, type check, coverage on every push/PR)
 - **ONNX Runtime Web** for in-browser AI inference
 
 ## Advanced Configuration
@@ -473,14 +488,14 @@ In this web implementation, the model has been converted to ONNX format to optim
 
 Confidence thresholds for detection and OCR can be adjusted in the following files:
 
-- `src/workers/detector/detector/detectionProcessor.js` - Detection confidence threshold and NMS IoU threshold
+- `src/workers/detector/detector/detectionProcessor.ts` - Detection confidence threshold and NMS IoU threshold
 - `src/composables/useDetection.ts` - Plate quality validation criteria
 
-```javascript
-// Detection confidence threshold (detectionProcessor.js)
+```typescript
+// Detection confidence threshold (detectionProcessor.ts)
 const confThresh = 0.6
 
-// NMS IoU threshold (boundingBoxUtils.js)
+// NMS IoU threshold (boundingBoxUtils.ts)
 const iouThreshold = 0.7
 ```
 

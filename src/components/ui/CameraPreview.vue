@@ -47,25 +47,11 @@
     </div>
 
     <!-- Camera error -->
-    <div
+    <CameraErrorOverlay
       v-if="appStore.cameraError"
-      class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-surface-950/95"
-    >
-      <div
-        class="w-14 h-14 rounded-2xl bg-red-900/30 border border-red-800/50 flex items-center justify-center mb-4"
-      >
-        <IconAlertTriangle class="w-7 h-7 text-red-400" />
-      </div>
-      <p class="text-white/90 font-semibold text-lg mb-1">{{ t('camera.error') }}</p>
-      <p class="text-white/60 text-sm mb-6">{{ appStore.cameraError }}</p>
-      <button
-        class="w-full max-w-xs flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm bg-brand-600 hover:bg-brand-500 text-white transition-all duration-200 active:scale-95"
-        @click="startCamera()"
-      >
-        <IconPlay class="w-4 h-4" />
-        {{ t('camera.retry') }}
-      </button>
-    </div>
+      :message="appStore.cameraError"
+      @retry="startCamera()"
+    />
 
     <!-- Model loading -->
     <div
@@ -179,42 +165,12 @@
         <IconFlipCamera class="w-4 h-4" />
       </button>
 
-      <div class="flex items-center gap-1.5">
-        <button
-          :class="[
-            'p-2 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm',
-            zoomLevel <= 1
-              ? 'bg-surface-800/40 text-white/20 cursor-not-allowed'
-              : 'bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white active:scale-95',
-          ]"
-          :disabled="zoomLevel <= 1"
-          :title="t('camera.zoomOut')"
-          @click="zoomOut()"
-        >
-          <IconZoomOut class="w-4 h-4" />
-        </button>
-
-        <span
-          v-if="zoomLevel > 1"
-          class="min-w-[2.5rem] text-center text-xs font-semibold text-white/80 bg-surface-800/70 backdrop-blur-sm rounded-full px-1.5 py-0.5"
-        >
-          {{ zoomLevel.toFixed(1) }}x
-        </span>
-
-        <button
-          :class="[
-            'p-2 rounded-full shadow-lg transition-all duration-200 backdrop-blur-sm',
-            zoomLevel >= maxZoom
-              ? 'bg-surface-800/40 text-white/20 cursor-not-allowed'
-              : 'bg-surface-800/80 hover:bg-surface-700 text-white/70 hover:text-white active:scale-95',
-          ]"
-          :disabled="zoomLevel >= maxZoom"
-          :title="t('camera.zoomIn')"
-          @click="zoomIn()"
-        >
-          <IconZoomIn class="w-4 h-4" />
-        </button>
-      </div>
+      <CameraZoomControls
+        :zoom-level="zoomLevel"
+        :max-zoom="maxZoom"
+        @zoom-in="zoomIn()"
+        @zoom-out="zoomOut()"
+      />
     </div>
   </div>
 </template>
@@ -228,11 +184,10 @@ import { useAppStore } from '@/stores/appStore'
 import IconPlay from '@/components/icons/IconPlay.vue'
 import IconStop from '@/components/icons/IconStop.vue'
 import IconCamera from '@/components/icons/IconCamera.vue'
-import IconAlertTriangle from '@/components/icons/IconAlertTriangle.vue'
 import IconFlipCamera from '@/components/icons/IconFlipCamera.vue'
 import IconClose from '@/components/icons/IconClose.vue'
-import IconZoomIn from '@/components/icons/IconZoomIn.vue'
-import IconZoomOut from '@/components/icons/IconZoomOut.vue'
+import CameraErrorOverlay from './CameraErrorOverlay.vue'
+import CameraZoomControls from './CameraZoomControls.vue'
 import MediaUploader from './MediaUploader.vue'
 
 defineProps<{ fullHeight?: boolean }>()

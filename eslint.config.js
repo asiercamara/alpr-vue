@@ -43,7 +43,23 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
+  // Configuración para workers TypeScript (entorno WebWorker)
+  // Usamos globals.browser porque todos los globals de browser están disponibles en workers
   {
-    ignores: ['dist/**', 'node_modules/**', 'src/workers/**', 'public/**'],
+    files: ['src/workers/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.es2022,
+      },
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/no-explicit-any': 'error',
+      'no-empty': ['error', { allowEmptyCatch: false }],
+    },
+  },
+  {
+    ignores: ['dist/**', 'node_modules/**', 'public/**'],
   },
 ]
