@@ -1,9 +1,43 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](./README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](./README.es.md)
+[![docs](https://img.shields.io/badge/docs-mintlify-6366f1.svg)](https://mintlify.wiki/asiercamara/alpr-vue)
+[![deepwiki](https://img.shields.io/badge/wiki-deepwiki-0ea5e9.svg)](https://deepwiki.com/asiercamara/alpr-vue)
+[![github](https://img.shields.io/badge/repo-GitHub-181717.svg?logo=github)](https://github.com/asiercamara/alpr-vue)
 
 # ALPR Vue - Reconocimiento Automático de Matrículas en Navegador
 
 Este proyecto implementa un sistema de reconocimiento automático de matrículas de vehículos (ALPR - Automatic License Plate Recognition) que funciona completamente en el navegador, sin necesidad de servidores externos. Utiliza modelos de IA optimizados (YOLO y OCR) que se ejecutan localmente mediante WebAssembly. Esta es una **reescritura en Vue 3** del proyecto original [fast-alpr](https://github.com/ankandrew/fast-alpr), usando Composition API, Pinia para gestión de estado y TypeScript.
+
+## ¿Qué es esto?
+
+**ALPR Vue** es una herramienta para leer matrículas de vehículos automáticamente. La abres en el navegador, apuntas con la cámara a un coche, y el sistema reconoce la matrícula por ti. No necesita internet después de la primera carga — todo el procesamiento ocurre en tu propio dispositivo, así que tus imágenes nunca salen de tu teléfono o PC.
+
+### ¿Qué puedes hacer con ella?
+
+**Leer matrículas de tres formas:**
+
+- **Cámara en vivo** — apuntas y el sistema detecta automáticamente
+- **Subir una foto** — seleccionas una imagen y te muestra las matrículas que encuentra
+- **Subir un vídeo** — procesa el vídeo entero y extrae todas las matrículas que aparecen
+
+**Ver los resultados:**
+
+- Lista de todas las matrículas detectadas, con fecha y hora
+- Pulsa en cualquier matrícula para ver la imagen recortada del vehículo, el texto reconocido carácter a carácter, y qué tan seguro está el sistema de cada letra
+- Corrige manualmente si alguna letra no se leyó bien
+- Copia el texto al portapapeles con un botón
+
+**Exportar:**
+
+- Descarga todas las matrículas en un archivo CSV (compatible con Excel) con texto, confianza, fecha e ID
+
+**Pruébalo sin tener un coche delante:**
+
+- Incluye 10 fotos de coches reales y 3 vídeos de tráfico de muestra para practicar
+
+### ¿Para quién es útil?
+
+Cualquier persona que necesite **anotar matrículas rápidamente y sin errores**: control de accesos en aparcamientos, gestión de flotas de vehículos, seguridad en instalaciones, o simplemente verificar una matrícula desde una foto o vídeo. Está especialmente ajustada para matrículas europeas.
 
 ## Características
 
@@ -36,7 +70,7 @@ Este proyecto implementa un sistema de reconocimiento automático de matrículas
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/alpr_vue.git
+git clone https://github.com/asiercamara/alpr-vue.git
 cd alpr_vue
 
 # Instalar dependencias
@@ -183,6 +217,110 @@ alpr_vue/
 ```
 
 ## Arquitectura y Componentes
+
+> Diagrama generado con [gitdiagram.com](https://gitdiagram.com/asiercamara/alpr-vue)
+
+```mermaid
+flowchart TD
+
+subgraph group_main["Hilo principal"]
+  node_main_ts["main.ts<br/>app bootstrap<br/>[main.ts]"]
+  node_app_vue["App shell<br/>vue shell<br/>[App.vue]"]
+  node_camera_preview["Camera preview<br/>ui surface<br/>[CameraPreview.vue]"]
+  node_media_uploader["Media uploader<br/>input ui<br/>[MediaUploader.vue]"]
+  node_plate_list["Plate list<br/>results ui<br/>[PlateList.vue]"]
+  node_plate_modal["Plate modal<br/>details ui<br/>[PlateModal.vue]"]
+  node_settings_sheet["Settings sheet<br/>prefs ui<br/>[SettingsSheet.vue]"]
+  node_help_sheet["Help sheet<br/>support ui<br/>[HelpSheet.vue]"]
+  node_use_camera["useCamera<br/>composable<br/>[useCamera.ts]"]
+  node_use_static_media["useStaticMedia<br/>composable<br/>[useStaticMedia.ts]"]
+  node_use_detection["useDetection<br/>bridge composable<br/>[useDetection.ts]"]
+  node_app_store["appStore<br/>ui state<br/>[appStore.ts]"]
+  node_plate_store["plateStore<br/>result state<br/>[plateStore.ts]"]
+  node_settings_store["settingsStore<br/>prefs state<br/>[settingsStore.ts]"]
+  node_use_theme["useTheme<br/>theme composable<br/>[useTheme.ts]"]
+  node_use_locale["useLocale<br/>locale composable<br/>[useLocale.ts]"]
+  node_i18n_core["i18n<br/>localization<br/>[index.ts]"]
+  node_validation["validation<br/>rules util<br/>[validation.ts]"]
+  node_feedback["feedback<br/>[feedback.ts]"]
+  node_export_csv["export<br/>[export.ts]"]
+end
+
+subgraph group_worker["Capa de inferencia"]
+  node_main_worker["main worker<br/>worker bridge<br/>[mainWorker.js]"]
+  node_models_loader["models loader<br/>worker init<br/>[modelsLoader.js]"]
+  node_detector_pipeline["detector pipeline<br/>plate detection"]
+  node_ocr_pipeline["ocr pipeline<br/>ocr stage<br/>[ocrProcessor.js]"]
+end
+
+subgraph group_assets["Assets"]
+  node_models_bundle[("model assets<br/>onnx assets")]
+  node_sample_media["sample media<br/>test assets"]
+end
+
+node_main_ts -->|"mounts"| node_app_vue
+node_app_vue -->|"composes"| node_camera_preview
+node_app_vue -->|"composes"| node_media_uploader
+node_app_vue -->|"composes"| node_plate_list
+node_app_vue -->|"composes"| node_plate_modal
+node_app_vue -->|"composes"| node_settings_sheet
+node_app_vue -->|"composes"| node_help_sheet
+node_app_vue -->|"uses"| node_use_camera
+node_app_vue -->|"uses"| node_use_static_media
+node_app_vue -->|"uses"| node_use_detection
+node_use_detection -->|"posts frames"| node_main_worker
+node_main_worker -->|"initializes"| node_models_loader
+node_main_worker -->|"runs"| node_detector_pipeline
+node_detector_pipeline -->|"crops to OCR"| node_ocr_pipeline
+node_main_worker -->|"loads assets"| node_models_bundle
+node_use_detection -->|"validates"| node_validation
+node_use_detection -->|"commits"| node_plate_store
+node_plate_store -->|"exports"| node_export_csv
+node_plate_store -->|"triggers"| node_feedback
+node_settings_store -->|"drives"| node_use_theme
+node_settings_store -->|"drives"| node_use_locale
+node_use_locale -->|"syncs"| node_i18n_core
+node_plate_list -->|"reads"| node_plate_store
+node_plate_modal -->|"edits"| node_plate_store
+node_settings_sheet -->|"edits"| node_settings_store
+node_camera_preview -->|"binds"| node_use_camera
+node_media_uploader -->|"binds"| node_use_static_media
+node_use_camera -.->|"demo input"| node_sample_media
+
+click node_main_ts "https://github.com/asiercamara/alpr-vue/blob/main/src/main.ts"
+click node_app_vue "https://github.com/asiercamara/alpr-vue/blob/main/src/App.vue"
+click node_camera_preview "https://github.com/asiercamara/alpr-vue/blob/main/src/components/ui/CameraPreview.vue"
+click node_media_uploader "https://github.com/asiercamara/alpr-vue/blob/main/src/components/ui/MediaUploader.vue"
+click node_plate_list "https://github.com/asiercamara/alpr-vue/blob/main/src/components/ui/PlateList.vue"
+click node_plate_modal "https://github.com/asiercamara/alpr-vue/blob/main/src/components/ui/PlateModal.vue"
+click node_settings_sheet "https://github.com/asiercamara/alpr-vue/blob/main/src/components/ui/SettingsSheet.vue"
+click node_help_sheet "https://github.com/asiercamara/alpr-vue/blob/main/src/components/ui/HelpSheet.vue"
+click node_use_camera "https://github.com/asiercamara/alpr-vue/blob/main/src/composables/useCamera.ts"
+click node_use_static_media "https://github.com/asiercamara/alpr-vue/blob/main/src/composables/useStaticMedia.ts"
+click node_use_detection "https://github.com/asiercamara/alpr-vue/blob/main/src/composables/useDetection.ts"
+click node_app_store "https://github.com/asiercamara/alpr-vue/blob/main/src/stores/appStore.ts"
+click node_plate_store "https://github.com/asiercamara/alpr-vue/blob/main/src/stores/plateStore.ts"
+click node_settings_store "https://github.com/asiercamara/alpr-vue/blob/main/src/stores/settingsStore.ts"
+click node_use_theme "https://github.com/asiercamara/alpr-vue/blob/main/src/composables/useTheme.ts"
+click node_use_locale "https://github.com/asiercamara/alpr-vue/blob/main/src/composables/useLocale.ts"
+click node_i18n_core "https://github.com/asiercamara/alpr-vue/blob/main/src/i18n/index.ts"
+click node_validation "https://github.com/asiercamara/alpr-vue/blob/main/src/utils/validation.ts"
+click node_feedback "https://github.com/asiercamara/alpr-vue/blob/main/src/utils/feedback.ts"
+click node_export_csv "https://github.com/asiercamara/alpr-vue/blob/main/src/utils/export.ts"
+click node_main_worker "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/mainWorker.js"
+click node_models_loader "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/modelsLoader.js"
+click node_detector_pipeline "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/detector/detector/detectionProcessor.js"
+click node_ocr_pipeline "https://github.com/asiercamara/alpr-vue/blob/main/src/workers/ocr/ocr/ocrProcessor.js"
+click node_models_bundle "https://github.com/asiercamara/alpr-vue/tree/main/public/models"
+click node_sample_media "https://github.com/asiercamara/alpr-vue/tree/main/public/test"
+
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+class node_main_ts,node_app_vue,node_camera_preview,node_media_uploader,node_plate_list,node_plate_modal,node_settings_sheet,node_help_sheet,node_use_camera,node_use_static_media,node_use_detection,node_app_store,node_plate_store,node_settings_store,node_use_theme,node_use_locale,node_i18n_core,node_validation,node_feedback,node_export_csv toneBlue
+class node_main_worker,node_models_loader,node_detector_pipeline,node_ocr_pipeline toneAmber
+class node_models_bundle,node_sample_media toneMint
+```
 
 ### Flujo de Procesamiento
 
