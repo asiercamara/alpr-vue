@@ -1,3 +1,7 @@
+/**
+ * Web Worker singleton and detection pipeline.
+ * One Worker is created per page load and shared across all `useDetection()` calls.
+ */
 import { ref, markRaw } from 'vue'
 import { usePlateStore } from '@/stores/plateStore'
 import { useAppStore } from '@/stores/appStore'
@@ -7,14 +11,32 @@ import { calculateTextSimilarity } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
 import type { DetectionBox } from '@/types/detection'
 
-// Module-level singleton: the Worker and its state are shared across all composable instances.
-// This is intentional — only one Worker processes frames at a time, avoiding race conditions.
+/**
+ * The single Worker instance shared across the application.
+ * `null` until the first `getWorker()` call.
+ */
 let _worker: Worker | null = null
+/** `true` once the Worker has sent `{ status: 'model_ready' }`. */
 const _modelReady = ref(false)
+/** `true` if the Worker failed to load the model. */
 const _modelFailed = ref(false)
+/**
+ * Processing lock: `true` while a frame is in-flight to the Worker.
+ * Prevents queuing multiple frames simultaneously.
+ */
 const _isProcessing = ref(false)
+/** Registered callbacks invoked whenever the Worker returns a detection result. */
 let _onBoxesCallbacks: Array<(data: DetectionBox[]) => void> = []
 
+/**
+ * Lazily initialises and returns the detection Worker singleton.
+ *
+ * Routes 4 incoming message shapes:
+ * - `{ status: 'model_ready' }` — sets `_modelReady`, notifies `appStore`.
+ * - `{ status: 'model_failed' }` — sets `_modelFailed`, notifies `appStore`.
+ * - `{ error: string }` — logs the error and releases the processing lock.
+ * - `DetectionBox[]` — releases the processing lock and fans out to all registered callbacks.
+ */
 function getWorker(): Worker {
   if (_worker) return _worker
 
@@ -58,6 +80,17 @@ function getWorker(): Worker {
   return _worker
 }
 
+/**
+ * Filters and deduplicates detection boxes by confidence threshold and text.
+ *
+ * Filtering: boxes whose mean character confidence is below `threshold` are discarded.
+ * Deduplication: for boxes sharing the same `plateText.text`, keeps the one with the
+ * longer text (more characters recognized). On equal length, keeps the higher mean confidence.
+ *
+ * @param boxes - Raw detection results from the Worker.
+ * @param threshold - Minimum mean character confidence in `[0, 1]`.
+ * @returns Deduplicated array of best-quality boxes.
+ */
 function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox[] {
   const validBoxes = boxes.filter((box) => {
     if (!box.plateText?.confidence?.length) return false
@@ -87,11 +120,29 @@ function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox
   return Array.from(grouped.values())
 }
 
+/**
+ * Composable that exposes the shared detection Worker and pipeline utilities.
+ *
+ * Returns:
+ * - `modelReady` / `modelFailed` / `isProcessing` — reactive Worker state flags.
+ * - `processFrame` — send a frame bitmap to the Worker.
+ * - `onBoxes` — subscribe to detection results.
+ * - `drawBoxesAndUpdate` — draw bounding boxes and commit valid detections.
+ * - `resetProcessing` — release the processing lock after an aborted pipeline.
+ */
 export function useDetection() {
   const plateStore = usePlateStore()
   const settingsStore = useSettingsStore()
   const worker = getWorker()
 
+  /**
+   * Sends a video frame to the Worker for detection.
+   *
+   * Guards: skips (and closes) the bitmap when the model is not ready or a previous frame
+   * is still in-flight (`_isProcessing`), to avoid memory leaks and race conditions.
+   *
+   * @param imageBitmap - Frame captured via `createImageBitmap`. The Worker takes ownership.
+   */
   const processFrame = async (imageBitmap: ImageBitmap): Promise<void> => {
     if (!_modelReady.value || _isProcessing.value) {
       imageBitmap.close()
@@ -101,6 +152,14 @@ export function useDetection() {
     worker.postMessage({ imageBitmap }, [imageBitmap])
   }
 
+  /**
+   * Subscribes to detection results from the Worker.
+   *
+   * Uses a simple pub/sub array: the callback is called each time the Worker returns boxes.
+   *
+   * @param callback - Function to call with the detection results.
+   * @returns Unsubscribe function — call it (e.g., in `onUnmounted`) to stop receiving events.
+   */
   const onBoxes = (callback: (data: DetectionBox[]) => void): (() => void) => {
     _onBoxesCallbacks.push(callback)
     return () => {
@@ -108,6 +167,19 @@ export function useDetection() {
     }
   }
 
+  /**
+   * Draws bounding boxes on the canvas and commits valid detections to `plateStore`.
+   *
+   * Two-pass approach:
+   * 1. **Draw pass** — renders all best-quality boxes on the canvas with confidence labels.
+   * 2. **Validate & store pass** — for each box: runs `evaluatePlateQuality`; skips invalid
+   *    or duplicate plates (when `skipDuplicates` is on); calls `plateStore.addPlate` and
+   *    triggers `notifyDetection` on confirmation.
+   *
+   * @param canvas - Canvas element to draw onto (must match video dimensions).
+   * @param boxes - Raw detection boxes from the Worker.
+   * @returns `true` when at least one new plate was confirmed (signals camera to consider stopping).
+   */
   const drawBoxesAndUpdate = (canvas: HTMLCanvasElement, boxes: DetectionBox[]): boolean => {
     let confirmedNew = false
     if (!boxes?.length) return false
@@ -168,6 +240,12 @@ export function useDetection() {
     return confirmedNew
   }
 
+  /**
+   * Clears the processing lock.
+   *
+   * Call after aborting the pipeline (e.g., on camera stop) to prevent deadlock where
+   * `_isProcessing` remains `true` and no further frames are sent.
+   */
   const resetProcessing = (): void => {
     _isProcessing.value = false
   }

@@ -15,7 +15,11 @@ Este proyecto implementa un sistema de reconocimiento automático de matrículas
 - **Exportar detecciones a CSV** para análisis posterior
 - **Cambio de cámara** (frontal/trasera) en dispositivos móviles
 - **Instrucciones de ayuda en bottom sheet** accesibles desde la cabecera
-- Modo oscuro/claro
+- **Panel de ajustes** (icono de engranaje) con controles de confianza, temporización y modo
+- **Tres modos de tema**: claro, oscuro, sistema (sigue la preferencia del SO con prevención de FOUC)
+- **Controles de zoom** (zoom nativo por hardware con respaldo digital)
+- **Notificaciones emergentes** al confirmar matrículas
+- **Sistema tipográfico personalizado**: Inter (UI), Space Grotesk (display), JetBrains Mono (texto de matrícula)
 - Diseño responsive optimizado para dispositivos móviles
 - **Contraste mejorado** para legibilidad a plena luz del sol
 - Procesamiento en Web Workers para una interfaz fluida
@@ -89,6 +93,8 @@ alpr_vue/
 ├── vitest.config.ts                    # Configuración de tests
 ├── tsconfig.json                       # Referencias de proyecto TypeScript
 ├── tsconfig.app.json                   # Configuración TypeScript de la app
+├── scripts/
+│   └── deploy-surge.sh                 # Script de despliegue a Surge.sh
 ├── public/
 │   ├── favicon.ico                     # Favicon
 │   ├── android-chrome-*.png            # Iconos PWA
@@ -102,36 +108,54 @@ alpr_vue/
     ├── main.ts                         # Entrada de la app (crea Vue + Pinia)
     ├── App.vue                         # Componente raíz (cabecera + cámara + historial)
     ├── assets/
-    │   └── main.css                    # Import de Tailwind CSS v4
+    │   └── main.css                    # Tailwind CSS v4 con tokens personalizados
     ├── components/
     │   ├── icons/
     │   │   ├── IconAlertTriangle.vue   # Icono de alerta
     │   │   ├── IconCamera.vue          # Icono de cámara
+    │   │   ├── IconClose.vue           # Icono de cerrar/descartar
     │   │   ├── IconCopy.vue            # Icono de copiar al portapapeles
     │   │   ├── IconDownload.vue        # Icono de descarga/exportación
     │   │   ├── IconEdit.vue            # Icono de edición
     │   │   ├── IconFlipCamera.vue      # Icono de cambio de cámara
+    │   │   ├── IconImage.vue           # Icono de archivo de imagen
+    │   │   ├── IconMoon.vue            # Icono de modo oscuro
+    │   │   ├── IconMonitor.vue         # Icono de tema del sistema
     │   │   ├── IconPlay.vue            # Icono SVG de reproducción
+    │   │   ├── IconReset.vue           # Icono de restablecer
+    │   │   ├── IconSettings.vue        # Icono de engranaje de ajustes
     │   │   ├── IconStop.vue            # Icono SVG de parada
+    │   │   ├── IconSun.vue             # Icono de modo claro
     │   │   ├── IconTrash.vue           # Icono de eliminación
-    │   │   └── IconUpload.vue          # Icono de subida de archivo
+    │   │   ├── IconUpload.vue          # Icono de subida de archivo
+    │   │   ├── IconVideo.vue           # Icono de archivo de vídeo
+    │   │   ├── IconVolumeOff.vue       # Icono de feedback silenciado
+    │   │   ├── IconVolumeOn.vue        # Icono de feedback activo
+    │   │   ├── IconZoomIn.vue          # Icono de acercar zoom
+    │   │   └── IconZoomOut.vue         # Icono de alejar zoom
     │   └── ui/
+    │       ├── BottomDrawer.vue        # Contenedor reutilizable de bottom sheet
     │       ├── CameraPreview.vue       # Video + canvas, controles de cámara y subida
     │       ├── ConfidenceRing.vue      # Indicador circular de confianza
     │       ├── HelpSheet.vue           # Bottom sheet con instrucciones de uso
     │       ├── MediaUploader.vue       # Subida de imágenes/vídeos con barra de progreso
     │       ├── PlateList.vue           # Lista de matrículas con exportación CSV
     │       ├── PlateListItem.vue       # Tarjeta individual de matrícula con anillo de confianza
-    │       └── PlateModal.vue          # Modal de detalle con edición y barras de confianza
+    │       ├── PlateModal.vue          # Modal de detalle con edición y barras de confianza
+    │       ├── SampleGallery.vue       # Galería de imágenes/vídeos de muestra para demo
+    │       ├── SettingsSheet.vue       # Panel de ajustes en bottom sheet
+    │       └── ToastNotification.vue   # Notificación emergente de confirmación
     ├── composables/
     │   ├── useCamera.ts               # Ciclo de vida de cámara, cambio de cámara y captura de frames
     │   ├── useDetection.ts            # Comunicación con Web Worker y lógica de detección
-    │   └── useStaticMedia.ts          # Composable para procesar archivos de imagen/vídeo
+    │   ├── useStaticMedia.ts          # Composable para procesar archivos de imagen/vídeo
+    │   └── useTheme.ts                # Gestión del tema oscuro/claro/sistema
     ├── models/
     │   └── european_mobile_vit_v2_ocr_config.json  # Config del modelo OCR
     ├── stores/
     │   ├── appStore.ts                # Estado de la app (errores, carga, cámara activa)
-    │   └── plateStore.ts              # Estado de matrículas, agrupación, edición de texto y detección
+    │   ├── plateStore.ts              # Estado de matrículas, agrupación, edición de texto y detección
+    │   └── settingsStore.ts           # Ajustes de usuario con persistencia en localStorage
     ├── types/
     │   └── detection.ts               # Interfaces y tipos TypeScript
     ├── utils/
@@ -171,12 +195,14 @@ La interfaz está construida con **Vue 3** usando `<script setup>` y TypeScript.
 
 - **`appStore`**: Registra errores de cámara, estado de carga de modelos, estado activo de la cámara y errores de los mismos.
 - **`plateStore`**: Gestiona las matrículas detectadas, agrupa matrículas similares usando distancia Levenshtein (umbral 0.8), implementa confirmación basada en tiempo, permite editar el texto de las matrículas y ordena las detecciones de más reciente a más antigua.
+- **`settingsStore`**: Persiste los 7 ajustes en localStorage bajo `'alpr-settings'`. Proporciona setters tipados y funciones de reset por ajuste. `useTheme` consume `settingsStore.theme` para gestionar la clase dark en `<html>`.
 
 #### Composables
 
 - **`useCamera`**: Gestiona el ciclo de vida de la cámara web (`startCamera`/`stopCamera`), cambio de cámara frontal/trasera (`toggleCameraFacing`), captura frames vía `ImageBitmap`, coordina la detección mediante `useDetection` y sincroniza el estado con `appStore`.
 - **`useDetection`**: Gestiona el singleton del Web Worker, envía frames para procesamiento, recibe resultados de cajas delimitadoras mediante un patrón pub/sub (`onBoxes`) y valida la calidad de las matrículas antes de añadirlas al store.
 - **`useStaticMedia`**: Procesa archivos de imagen/vídeo subidos frame a frame a través del mismo pipeline de detección. Muestra progreso (loading/processing/done/error) y soporta cancelación.
+- **`useTheme`**: Observa `settingsStore.theme`, alterna la clase `dark` en `document.documentElement` y escucha cambios de `prefers-color-scheme` del SO en modo `'system'`. Se llama una sola vez en `App.vue`.
 
 #### Componente CameraPreview
 
@@ -195,6 +221,10 @@ Proporciona subida de archivos de imagen y vídeo con overlay de progreso de pro
 #### Componente HelpSheet
 
 Modal bottom sheet que muestra las instrucciones de uso, activado por el icono `?` en la cabecera. Reemplaza la sección de instrucciones en línea para ahorrar espacio vertical.
+
+#### Componente SettingsSheet
+
+Bottom sheet con selector de tema (claro/oscuro/sistema), toggle de audio/háptico, slider de confianza, sliders de tiempo de confirmación, toggles de modo continuo y omitir duplicados, y botones de reset por ajuste.
 
 #### PlateList y PlateModal
 
@@ -317,6 +347,18 @@ El umbral de similitud Levenshtein para agrupar matrículas similares puede ajus
 ### Personalización de la Interfaz
 
 El proyecto utiliza Tailwind CSS v4, que puede personalizarse mediante `src/assets/main.css` o añadiendo clases utilitarias directamente en los componentes.
+
+## Despliegue
+
+Despliega a [Surge.sh](https://surge.sh):
+
+```bash
+chmod +x scripts/deploy-surge.sh
+./scripts/deploy-surge.sh                      # → alpr-vue.surge.sh
+./scripts/deploy-surge.sh mi-dominio.surge.sh # → dominio personalizado
+```
+
+El script compila el proyecto (`pnpm build`) y publica `dist/` mediante `surge`. Requiere una cuenta en Surge (`surge login`). El script usa `npx surge` o `pnpm dlx surge` como alternativa si el CLI no está instalado globalmente.
 
 ## Limitaciones
 

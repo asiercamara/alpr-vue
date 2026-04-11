@@ -1,21 +1,40 @@
+/**
+ * User-configurable settings with automatic localStorage persistence.
+ * All mutations call `persist()` internally.
+ */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
 const STORAGE_KEY = 'alpr-settings'
 const LEGACY_FEEDBACK_KEY = 'alpr-feedback-enabled'
 
+/**
+ * Theme preference.
+ * - `'light'` — always use light mode.
+ * - `'dark'` — always use dark mode.
+ * - `'system'` — follows the OS `prefers-color-scheme` media query.
+ */
 export type ThemeMode = 'light' | 'dark' | 'system'
 
+/** Shape of the settings object stored in localStorage and used by the store. */
 interface SettingsConfig {
+  /** Whether audio/haptic feedback fires on plate confirmation. */
   feedbackEnabled: boolean
+  /** Minimum mean OCR confidence (0–1) for a detection to be stored. */
   confidenceThreshold: number
+  /** Seconds of continuous detection required to confirm a plate in normal mode. */
   confirmationTime: number
+  /** Seconds of continuous detection required in fast-confirmation (high-confidence) mode. */
   fastConfirmationTime: number
+  /** When `true`, the camera continues scanning after each confirmed plate. */
   continuousMode: boolean
+  /** When `true`, plates whose text is already in history are silently skipped. */
   skipDuplicates: boolean
+  /** Active theme mode; drives the `dark` class on `<html>` via `useTheme`. */
   theme: ThemeMode
 }
 
+/** Default values applied on first run or after `resetAll()`. */
 export const DEFAULTS: SettingsConfig = {
   feedbackEnabled: true,
   confidenceThreshold: 0.7,
@@ -26,6 +45,12 @@ export const DEFAULTS: SettingsConfig = {
   theme: 'system',
 }
 
+/**
+ * Reads persisted settings from localStorage, merging over `DEFAULTS`.
+ *
+ * Migrates the legacy `'alpr-feedback-enabled'` key on first call and removes it.
+ * Falls back silently to defaults on parse failure or when localStorage is unavailable.
+ */
 function loadSettings(): SettingsConfig {
   const defaults = { ...DEFAULTS }
 
@@ -49,6 +74,11 @@ function loadSettings(): SettingsConfig {
   }
 }
 
+/**
+ * Serializes `settings` to localStorage under `STORAGE_KEY`.
+ *
+ * Silently no-ops when localStorage is unavailable (e.g., private browsing with strict settings).
+ */
 function saveSettings(settings: SettingsConfig): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
@@ -60,17 +90,31 @@ function saveSettings(settings: SettingsConfig): void {
 export const useSettingsStore = defineStore('settings', () => {
   const loaded = loadSettings()
 
+  /** Whether audio/haptic feedback fires on plate confirmation. */
   const feedbackEnabled = ref(loaded.feedbackEnabled)
+  /** Minimum mean OCR confidence (0–1) required to store a detection. */
   const confidenceThreshold = ref(loaded.confidenceThreshold)
+  /** Confirmation window duration in seconds (normal mode). */
   const confirmationTime = ref(loaded.confirmationTime)
+  /** Confirmation window duration in seconds (fast/high-confidence mode). */
   const fastConfirmationTime = ref(loaded.fastConfirmationTime)
+  /** `true` when the camera keeps scanning after each confirmed plate. */
   const continuousMode = ref(loaded.continuousMode)
+  /** `true` when already-seen plate texts are silently skipped. */
   const skipDuplicates = ref(loaded.skipDuplicates)
+  /** Active theme preference; `useTheme` reacts to this value. */
   const theme = ref<ThemeMode>(loaded.theme)
 
+  /** Millisecond equivalent of `confirmationTime`. Use in `setTimeout` and timing logic. */
   const confirmationTimeMs = computed(() => confirmationTime.value * 1000)
+  /** Millisecond equivalent of `fastConfirmationTime`. Use in `setTimeout` and timing logic. */
   const fastConfirmationTimeMs = computed(() => fastConfirmationTime.value * 1000)
 
+  /**
+   * Serializes all current settings to localStorage.
+   *
+   * Called automatically by every setter — do not call manually from outside the store.
+   */
   function persist(): void {
     saveSettings({
       feedbackEnabled: feedbackEnabled.value,
@@ -158,6 +202,9 @@ export const useSettingsStore = defineStore('settings', () => {
     persist()
   }
 
+  /**
+   * Resets all 7 settings to `DEFAULTS` with a single `persist()` call.
+   */
   function resetAll(): void {
     feedbackEnabled.value = DEFAULTS.feedbackEnabled
     confidenceThreshold.value = DEFAULTS.confidenceThreshold

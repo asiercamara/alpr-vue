@@ -15,7 +15,11 @@ This project implements an automatic license plate recognition (ALPR) system tha
 - **Export detections to CSV** for further analysis
 - **Camera facing toggle** (front/back) on mobile devices
 - **Bottom sheet help instructions** accessible from the header
-- Dark/light mode
+- **Configurable settings panel** (gear icon) with confidence, timing, and mode controls
+- **Three theme modes**: light, dark, system (follows OS preference with FOUC prevention)
+- **Zoom controls** (native hardware zoom with digital fallback)
+- **Toast notifications** for plate confirmations
+- **Custom font system**: Inter (UI), Space Grotesk (display), JetBrains Mono (plate text)
 - Responsive design optimized for mobile devices
 - **Improved contrast** for sunlight readability
 - Processing offloaded to Web Workers for smooth UI
@@ -89,6 +93,8 @@ alpr_vue/
 ├── vitest.config.ts                    # Test configuration
 ├── tsconfig.json                       # TypeScript project references
 ├── tsconfig.app.json                   # TypeScript app config
+├── scripts/
+│   └── deploy-surge.sh                 # Surge.sh deployment script
 ├── public/
 │   ├── favicon.ico                     # Favicon
 │   ├── android-chrome-*.png            # PWA icons
@@ -102,36 +108,54 @@ alpr_vue/
     ├── main.ts                         # App entry (creates Vue + Pinia)
     ├── App.vue                         # Root component (header + camera + history)
     ├── assets/
-    │   └── main.css                    # Tailwind CSS v4 import
+    │   └── main.css                    # Tailwind CSS v4 with custom tokens
     ├── components/
     │   ├── icons/
     │   │   ├── IconAlertTriangle.vue   # Alert icon
     │   │   ├── IconCamera.vue          # Camera icon
+    │   │   ├── IconClose.vue           # Close/dismiss icon
     │   │   ├── IconCopy.vue            # Copy to clipboard icon
     │   │   ├── IconDownload.vue        # Download/export icon
     │   │   ├── IconEdit.vue            # Edit icon
     │   │   ├── IconFlipCamera.vue      # Toggle camera facing icon
+    │   │   ├── IconImage.vue           # Image file icon
+    │   │   ├── IconMoon.vue            # Dark mode icon
+    │   │   ├── IconMonitor.vue         # System theme icon
     │   │   ├── IconPlay.vue            # Play icon
+    │   │   ├── IconReset.vue           # Reset/restore icon
+    │   │   ├── IconSettings.vue        # Settings gear icon
     │   │   ├── IconStop.vue            # Stop icon
+    │   │   ├── IconSun.vue             # Light mode icon
     │   │   ├── IconTrash.vue           # Delete icon
-    │   │   └── IconUpload.vue          # Upload file icon
+    │   │   ├── IconUpload.vue          # Upload file icon
+    │   │   ├── IconVideo.vue           # Video file icon
+    │   │   ├── IconVolumeOff.vue       # Muted feedback icon
+    │   │   ├── IconVolumeOn.vue        # Active feedback icon
+    │   │   ├── IconZoomIn.vue          # Zoom in icon
+    │   │   └── IconZoomOut.vue         # Zoom out icon
     │   └── ui/
+    │       ├── BottomDrawer.vue        # Reusable bottom sheet container
     │       ├── CameraPreview.vue       # Video + canvas overlay, camera controls, upload
     │       ├── ConfidenceRing.vue      # Circular confidence indicator
     │       ├── HelpSheet.vue           # Bottom sheet with usage instructions
     │       ├── MediaUploader.vue       # Image/video file upload with progress overlay
     │       ├── PlateList.vue           # Detected plates list with export CSV
     │       ├── PlateListItem.vue       # Single plate card with confidence ring
-    │       └── PlateModal.vue          # Plate detail modal with edit & confidence bars
+    │       ├── PlateModal.vue          # Plate detail modal with edit & confidence bars
+    │       ├── SampleGallery.vue       # Built-in sample images/videos for demo
+    │       ├── SettingsSheet.vue       # Bottom sheet settings panel
+    │       └── ToastNotification.vue   # Transient confirmation toast
     ├── composables/
     │   ├── useCamera.ts               # Camera lifecycle, facing toggle & frame capture
     │   ├── useDetection.ts            # Web Worker communication & detection logic
-    │   └── useStaticMedia.ts          # Image/video file processing composable
+    │   ├── useStaticMedia.ts          # Image/video file processing composable
+    │   └── useTheme.ts                # Dark/light/system theme management
     ├── models/
     │   └── european_mobile_vit_v2_ocr_config.json  # OCR model config
     ├── stores/
     │   ├── appStore.ts                # App state (errors, model loading, camera active)
-    │   └── plateStore.ts              # Plates state, grouping, text editing & detection
+    │   ├── plateStore.ts              # Plates state, grouping, text editing & detection
+    │   └── settingsStore.ts           # User settings with localStorage persistence
     ├── types/
     │   └── detection.ts               # TypeScript interfaces & types
     ├── utils/
@@ -171,12 +195,14 @@ The UI is built with **Vue 3** using `<script setup>` and TypeScript. State mana
 
 - **`appStore`**: Tracks camera errors, model loading state, camera active state, and model errors.
 - **`plateStore`**: Manages detected plates, groups similar plates using Levenshtein distance (threshold 0.8), implements time-based confirmation logic, and supports editing plate text. Plates are sorted chronologically (most recent first).
+- **`settingsStore`**: Persists all 7 settings to localStorage under `'alpr-settings'`. Provides typed setters and per-setting reset functions. `useTheme` consumes `settingsStore.theme` to drive the dark class on `<html>`.
 
 #### Composables
 
 - **`useCamera`**: Manages webcam lifecycle (`startCamera`/`stopCamera`), camera facing toggle (`toggleCameraFacing`), captures frames via `ImageBitmap`, and coordinates detection via `useDetection`. Syncs camera state with `appStore`.
 - **`useDetection`**: Manages the Web Worker singleton, sends frames for processing, receives bounding box results via a pub/sub pattern (`onBoxes`), and validates plate quality before adding to the store.
 - **`useStaticMedia`**: Processes uploaded image/video files frame-by-frame through the same detection pipeline. Shows progress (loading/processing/done/error) and supports cancellation.
+- **`useTheme`**: Watches `settingsStore.theme`, toggles the `dark` class on `document.documentElement`, and listens to OS `prefers-color-scheme` changes in `'system'` mode. Called once in `App.vue`.
 
 #### CameraPreview Component
 
@@ -195,6 +221,10 @@ Provides file upload for images and videos with a processing progress overlay, c
 #### HelpSheet Component
 
 Bottom sheet modal showing usage instructions, triggered by the `?` icon in the header. Replaces the inline instructions section to save vertical space.
+
+#### SettingsSheet Component
+
+Bottom sheet with theme selector (light/dark/system), audio/haptic toggle, confidence slider, confirmation time sliders, continuous mode and skip-duplicates toggles, and per-setting reset buttons.
 
 #### PlateList & PlateModal
 
@@ -316,6 +346,18 @@ The Levenshtein similarity threshold for grouping similar plates can be adjusted
 ### Interface Customization
 
 The project uses Tailwind CSS v4, which can be customized via `src/assets/main.css` or by adding utility classes directly in components.
+
+## Deployment
+
+Deploy to [Surge.sh](https://surge.sh):
+
+```bash
+chmod +x scripts/deploy-surge.sh
+./scripts/deploy-surge.sh                      # → alpr-vue.surge.sh
+./scripts/deploy-surge.sh my-domain.surge.sh  # → custom domain
+```
+
+The script builds the project (`pnpm build`) then publishes `dist/` via `surge`. Requires a Surge account (`surge login`). The script falls back to `npx surge` or `pnpm dlx surge` when the CLI is not installed globally.
 
 ## Limitations
 

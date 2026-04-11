@@ -1,3 +1,7 @@
+/**
+ * Manages webcam lifecycle, camera-facing toggle, native/digital zoom, and frame capture loop.
+ * Coordinates with `useDetection`, `appStore`, and `plateStore`.
+ */
 import { ref, onUnmounted, type Ref } from 'vue'
 import { useDetection } from './useDetection'
 import { usePlateStore } from '@/stores/plateStore'
@@ -5,7 +9,9 @@ import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import type { DetectionBox } from '@/types/detection'
 
+/** How much zoom changes per increment/decrement step. */
 const ZOOM_STEP = 0.5
+/** Maximum zoom level allowed in digital (CSS transform) fallback mode. */
 const DIGITAL_ZOOM_MAX = 5
 
 export function useCamera(): {
@@ -50,6 +56,13 @@ export function useCamera(): {
     lastBoxes = boxes
   })
 
+  /**
+   * Queries the active video track for native zoom capabilities via `getCapabilities()`.
+   *
+   * If the browser supports native zoom, sets `isZoomSupported = true` and reads the
+   * hardware maximum. Otherwise falls back to digital zoom (`isDigitalZoom = true`) capped
+   * at `DIGITAL_ZOOM_MAX`. Always resets `zoomLevel` to 1.
+   */
   const detectZoomCapabilities = (): void => {
     try {
       videoTrack = stream?.getVideoTracks?.()?.[0] ?? null
@@ -75,6 +88,13 @@ export function useCamera(): {
     zoomLevel.value = 1
   }
 
+  /**
+   * Stops the webcam stream and cleans up all related state.
+   *
+   * Side effects: clears the capture interval, stops all media tracks, resets zoom,
+   * clears the canvas, resets the processing lock, and clears the consecutive-detection
+   * window in `plateStore`.
+   */
   const stopCamera = (): void => {
     if (intervalId !== null) {
       clearInterval(intervalId)
@@ -97,6 +117,16 @@ export function useCamera(): {
     }
   }
 
+  /**
+   * Requests webcam access and starts the 20 ms capture-and-detect interval.
+   *
+   * Each tick: sizes the canvas to the video resolution, clears it, draws pending bounding
+   * boxes, and — when the model is ready — captures a new `ImageBitmap` and sends it for
+   * processing via `processFrame`. If `settingsStore.continuousMode` is `false`, the camera
+   * stops automatically after the first confirmed plate.
+   *
+   * On permission denial or hardware failure, writes an error to `appStore.cameraError`.
+   */
   const startCamera = async (): Promise<void> => {
     try {
       lastBoxes = []
@@ -160,6 +190,14 @@ export function useCamera(): {
     }
   }
 
+  /**
+   * Applies a native zoom level to the active video track via the `advanced` constraint.
+   *
+   * Falls back to digital zoom mode on any exception (e.g., browser does not support
+   * the `zoom` constraint at runtime despite advertising it via `getCapabilities`).
+   *
+   * @param value - Desired zoom level, clamped to `[1, maxZoom]` by the caller.
+   */
   const applyNativeZoom = async (value: number): Promise<void> => {
     if (!videoTrack || !isZoomSupported.value) return
     try {
@@ -172,6 +210,12 @@ export function useCamera(): {
     }
   }
 
+  /**
+   * Increases zoom by `ZOOM_STEP`, clamped to `[1, maxZoom]`.
+   *
+   * Uses native zoom when available, otherwise sets `isDigitalZoom = true` to signal
+   * the template to apply a CSS scale transform.
+   */
   const zoomIn = async (): Promise<void> => {
     const next = Math.min(zoomLevel.value + ZOOM_STEP, maxZoom.value)
     if (next === zoomLevel.value) return
@@ -186,6 +230,11 @@ export function useCamera(): {
     }
   }
 
+  /**
+   * Decreases zoom by `ZOOM_STEP`, clamped to `[1, maxZoom]`.
+   *
+   * Uses native zoom when available, otherwise sets `isDigitalZoom = true`.
+   */
   const zoomOut = async (): Promise<void> => {
     const next = Math.max(zoomLevel.value - ZOOM_STEP, 1)
     if (next === zoomLevel.value) return
@@ -210,6 +259,12 @@ export function useCamera(): {
     isDigitalZoom.value = false
   }
 
+  /**
+   * Switches between `'environment'` (rear) and `'user'` (front) camera.
+   *
+   * Stops the current stream, flips `facingMode`, then restarts the camera.
+   * No-op if no camera is active.
+   */
   const toggleCameraFacing = async (): Promise<void> => {
     facingMode.value = facingMode.value === 'environment' ? 'user' : 'environment'
     if (isCameraActive.value) {

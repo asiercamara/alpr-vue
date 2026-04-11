@@ -1,7 +1,17 @@
+/**
+ * Audio and haptic feedback utilities triggered on plate confirmation.
+ */
 declare global {
-  interface Window { webkitAudioContext?: typeof AudioContext }
+  interface Window {
+    webkitAudioContext?: typeof AudioContext
+  }
 }
 
+/**
+ * Plays an 800 Hz sine-wave beep for 200 ms using the Web Audio API.
+ *
+ * Silent no-op when `AudioContext` is unavailable (e.g., SSR or restricted browser).
+ */
 export function playBeep(): void {
   try {
     const AudioCtx = window.AudioContext ?? window.webkitAudioContext
@@ -31,6 +41,11 @@ export function playBeep(): void {
   }
 }
 
+/**
+ * Triggers a 200 ms vibration via `navigator.vibrate`.
+ *
+ * No-op on iOS or desktop browsers that do not implement the Vibration API.
+ */
 export function triggerVibration(): void {
   try {
     if (navigator.vibrate) {
@@ -41,6 +56,11 @@ export function triggerVibration(): void {
   }
 }
 
+/**
+ * Fires audio and haptic feedback simultaneously.
+ *
+ * Safe to call when either channel is unavailable — each falls back independently.
+ */
 export function notifyDetection(): void {
   playBeep()
   triggerVibration()
