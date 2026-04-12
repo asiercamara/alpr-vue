@@ -1,0 +1,4 @@
+if grep -qiP '^\s*Co-Authored-By\s*:' "$1"; then
+  echo "Error: Co-Authored-By lines are not allowed in commit messages." >&2
+  exit 1
+fi
