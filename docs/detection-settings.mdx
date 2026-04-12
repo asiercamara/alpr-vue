@@ -37,15 +37,19 @@ The detection settings let you tune how selective and how fast ALPR Vue is when 
   <Accordion title="Continuous mode (default: on)">
     When continuous mode is **on**, the camera keeps scanning after each confirmed plate. ALPR Vue will continue detecting and confirming new plates without any interaction from you.
 
-    When continuous mode is **off**, the camera stops automatically as soon as the first plate is confirmed. This is useful for single-plate capture workflows — for example, manually logging vehicles one at a time at a checkpoint — where you want to review each plate before moving on.
+    When continuous mode is **off**, the camera stops automatically as soon as a **new** plate is confirmed. This is useful for single-plate capture workflows — for example, manually logging vehicles one at a time at a checkpoint — where you want to review each plate before moving on.
+
+    <Note>
+      If **skip duplicates** is also on, a plate that already appears in your history will not stop the camera even in single-capture mode. The camera only stops for genuinely new plates.
+    </Note>
 
     Toggle continuous mode back on at any time to resume uninterrupted scanning.
   </Accordion>
 
   <Accordion title="Skip duplicates (default: on)">
-    When skip duplicates is **on**, any plate whose text already appears in your current detection history is silently ignored. This keeps your history clean when the same vehicle stays in view for an extended period.
+    When skip duplicates is **on**, confirming a plate that already appears in your history will **not** trigger a beep or vibration, and will **not** stop the camera (even when continuous mode is off). The detection is still saved, and if the new reading has a higher confidence score than the previous one, it becomes the best representative for that plate in your history.
 
-    Turn this **off** if you need to record every detection event regardless of whether that plate has been seen before — for example, when logging entry and exit times for the same vehicle.
+    Turn this **off** if you want every confirmed plate — including repeated ones — to trigger an alert and, when continuous mode is off, stop the camera. This is useful when logging entry and exit events for the same vehicle, where each pass should be treated as a distinct event.
   </Accordion>
 
   <Accordion title="Audio / haptic feedback (default: on)">

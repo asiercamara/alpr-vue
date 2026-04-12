@@ -37,15 +37,19 @@ Los ajustes de detección te permiten configurar lo selectiva y lo rápida que e
   <Accordion title="Modo continuo (predeterminado: activado)">
     Cuando el modo continuo está **activado**, la cámara sigue escaneando tras cada matrícula confirmada. ALPR Vue continuará detectando y confirmando nuevas matrículas sin ninguna interacción por tu parte.
 
-    Cuando el modo continuo está **desactivado**, la cámara se detiene automáticamente en cuanto se confirma la primera matrícula. Esto es útil para flujos de trabajo de captura de una sola matrícula — por ejemplo, registrar manualmente vehículos uno a uno en un puesto de control — donde quieres revisar cada matrícula antes de continuar.
+    Cuando el modo continuo está **desactivado**, la cámara se detiene automáticamente en cuanto se confirma una matrícula **nueva**. Esto es útil para flujos de trabajo de captura de una sola matrícula — por ejemplo, registrar manualmente vehículos uno a uno en un puesto de control — donde quieres revisar cada matrícula antes de continuar.
+
+    <Note>
+      Si **omitir duplicados** también está activado, una matrícula que ya aparezca en tu historial no detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas.
+    </Note>
 
     Activa el modo continuo de nuevo en cualquier momento para reanudar el escaneo ininterrumpido.
   </Accordion>
 
   <Accordion title="Omitir duplicados (predeterminado: activado)">
-    Cuando omitir duplicados está **activado**, cualquier matrícula cuyo texto ya aparece en tu historial de detecciones actual se ignora silenciosamente. Esto mantiene tu historial limpio cuando el mismo vehículo permanece a la vista durante un período prolongado.
+    Cuando omitir duplicados está **activado**, confirmar una matrícula que ya aparece en tu historial **no** activa ningún pitido ni vibración, y **no** detiene la cámara (aunque el modo continuo esté desactivado). La detección sí se guarda, y si la nueva lectura tiene una puntuación de confianza mayor que la anterior, pasa a ser el mejor representante de esa matrícula en tu historial.
 
-    Desactívalo si necesitas registrar cada evento de detección independientemente de si esa matrícula ya se ha visto antes — por ejemplo, al registrar los tiempos de entrada y salida del mismo vehículo.
+    Desactívalo si quieres que cada matrícula confirmada — incluidas las repetidas — active una alerta y, cuando el modo continuo esté desactivado, detenga la cámara. Esto es útil al registrar entradas y salidas del mismo vehículo, donde cada paso debe tratarse como un evento distinto.
   </Accordion>
 
   <Accordion title="Feedback de audio / haptic (predeterminado: activado)">

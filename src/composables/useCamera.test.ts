@@ -640,6 +640,85 @@ describe('useCamera', () => {
     })
   })
 
+  describe('auto-stop behavior', () => {
+    function startCameraWithCanvas(camera: ReturnType<typeof useCamera>) {
+      const mockVideo = document.createElement('video')
+      mockVideo.play = vi.fn().mockResolvedValue(undefined)
+      Object.defineProperty(mockVideo, 'readyState', { value: 2, configurable: true })
+      Object.defineProperty(mockVideo, 'videoWidth', { value: 300, configurable: true })
+      Object.defineProperty(mockVideo, 'videoHeight', { value: 150, configurable: true })
+      Object.defineProperty(camera.videoRef, 'value', { value: mockVideo, writable: true })
+      Object.defineProperty(camera.canvasRef, 'value', {
+        value: document.createElement('canvas'),
+        writable: true,
+      })
+      return mockVideo
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+      const mockTrack = { stop: vi.fn() }
+      const mockStream = { getTracks: () => [mockTrack], getVideoTracks: () => [mockTrack] }
+      vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      mockDrawBoxesAndUpdate.mockReset()
+    })
+
+    it('stops camera when continuousMode is false and a new plate is confirmed', async () => {
+      mockDrawBoxesAndUpdate.mockReturnValue(true)
+
+      const camera = useCamera({ settingsStore: { continuousMode: false } as any })
+      startCameraWithCanvas(camera)
+      await camera.startCamera()
+      expect(camera.isCameraActive.value).toBe(true)
+
+      // Trigger lastBoxes so the interval actually calls drawBoxesAndUpdate
+      const lastBoxesCallback = mockOnBoxes.mock.calls[0][0] as (boxes: unknown[]) => void
+      lastBoxesCallback([{ x1: 0, y1: 0, x2: 100, y2: 50 }])
+
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(camera.isCameraActive.value).toBe(false)
+    })
+
+    it('keeps camera running when continuousMode is false but drawBoxesAndUpdate returns false', async () => {
+      mockDrawBoxesAndUpdate.mockReturnValue(false)
+
+      const camera = useCamera({ settingsStore: { continuousMode: false } as any })
+      startCameraWithCanvas(camera)
+      await camera.startCamera()
+      expect(camera.isCameraActive.value).toBe(true)
+
+      const lastBoxesCallback = mockOnBoxes.mock.calls[0][0] as (boxes: unknown[]) => void
+      lastBoxesCallback([{ x1: 0, y1: 0, x2: 100, y2: 50 }])
+
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(camera.isCameraActive.value).toBe(true)
+      camera.stopCamera()
+    })
+
+    it('keeps camera running when continuousMode is true even when a plate is confirmed', async () => {
+      mockDrawBoxesAndUpdate.mockReturnValue(true)
+
+      const camera = useCamera({ settingsStore: { continuousMode: true } as any })
+      startCameraWithCanvas(camera)
+      await camera.startCamera()
+      expect(camera.isCameraActive.value).toBe(true)
+
+      const lastBoxesCallback = mockOnBoxes.mock.calls[0][0] as (boxes: unknown[]) => void
+      lastBoxesCallback([{ x1: 0, y1: 0, x2: 100, y2: 50 }])
+
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(camera.isCameraActive.value).toBe(true)
+      camera.stopCamera()
+    })
+  })
+
   describe('onUnmounted cleanup', () => {
     it('calls unsubscribe and stopCamera when component is unmounted', async () => {
       const unsubscribeSpy = vi.fn()

@@ -36,7 +36,7 @@ interface SettingsConfig {
   fastConfirmationTime: number
   /** When `true`, the camera continues scanning after each confirmed plate. */
   continuousMode: boolean
-  /** When `true`, plates whose text is already in history are silently skipped. */
+  /** When `true`, no alert sounds or vibrations fire for plates whose text already appears in history. */
   skipDuplicates: boolean
   /** Active theme mode; drives the `dark` class on `<html>` via `useTheme`. */
   theme: ThemeMode

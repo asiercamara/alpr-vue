@@ -184,13 +184,16 @@ export function useDetection(options?: UseDetectionOptions) {
    *
    * Two-pass approach:
    * 1. **Draw pass** — renders all best-quality boxes on the canvas with confidence labels.
-   * 2. **Validate & store pass** — for each box: runs `evaluatePlateQuality`; skips invalid
-   *    or duplicate plates (when `skipDuplicates` is on); calls `plateStore.addPlate` and
-   *    triggers `notifyDetection` on confirmation.
+   * 2. **Validate & store pass** — for each box: runs `evaluatePlateQuality`; calls
+   *    `plateStore.addPlate` and triggers `notifyDetection` on confirmation.
+   *    When `skipDuplicates` is on and the confirmed plate is already in history, the camera
+   *    is not signalled to stop (returns `false`) and feedback is suppressed. The new detection
+   *    is still stored so `bestDetections` can surface the highest-confidence variant.
    *
    * @param canvas - Canvas element to draw onto (must match video dimensions).
    * @param boxes - Raw detection boxes from the Worker.
-   * @returns `true` when at least one new plate was confirmed (signals camera to consider stopping).
+   * @returns `true` when at least one genuinely new plate was confirmed (signals camera to stop
+   *   when `continuousMode` is off). Returns `false` for duplicate confirmations even if stored.
    */
   const drawBoxesAndUpdate = (canvas: HTMLCanvasElement, boxes: DetectionBox[]): boolean => {
     let confirmedNew = false
@@ -241,7 +244,9 @@ export function useDetection(options?: UseDetectionOptions) {
       })
 
       if (shouldStop === true) {
-        confirmedNew = true
+        if (!isDuplicateText) {
+          confirmedNew = true
+        }
 
         if (settingsStore.feedbackEnabled && !isDuplicateText) {
           notifyDetection()

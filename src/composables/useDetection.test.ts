@@ -690,6 +690,145 @@ describe('useDetection', () => {
       vi.restoreAllMocks()
     })
 
+    it('returns false for duplicate confirmation when skipDuplicates is true (camera should not stop)', async () => {
+      vi.resetModules()
+      vi.doMock('@/stores/settingsStore', () => {
+        const store = {
+          feedbackEnabled: true,
+          confidenceThreshold: 0.7,
+          skipDuplicates: true,
+          continuousMode: true,
+          confirmationTimeMs: 3000,
+          fastConfirmationTimeMs: 1000,
+        }
+        return {
+          useSettingsStore: vi.fn(() => store),
+          DEFAULTS: {
+            feedbackEnabled: true,
+            confidenceThreshold: 0.7,
+            confirmationTime: 3,
+            fastConfirmationTime: 1,
+            continuousMode: true,
+            skipDuplicates: true,
+            theme: 'system',
+          },
+        }
+      })
+
+      const { useDetection: useDetectionFresh } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+
+      // Plate already confirmed in history (upload mode adds directly)
+      store.addPlate({
+        id: 'notstop_existing',
+        text: 'NST001',
+        confidence: 0.88,
+        plateText: { text: 'NST001', confidence: [0.88, 0.88, 0.88, 0.88, 0.88, 0.88] },
+        croppedImage: null,
+        boundingBox: null,
+      })
+
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      for (let i = 0; i < 5; i++) {
+        store.addPlate({
+          id: `notstop_cam_${i}`,
+          text: 'NST001',
+          confidence: 0.9,
+          plateText: { text: 'NST001', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        })
+      }
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
+
+      const detection = useDetectionFresh()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const result = detection.drawBoxesAndUpdate(canvas, [
+        makeBox({ plateText: { text: 'NST001', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }),
+      ])
+
+      // Must return false so useCamera does not stop when continuousMode is off
+      expect(result).toBe(false)
+      // And no feedback for the duplicate
+      expect(mockNotifyDetection).not.toHaveBeenCalled()
+
+      vi.doUnmock('@/stores/settingsStore')
+      vi.restoreAllMocks()
+    })
+
+    it('returns true for duplicate confirmation when skipDuplicates is false (camera stops normally)', async () => {
+      vi.resetModules()
+      vi.doMock('@/stores/settingsStore', () => {
+        const store = {
+          feedbackEnabled: true,
+          confidenceThreshold: 0.7,
+          skipDuplicates: false,
+          continuousMode: true,
+          confirmationTimeMs: 3000,
+          fastConfirmationTimeMs: 1000,
+        }
+        return {
+          useSettingsStore: vi.fn(() => store),
+          DEFAULTS: {
+            feedbackEnabled: true,
+            confidenceThreshold: 0.7,
+            confirmationTime: 3,
+            fastConfirmationTime: 1,
+            continuousMode: true,
+            skipDuplicates: true,
+            theme: 'system',
+          },
+        }
+      })
+
+      const { useDetection: useDetectionFresh } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+
+      store.addPlate({
+        id: 'stop_existing',
+        text: 'STP002',
+        confidence: 0.88,
+        plateText: { text: 'STP002', confidence: [0.88, 0.88, 0.88, 0.88, 0.88, 0.88] },
+        croppedImage: null,
+        boundingBox: null,
+      })
+
+      store.setMode('camera')
+
+      const now = Date.now()
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      for (let i = 0; i < 5; i++) {
+        store.addPlate({
+          id: `stop_cam_${i}`,
+          text: 'STP002',
+          confidence: 0.9,
+          plateText: { text: 'STP002', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+        })
+      }
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
+
+      const detection = useDetectionFresh()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const result = detection.drawBoxesAndUpdate(canvas, [
+        makeBox({ plateText: { text: 'STP002', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] } }),
+      ])
+
+      // skipDuplicates is off, so camera must stop even for duplicates
+      expect(result).toBe(true)
+
+      vi.doUnmock('@/stores/settingsStore')
+      vi.restoreAllMocks()
+    })
+
     it('selects longer text over shorter text in selectBestBoxes', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const detection = useDetection()

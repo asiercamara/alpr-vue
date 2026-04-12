@@ -42,7 +42,10 @@ export function postprocessOutput(
 
   if (returnConfidence) {
     const confidenceValues = getMaxValues(predictions, maxPlateSlots)
-    return { text: cleanedPlateText, confidence: confidenceValues }
+    return {
+      text: cleanedPlateText,
+      confidence: confidenceValues.slice(0, cleanedPlateText.length),
+    }
   }
 
   return cleanedPlateText
