@@ -400,7 +400,7 @@ describe('plateStore', () => {
       store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.8 }))
 
       store.updatePlateText('p1', 'ABC124')
-      const groupsAfter = store.plateGroups as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      const groupsAfter = store.plateGroups as any
       expect(Object.keys(groupsAfter)).toHaveLength(1)
     })
   })

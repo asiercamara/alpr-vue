@@ -37,10 +37,12 @@ export default [
     },
   },
   // Relajar reglas en archivos de test — los mocks legítimamente usan `any`
+  // y los componentes helper de test se definen múltiples por archivo
   {
     files: ['src/**/*.test.ts'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'vue/one-component-per-file': 'off',
     },
   },
   // Configuración para workers TypeScript (entorno WebWorker)
