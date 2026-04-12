@@ -1,0 +1,16 @@
+# Lista blanca de paquetes que pueden ejecutar scripts de build/install.
+# En este proyecto solo protobufjs (transitiva de onnxruntime-web) necesita postinstall.
+# Reemplaza onlyBuiltDependencies/ignoredBuiltDependencies (pnpm >= 10.26.0)
+allowBuilds:
+  protobufjs: true
+
+# No instalar versiones publicadas hace menos de 3 días.
+# Mitiga ataques de supply chain que aprovechan ventanas de publicación recientes.
+minimumReleaseAge: 4320
+
+# Falla si el nivel de confianza de un paquete baja respecto a versiones anteriores.
+trustPolicy: no-downgrade
+
+# Solo las dependencias directas pueden usar fuentes exóticas (git URLs, tarballs directos).
+# Las transitivas quedan bloqueadas.
+blockExoticSubdeps: true

@@ -123,9 +123,11 @@ pnpm format        # Ejecutar Prettier
 ```
 alpr_vue/
 ├── .github/workflows/
-│   └── ci.yml                          # Pipeline CI (lint, tipos, tests)
+│   └── ci.yml                          # Pipeline CI (lint, tipos, tests, auditoría de seguridad)
+├── .npmrc                              # Endurecimiento de instalación pnpm (engine-strict, ignore-dep-scripts)
 ├── index.html                          # Punto de entrada HTML
-├── package.json                        # Dependencias y scripts
+├── package.json                        # Dependencias, scripts y overrides de pnpm
+├── pnpm-workspace.yaml                 # Seguridad supply chain pnpm (allowBuilds, minimumReleaseAge, trustPolicy, blockExoticSubdeps)
 ├── vite.config.ts                      # Configuración de Vite
 ├── vitest.config.ts                    # Configuración de tests
 ├── tsconfig.json                       # Referencias de proyecto TypeScript
@@ -480,7 +482,8 @@ En esta implementación web, el modelo ha sido convertido a formato ONNX para op
 - **vue-i18n** v9+ para internacionalización (inglés / español)
 - **Vitest** + `@vue/test-utils` para testing (cobertura 95%+)
 - **ESLint** + **Prettier** + **Husky** para calidad de código
-- **GitHub Actions** pipeline CI (lint, tipos, cobertura en cada push/PR)
+- **GitHub Actions** pipeline CI (lint, tipos, cobertura y auditoría de seguridad en cada push/PR)
+- **pnpm** con endurecimiento de supply chain — `allowBuilds`, `minimumReleaseAge`, `trustPolicy`, `blockExoticSubdeps`
 - **ONNX Runtime Web** para inferencia de IA en el navegador
 
 ## Configuración Avanzada
@@ -509,6 +512,44 @@ El umbral de similitud Levenshtein para agrupar matrículas similares puede ajus
 ### Personalización de la Interfaz
 
 El proyecto utiliza Tailwind CSS v4, que puede personalizarse mediante `src/assets/main.css` o añadiendo clases utilitarias directamente en los componentes.
+
+## Seguridad
+
+El proyecto aplica varias capas de endurecimiento de supply chain usando las funcionalidades de seguridad integradas en pnpm.
+
+### Configuración
+
+| Fichero               | Setting                             | Efecto                                                                                                            |
+| --------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `.npmrc`              | `ignore-dep-scripts=true`           | Bloquea por defecto todos los scripts postinstall de las dependencias                                             |
+| `.npmrc`              | `engine-strict=true`                | Falla la instalación si la versión de Node.js no satisface `engines` en `package.json`                            |
+| `.npmrc`              | `strict-peer-dependencies=true`     | Trata los problemas de peer dependencies como errores                                                             |
+| `pnpm-workspace.yaml` | `allowBuilds: { protobufjs: true }` | Lista blanca de la única dependencia que necesita script de build (`protobufjs`, transitiva de `onnxruntime-web`) |
+| `pnpm-workspace.yaml` | `minimumReleaseAge: 4320`           | Impide instalar paquetes publicados hace menos de 3 días                                                          |
+| `pnpm-workspace.yaml` | `trustPolicy: no-downgrade`         | Falla si el nivel de confianza de un paquete disminuye respecto a su versión anterior                             |
+| `pnpm-workspace.yaml` | `blockExoticSubdeps: true`          | Bloquea que las dependencias transitivas usen repositorios git o URLs de tarball directas                         |
+| `package.json`        | `pnpm.overrides.vite: ">=8.0.5"`    | Fuerza una versión parcheada de vite en todo el grafo de dependencias                                             |
+| `package.json`        | `packageManager: "pnpm@10.33.0"`    | Fija la versión exacta de pnpm usada en el proyecto                                                               |
+
+### CI/CD
+
+El pipeline CI (`.github/workflows/ci.yml`) aplica dos comprobaciones adicionales en cada push y pull request:
+
+- **`pnpm install --frozen-lockfile`** — falla si `pnpm-lock.yaml` no está sincronizado con `package.json`
+- **`pnpm security:audit:ci`** — falla el pipeline ante cualquier vulnerabilidad de severidad alta en dependencias de producción
+
+### Ejecutar auditorías manualmente
+
+```bash
+pnpm security:audit      # todas las dependencias, falla en severidad alta
+pnpm security:audit:ci   # solo dependencias de producción, falla en severidad alta
+```
+
+### Referencias
+
+- [pnpm Supply Chain Security](https://pnpm.io/supply-chain-security)
+- [pnpm Settings](https://pnpm.io/settings)
+- [npm Security Best Practices](https://github.com/lirantal/npm-security-best-practices)
 
 ## Despliegue
 

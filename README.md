@@ -123,9 +123,11 @@ pnpm format        # Run Prettier
 ```
 alpr_vue/
 ├── .github/workflows/
-│   └── ci.yml                          # CI pipeline (lint, type check, tests)
+│   └── ci.yml                          # CI pipeline (lint, type check, tests, security audit)
+├── .npmrc                              # pnpm install hardening (engine-strict, ignore-dep-scripts)
 ├── index.html                          # Main HTML entry point
-├── package.json                        # Dependencies and scripts
+├── package.json                        # Dependencies, scripts, pnpm overrides
+├── pnpm-workspace.yaml                 # pnpm supply chain security (allowBuilds, minimumReleaseAge, trustPolicy, blockExoticSubdeps)
 ├── vite.config.ts                      # Vite configuration
 ├── vitest.config.ts                    # Test configuration
 ├── tsconfig.json                       # TypeScript project references
@@ -479,7 +481,8 @@ In this web implementation, the model has been converted to ONNX format to optim
 - **vue-i18n** v9+ for internationalization (English / Spanish)
 - **Vitest** + `@vue/test-utils` for testing (95%+ coverage)
 - **ESLint** + **Prettier** + **Husky** for code quality
-- **GitHub Actions** CI pipeline (lint, type check, coverage on every push/PR)
+- **GitHub Actions** CI pipeline (lint, type check, coverage, security audit on every push/PR)
+- **pnpm** supply chain hardening — `allowBuilds`, `minimumReleaseAge`, `trustPolicy`, `blockExoticSubdeps`
 - **ONNX Runtime Web** for in-browser AI inference
 
 ## Advanced Configuration
@@ -508,6 +511,44 @@ The Levenshtein similarity threshold for grouping similar plates can be adjusted
 ### Interface Customization
 
 The project uses Tailwind CSS v4, which can be customized via `src/assets/main.css` or by adding utility classes directly in components.
+
+## Security
+
+The project applies several layers of supply chain hardening using pnpm's built-in security features.
+
+### Configuration
+
+| File                  | Setting                             | Effect                                                                                                   |
+| --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `.npmrc`              | `ignore-dep-scripts=true`           | Blocks all dependency postinstall scripts by default                                                     |
+| `.npmrc`              | `engine-strict=true`                | Fails install if Node.js version doesn't satisfy `engines` in `package.json`                             |
+| `.npmrc`              | `strict-peer-dependencies=true`     | Treats peer dependency issues as errors                                                                  |
+| `pnpm-workspace.yaml` | `allowBuilds: { protobufjs: true }` | Whitelists the only dependency that needs a build script (`protobufjs`, transitive of `onnxruntime-web`) |
+| `pnpm-workspace.yaml` | `minimumReleaseAge: 4320`           | Prevents installing packages published less than 3 days ago                                              |
+| `pnpm-workspace.yaml` | `trustPolicy: no-downgrade`         | Fails if a package's trust level decreases compared to its previous release                              |
+| `pnpm-workspace.yaml` | `blockExoticSubdeps: true`          | Blocks transitive dependencies from using git repositories or direct tarball URLs                        |
+| `package.json`        | `pnpm.overrides.vite: ">=8.0.5"`    | Forces a patched version of vite across the entire dependency graph                                      |
+| `package.json`        | `packageManager: "pnpm@10.33.0"`    | Pins the exact pnpm version used in the project                                                          |
+
+### CI/CD
+
+The CI pipeline (`.github/workflows/ci.yml`) enforces two additional checks on every push and pull request:
+
+- **`pnpm install --frozen-lockfile`** — fails if `pnpm-lock.yaml` is not in sync with `package.json`
+- **`pnpm security:audit:ci`** — fails the pipeline on any high-severity vulnerability in production dependencies
+
+### Running audits manually
+
+```bash
+pnpm security:audit      # all dependencies, fails on high severity
+pnpm security:audit:ci   # production dependencies only, fails on high severity
+```
+
+### References
+
+- [pnpm Supply Chain Security](https://pnpm.io/supply-chain-security)
+- [pnpm Settings](https://pnpm.io/settings)
+- [npm Security Best Practices](https://github.com/lirantal/npm-security-best-practices)
 
 ## Deployment
 
