@@ -1,0 +1,56 @@
+---
+title: "Ajustar la Sensibilidad y el Tiempo de Detección"
+description: "Cómo configurar el umbral de confianza, el tiempo de confirmación, el modo continuo y el filtrado de duplicados en ALPR Vue para adaptarlo a tu entorno de escaneo."
+---
+
+Los ajustes de detección te permiten configurar lo selectiva y lo rápida que es ALPR Vue al reconocer matrículas. Si estás escaneando un aparcamiento concurrido puede que quieras capturar todo rápidamente; si necesitas alta precisión para un control de acceso puede que prefieras un umbral más estricto y un tiempo de confirmación más largo. Abre el **panel de ajustes** (icono de engranaje en el encabezado) y cambia cualquiera de las opciones a continuación para adaptarlo a tu caso de uso.
+
+<Tip>
+  Para aparcamientos concurridos o cámaras de tráfico, baja el umbral de confianza ligeramente (prueba con 0,6) y asegúrate de tener el modo continuo activado. Esta combinación maximiza la tasa de captura sin detener la cámara entre matrículas.
+</Tip>
+
+<AccordionGroup>
+  <Accordion title="Umbral de confianza (predeterminado: 0,7)">
+    El umbral de confianza es un control deslizante de 0 a 1. Establece la puntuación de confianza OCR media mínima que debe alcanzar una detección para que ALPR Vue la guarde en tu historial.
+
+    - **Valores bajos** (p. ej. 0,5–0,65): se guardan más matrículas, pero puede haber falsos positivos o caracteres mal leídos.
+    - **Valores altos** (p. ej. 0,85–1,0): solo se guardan matrículas claras y bien iluminadas, lo que reduce el ruido pero puede perder algunas detecciones.
+
+    El rango recomendado para la mayoría de situaciones es **0,6–0,8**. El valor predeterminado de 0,7 equilibra bien la precisión y la tasa de captura para condiciones de luz diurna típicas.
+  </Accordion>
+
+  <Accordion title="Tiempo de confirmación (predeterminado: 3 segundos)">
+    El tiempo de confirmación controla cuántos segundos debe aparecer la misma matrícula de forma continua en el encuadre de la cámara antes de que ALPR Vue la considere confirmada y la guarde.
+
+    - **Auméntalo** (p. ej. a 5 segundos) si quieres reducir las confirmaciones falsas de matrículas parcialmente visibles o en movimiento.
+    - **Redúcelo** (p. ej. a 1–2 segundos) si necesitas una respuesta más rápida, como en una entrada de vehículos donde los coches se detienen solo brevemente.
+
+    Este ajuste se aplica en el modo de detección normal. Cuando la confianza media de una detección es 0,8 o superior, se usa el tiempo de confirmación rápida en su lugar.
+  </Accordion>
+
+  <Accordion title="Tiempo de confirmación rápida (predeterminado: 1 segundo)">
+    Cuando la confianza OCR de ALPR Vue para una detección alcanza una media de 0,8 o superior, cambia a la ventana de confirmación rápida en lugar de la estándar. El valor predeterminado es 1 segundo.
+
+    Esto permite que las matrículas claramente visibles y bien iluminadas se confirmen casi al instante, mientras que las detecciones ambiguas siguen pasando por el período de confirmación completo. Puedes aumentar este valor si encuentras que las confirmaciones rápidas son demasiado apresuradas, o reducirlo más si tu entorno produce sistemáticamente lecturas de muy alta confianza.
+  </Accordion>
+
+  <Accordion title="Modo continuo (predeterminado: activado)">
+    Cuando el modo continuo está **activado**, la cámara sigue escaneando tras cada matrícula confirmada. ALPR Vue continuará detectando y confirmando nuevas matrículas sin ninguna interacción por tu parte.
+
+    Cuando el modo continuo está **desactivado**, la cámara se detiene automáticamente en cuanto se confirma la primera matrícula. Esto es útil para flujos de trabajo de captura de una sola matrícula — por ejemplo, registrar manualmente vehículos uno a uno en un puesto de control — donde quieres revisar cada matrícula antes de continuar.
+
+    Activa el modo continuo de nuevo en cualquier momento para reanudar el escaneo ininterrumpido.
+  </Accordion>
+
+  <Accordion title="Omitir duplicados (predeterminado: activado)">
+    Cuando omitir duplicados está **activado**, cualquier matrícula cuyo texto ya aparece en tu historial de detecciones actual se ignora silenciosamente. Esto mantiene tu historial limpio cuando el mismo vehículo permanece a la vista durante un período prolongado.
+
+    Desactívalo si necesitas registrar cada evento de detección independientemente de si esa matrícula ya se ha visto antes — por ejemplo, al registrar los tiempos de entrada y salida del mismo vehículo.
+  </Accordion>
+
+  <Accordion title="Feedback de audio / haptic (predeterminado: activado)">
+    Cuando el feedback está **activado**, ALPR Vue reproduce un breve pitido y activa una vibración corta (en dispositivos que lo admiten) cada vez que se confirma una matrícula. Esto te avisa de que se ha capturado una matrícula sin necesidad de mirar la pantalla.
+
+    Desactiva el feedback para un funcionamiento silencioso en entornos donde el sonido o la vibración sean molestos, como bibliotecas, oficinas o zonas residenciales tranquilas.
+  </Accordion>
+</AccordionGroup>

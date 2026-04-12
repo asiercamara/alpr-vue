@@ -1,0 +1,81 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "ALPR Vue",
+  "favicon": "/favicon.ico",
+  "logo": {
+    "light": "/logo.png",
+    "dark": "/logo.png"
+  },
+  "colors": {
+    "primary": "#7c3aed",
+    "light": "#a78bfa",
+    "dark": "#7c3aed"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/asiercamara/alpr-vue"
+    }
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "default": true,
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart", "browser-requirements"]
+          },
+          {
+            "group": "Using the App",
+            "pages": ["camera-mode", "upload-files", "viewing-results", "exporting-data"]
+          },
+          {
+            "group": "Settings",
+            "pages": ["settings-overview", "detection-settings", "appearance-language"]
+          },
+          {
+            "group": "How It Works",
+            "pages": ["how-it-works", "ai-models", "privacy"]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": ["troubleshooting", "faq"]
+          }
+        ]
+      },
+      {
+        "language": "es",
+        "groups": [
+          {
+            "group": "Primeros pasos",
+            "pages": ["es/introduction", "es/quickstart", "es/browser-requirements"]
+          },
+          {
+            "group": "Usar la aplicación",
+            "pages": [
+              "es/camera-mode",
+              "es/upload-files",
+              "es/viewing-results",
+              "es/exporting-data"
+            ]
+          },
+          {
+            "group": "Ajustes",
+            "pages": ["es/settings-overview", "es/detection-settings", "es/appearance-language"]
+          },
+          {
+            "group": "Cómo funciona",
+            "pages": ["es/how-it-works", "es/ai-models", "es/privacy"]
+          },
+          {
+            "group": "Solución de problemas",
+            "pages": ["es/troubleshooting", "es/faq"]
+          }
+        ]
+      }
+    ]
+  }
+}

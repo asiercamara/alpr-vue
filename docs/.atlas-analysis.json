@@ -1,0 +1,53 @@
+{
+  "projectType": "frontend",
+  "projectName": "ALPR Vue",
+  "projectDescription": "A browser-based automatic license plate recognition app that detects and reads vehicle plates in real time using your camera or uploaded images and videos — no server required.",
+  "theme": "almond",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["introduction", "quickstart", "browser-requirements"]
+      },
+      {
+        "group": "Using the App",
+        "pages": ["camera-mode", "upload-files", "viewing-results", "exporting-data"]
+      },
+      {
+        "group": "Settings",
+        "pages": ["settings-overview", "detection-settings", "appearance-language"]
+      },
+      {
+        "group": "How It Works",
+        "pages": ["how-it-works", "ai-models", "privacy"]
+      },
+      {
+        "group": "Troubleshooting",
+        "pages": ["troubleshooting", "faq"]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Real-time license plate detection via webcam",
+    "Upload images or videos for offline plate recognition",
+    "100% in-browser processing — no data leaves your device",
+    "Character-by-character confidence scores",
+    "Editable detected plate text",
+    "Export detections to CSV",
+    "Light, dark, and system theme modes",
+    "English and Spanish language support",
+    "Sample images and videos for quick demos",
+    "Works on mobile and desktop browsers"
+  ],
+  "publicApiSurface": [
+    "Camera mode: start/stop/flip camera",
+    "Upload mode: image and video file processing",
+    "Plate list: view, edit, copy, clear detections",
+    "CSV export: download all detections with text, confidence, timestamp, ID",
+    "Settings panel: confidence threshold, confirmation time, continuous mode, skip duplicates, theme, language, audio/haptic feedback",
+    "Sample gallery: 10 demo images and 3 demo videos"
+  ]
+}
