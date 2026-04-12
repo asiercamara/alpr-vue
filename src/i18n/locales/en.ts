@@ -13,6 +13,7 @@ export default {
     },
     nav: {
       settings: 'Settings',
+      docs: 'Documentation',
       help: 'How to use',
     },
   },
@@ -120,6 +121,9 @@ export default {
     step1: 'Enable the camera to start real-time scanning.',
     step2: 'Point the camera directly at the vehicle license plate.',
     step3: 'The system will automatically detect the text and save it to history.',
+    step4prefix: 'Tap',
+    step4suffix: 'to adjust detection sensitivity, appearance, and language.',
+    moreInfo: 'Open full documentation',
     close: 'Got it',
   },
   errors: {

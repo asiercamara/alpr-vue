@@ -13,6 +13,7 @@ export default {
     },
     nav: {
       settings: 'Configuración',
+      docs: 'Documentación',
       help: 'Cómo usar',
     },
   },
@@ -120,6 +121,9 @@ export default {
     step1: 'Activa la cámara para comenzar el escaneo en tiempo real.',
     step2: 'Apunta la cámara directamente a la matrícula del vehículo.',
     step3: 'El sistema detectará automáticamente el texto y lo guardará en el historial.',
+    step4prefix: 'Pulsa',
+    step4suffix: 'para ajustar la sensibilidad de detección, apariencia e idioma.',
+    moreInfo: 'Abrir documentación completa',
     close: 'Entendido',
   },
   errors: {

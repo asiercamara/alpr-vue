@@ -50,6 +50,16 @@
           >
             <IconSettings class="w-3 h-3" />
           </button>
+          <!-- Docs -->
+          <a
+            :href="docsUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors"
+            :title="t('app.nav.docs')"
+          >
+            <IconDocs class="w-3 h-3" />
+          </a>
           <button
             class="w-6 h-6 rounded-full border border-surface-300 dark:border-white/30 flex items-center justify-center text-surface-400 dark:text-white/50 hover:text-brand-500 hover:border-brand-500 transition-colors text-xs font-bold"
             :title="t('app.nav.help')"
@@ -99,14 +109,19 @@ import SettingsSheet from '@/components/ui/SettingsSheet.vue'
 import BottomDrawer from '@/components/ui/BottomDrawer.vue'
 import ToastNotification from '@/components/ui/ToastNotification.vue'
 import IconSettings from '@/components/icons/IconSettings.vue'
+import IconDocs from '@/components/icons/IconDocs.vue'
 import { useAppStore } from '@/stores/appStore'
 import { useTheme } from '@/composables/useTheme'
 import { useLocale } from '@/composables/useLocale'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const appStore = useAppStore()
 const showHelp = ref(false)
 const showSettings = ref(false)
+
+const docsUrl = computed(() =>
+  locale.value === 'es' ? 'https://alpr-vue-docs.asier.uk/es' : 'https://alpr-vue-docs.asier.uk/',
+)
 
 useTheme()
 useLocale()
