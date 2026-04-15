@@ -120,7 +120,9 @@ const showHelp = ref(false)
 const showSettings = ref(false)
 
 const docsUrl = computed(() =>
-  locale.value === 'es' ? 'https://alpr-vue-docs.asier.uk/es' : 'https://alpr-vue-docs.asier.uk/',
+  locale.value === 'es'
+    ? 'https://alpr-vue-docs.asier.uk/es/introduction'
+    : 'https://alpr-vue-docs.asier.uk/',
 )
 
 useTheme()
