@@ -1,6 +1,6 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](./README.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](./README.es.md)
-[![docs](https://img.shields.io/badge/docs-alpr--vue-6366f1.svg)](https://alpr-vue-docs.asier.uk/es)
+[![docs](https://img.shields.io/badge/docs-alpr--vue-6366f1.svg)](https://alpr-vue-docs.asier.uk/es/introduction)
 [![deepwiki](https://img.shields.io/badge/wiki-deepwiki-0ea5e9.svg)](https://deepwiki.com/asiercamara/alpr-vue)
 [![github](https://img.shields.io/badge/repo-GitHub-181717.svg?logo=github)](https://github.com/asiercamara/alpr-vue)
 

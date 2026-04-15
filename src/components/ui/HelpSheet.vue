@@ -101,7 +101,9 @@ import IconSettings from '@/components/icons/IconSettings.vue'
 const { t, locale } = useI18n()
 
 const docsUrl = computed(() =>
-  locale.value === 'es' ? 'https://alpr-vue-docs.asier.uk/es' : 'https://alpr-vue-docs.asier.uk/',
+  locale.value === 'es'
+    ? 'https://alpr-vue-docs.asier.uk/es/introduction'
+    : 'https://alpr-vue-docs.asier.uk/',
 )
 
 defineProps<{
