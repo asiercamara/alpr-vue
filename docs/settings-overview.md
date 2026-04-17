@@ -1,0 +1,51 @@
+---
+title: 'Configuring ALPR Vue Settings'
+description: 'A guide to all eight settings in ALPR Vue: detection sensitivity, confirmation timing, continuous mode, duplicate filtering, theme, language, and feedback.'
+---
+
+ALPR Vue gives you full control over how plates are detected, how the interface looks, and what language it uses. All settings live in a single panel that you open directly from the app header, and every change you make is saved automatically — no save button needed.
+
+## Opening settings
+
+Tap the **gear icon (⚙️)** in the app header to open the settings panel. The panel slides up from the bottom of the screen and stays open until you dismiss it.
+
+## Settings categories
+
+The settings panel covers three areas:
+
+<CardGroup cols="3">
+  <Card title="Detection" icon="sliders" href="/detection-settings">
+    Confidence threshold, confirmation timing, continuous mode, duplicate filtering, and audio/haptic feedback.
+  </Card>
+  <Card title="Appearance" icon="sun" href="/appearance-language">
+    Switch between light, dark, and system theme modes.
+  </Card>
+  <Card title="Language" icon="language" href="/appearance-language">
+    Choose English, Spanish, or automatic detection from your browser.
+  </Card>
+</CardGroup>
+
+## Settings persistence
+
+Every time you change a setting, ALPR Vue saves it automatically to your browser's `localStorage` under the key `alpr-settings`. Your preferences survive page reloads and browser restarts without any extra steps on your part.
+
+<Note>
+  Settings are stored locally in your browser. If you clear your browser's site data or use private/incognito mode with strict storage settings, all settings will reset to their defaults.
+</Note>
+
+## Resetting settings
+
+You can reset any individual setting back to its default using the reset button shown next to that setting in the panel. To restore every setting at once, tap **Reset all** at the bottom of the settings panel.
+
+## All settings at a glance
+
+| Setting                 | Default   | What it controls                                                                 |
+| ----------------------- | --------- | -------------------------------------------------------------------------------- |
+| Audio / Haptic Feedback | On        | Plays a beep and vibrates when a plate is confirmed                              |
+| Confidence Threshold    | 0.7       | Minimum mean OCR confidence (0–1) required to save a detection                   |
+| Confirmation Time       | 3 seconds | How long the same plate must be detected continuously before being confirmed     |
+| Fast Confirmation Time  | 1 second  | Shorter confirmation window for high-confidence detections (mean ≥ 0.8)          |
+| Continuous Mode         | On        | Keeps the camera scanning after each confirmed plate                             |
+| Skip Duplicates         | On        | Silently skips plates already present in your detection history                  |
+| Theme                   | System    | Controls whether the interface uses light, dark, or your OS preference           |
+| Language                | Auto      | Sets the display language (English, Spanish, or auto-detected from your browser) |

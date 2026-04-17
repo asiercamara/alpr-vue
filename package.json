@@ -15,6 +15,10 @@
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src",
     "prepare": "husky",
+    "dev:docs": "vitepress dev docs",
+    "build:docs": "vitepress build docs",
+    "build:all": "pnpm build && pnpm build:docs",
+    "preview:docs": "vitepress preview docs",
     "deploy:surge": "bash ./scripts/deploy-surge.sh",
     "security:audit": "pnpm audit --audit-level high",
     "security:audit:ci": "pnpm audit --audit-level high --prod"
@@ -27,6 +31,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@heroicons/vue": "^2.2.0",
     "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.3",
@@ -44,6 +49,7 @@
     "typescript-eslint": "^8.58.1",
     "vite": "^8.0.8",
     "vite-plugin-vue-devtools": "^8.1.1",
+    "vitepress": "^1.6.4",
     "vitest": "^4.1.3",
     "vue-tsc": "^3.2.6"
   },
@@ -52,7 +58,9 @@
   },
   "pnpm": {
     "overrides": {
-      "vite": ">=8.0.5"
+      "vite": ">=8.0.5",
+      "vitepress>vite": "^5.4 || ^6.0",
+      "protobufjs": ">=7.5.5"
     }
   },
   "lint-staged": {

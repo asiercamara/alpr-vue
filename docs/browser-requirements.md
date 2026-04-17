@@ -1,0 +1,49 @@
+---
+title: 'Supported Browsers and Device Requirements'
+description: 'What browsers and devices work with ALPR Vue, including WebAssembly, OffscreenCanvas, and secure context requirements for camera access.'
+---
+
+ALPR Vue runs AI models directly in your browser using **WebAssembly** — a technology that lets compiled code execute at near-native speed without any plugins. It also uses **OffscreenCanvas** to process video frames in a background thread, keeping the interface smooth while detection runs. Both features must be available in your browser for the app to work.
+
+## Browser compatibility
+
+| Browser                | Desktop      | Mobile       |
+| ---------------------- | ------------ | ------------ |
+| Chrome                 | ✅ Supported | ✅ Supported |
+| Edge                   | ✅ Supported | ✅ Supported |
+| Firefox                | ✅ Supported | ✅ Supported |
+| Safari 16+             | ✅ Supported | ✅ Supported |
+| Safari (older than 16) | ⚠️ Partial   | ⚠️ Partial   |
+
+<Warning>
+  Browsers that do not support **WebAssembly** or **OffscreenCanvas** will not run ALPR Vue. This includes Internet Explorer and older versions of Safari. If the app fails to load or the models never initialize, check that your browser is up to date.
+</Warning>
+
+## Required browser features
+
+ALPR Vue depends on three browser capabilities:
+
+- **WebAssembly** — runs the YOLO plate detection and OCR models locally, inside your browser
+- **OffscreenCanvas** — processes video frames off the main thread so the UI stays responsive
+- **Secure context (HTTPS or localhost)** — required by browsers before they grant camera access
+
+<Note>
+  Camera access requires a **secure context** — the page must be served over HTTPS or from localhost. If you open ALPR Vue over a plain HTTP connection, the camera button will not work. Image and video upload still work without a secure context.
+</Note>
+
+## Recommended device specs
+
+ALPR Vue runs on a wide range of devices, but performance depends on processing power:
+
+- **Smartphone**: Any modern Android or iOS device (released roughly in the last four years) with hardware acceleration enabled in the browser works well
+- **Desktop or laptop**: Any modern computer handles the models comfortably; hardware-accelerated graphics help maintain smooth frame processing
+- **Hardware acceleration**: Enable GPU acceleration in your browser settings if available — this significantly improves model inference speed on both desktop and mobile
+
+## Node.js requirements (self-hosting only)
+
+If you are building or self-hosting ALPR Vue, your environment needs:
+
+- **Node.js** `^20.19.0` or `>=22.12.0`
+- **pnpm** as the package manager
+
+These requirements apply only to the build environment, not to users accessing the deployed app.
