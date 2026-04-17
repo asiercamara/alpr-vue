@@ -5,6 +5,27 @@ description: "Use ALPR Vue's live camera mode to detect license plates in real t
 
 Camera mode turns your device's camera into a live license plate scanner. Point it at any vehicle and ALPR Vue automatically finds and reads the plate — no button press required. Use this mode when you need to capture plates on the spot, such as logging vehicles at an entrance, checking a fleet, or quickly reading a plate from a distance.
 
+## Camera state overview
+
+This state diagram shows the main camera lifecycle while live scanning is active.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> RequestingPermission: Start Camera
+  RequestingPermission --> CameraActive: Permission granted
+  RequestingPermission --> CameraError: Permission denied or no device
+  CameraActive --> Scanning: First frame arrives
+  Scanning --> PlateVisible: Plate detected in frame
+  PlateVisible --> Confirmed: Detection stays stable long enough
+  PlateVisible --> Scanning: Plate leaves frame
+  Confirmed --> AutoStopped: Continuous mode off
+  Confirmed --> Scanning: Continuous mode on
+  AutoStopped --> Idle: User restarts camera
+  CameraActive --> Idle: Stop Camera
+  CameraError --> Idle: Retry
+```
+
 ## Starting the camera
 
 <Steps>

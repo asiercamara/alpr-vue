@@ -118,6 +118,23 @@ pnpm lint          # Run ESLint
 pnpm format        # Run Prettier
 ```
 
+## Documentation
+
+ALPR Vue ships with a separate documentation site built with **VitePress** under `docs/`.
+
+- Main VitePress config: `docs/.vitepress/config.ts`
+- Custom docs theme and Mermaid integration: `docs/.vitepress/theme/`
+- Mermaid support: `vitepress-mermaid-renderer` + `mermaid`
+- Docs commands:
+
+```bash
+pnpm dev:docs
+pnpm build:docs
+pnpm preview:docs
+```
+
+The docs theme includes custom Mermaid defaults for initial framing, toolbar visibility, and fullscreen fit. For contributor-oriented docs details, see `docs/README.md` and `docs/README.es.md`.
+
 ## Project Structure
 
 ```

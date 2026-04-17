@@ -118,6 +118,23 @@ pnpm lint          # Ejecutar ESLint
 pnpm format        # Ejecutar Prettier
 ```
 
+## Documentación
+
+ALPR Vue incluye un sitio de documentación independiente construido con **VitePress** dentro de `docs/`.
+
+- Configuración principal de VitePress: `docs/.vitepress/config.ts`
+- Tema personalizado e integración Mermaid: `docs/.vitepress/theme/`
+- Soporte Mermaid: `vitepress-mermaid-renderer` + `mermaid`
+- Comandos de documentación:
+
+```bash
+pnpm dev:docs
+pnpm build:docs
+pnpm preview:docs
+```
+
+El tema de documentación incluye ajustes propios para Mermaid: encuadre inicial, visibilidad de la toolbar y ajuste al ancho en fullscreen. Para más detalles orientados a contribución, consulta `docs/README.md` y `docs/README.es.md`.
+
 ## Estructura del Proyecto
 
 ```

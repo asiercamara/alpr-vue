@@ -5,6 +5,27 @@ description: 'Usa el modo cámara de ALPR Vue para detectar matrículas en tiemp
 
 El modo cámara convierte la cámara de tu dispositivo en un escáner de matrículas en vivo. Apúntala hacia cualquier vehículo y ALPR Vue encuentra y lee la matrícula automáticamente, sin necesidad de pulsar ningún botón. Usa este modo cuando necesites capturar matrículas sobre el terreno, como registrar vehículos en una entrada, revisar una flota o leer rápidamente una matrícula a distancia.
 
+## Resumen de estados de la camara
+
+Este diagrama de estados muestra el ciclo principal de la camara mientras el escaneo en vivo esta activo.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> RequestingPermission: Iniciar camara
+  RequestingPermission --> CameraActive: Permiso concedido
+  RequestingPermission --> CameraError: Permiso denegado o sin dispositivo
+  CameraActive --> Scanning: Llega el primer fotograma
+  Scanning --> PlateVisible: Se detecta una matricula
+  PlateVisible --> Confirmed: La deteccion se mantiene estable
+  PlateVisible --> Scanning: La matricula sale del encuadre
+  Confirmed --> AutoStopped: Modo continuo desactivado
+  Confirmed --> Scanning: Modo continuo activado
+  AutoStopped --> Idle: El usuario reinicia la camara
+  CameraActive --> Idle: Detener camara
+  CameraError --> Idle: Reintentar
+```
+
 ## Iniciar la cámara
 
 <Steps>
