@@ -100,11 +100,7 @@ import IconSettings from '@/components/icons/IconSettings.vue'
 
 const { t, locale } = useI18n()
 
-const docsUrl = computed(() =>
-  locale.value === 'es'
-    ? 'https://alpr-vue-docs.asier.uk/es/introduction'
-    : 'https://alpr-vue-docs.asier.uk/',
-)
+const docsUrl = computed(() => (locale.value === 'es' ? '/docs/es/introduction' : '/docs/'))
 
 defineProps<{
   modelValue: boolean

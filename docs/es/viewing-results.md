@@ -1,0 +1,67 @@
+---
+title: 'Ver y Editar las Matrículas Detectadas'
+description: 'Consulta el historial de detecciones, inspecciona las puntuaciones de confianza por carácter, corrige matrículas mal leídas, copia el texto al portapapeles y limpia los resultados cuando hayas terminado.'
+---
+
+Cada matrícula que detecta la aplicación se guarda en el panel **Matrículas detectadas**, que aparece debajo de la previsualización de la cámara (o junto a ella en pantallas más grandes). Desde aquí puedes revisar lo que se ha encontrado, inspeccionar la confianza del modelo carácter por carácter, corregir errores y copiar o borrar resultados según necesites.
+
+## Historial de matrículas
+
+El historial muestra todas las detecciones confirmadas ordenadas con la más reciente en la parte superior. Cada entrada de la lista muestra:
+
+- **Texto de la matrícula** — la cadena alfanumérica reconocida, con una tipografía monoespaciada de matrícula.
+- **Anillo de confianza** — un indicador circular que muestra la confianza OCR global de esa detección.
+- **Marca de tiempo** — la fecha y hora en que se detectó la matrícula.
+
+Un contador junto al encabezado "Matrículas detectadas" indica cuántas matrículas hay en la lista.
+
+## Vista detallada de la matrícula
+
+Haz clic o toca cualquier matrícula de la lista para abrir su vista detallada. El modal muestra:
+
+- **Imagen recortada de la matrícula** — un primer plano de la región de la matrícula detectada, extraída de tu imagen o fotograma de vídeo.
+- **Texto de la matrícula** — caracteres grandes y claramente legibles en la parte superior del modal.
+- **Confianza global** — la confianza OCR media de todos los caracteres, mostrada como porcentaje junto a un anillo de confianza.
+- **Barras de confianza carácter por carácter** — una barra por carácter que muestra exactamente la confianza del modelo para esa letra o dígito (consulta la nota a continuación para el significado de los colores).
+- **Marca de tiempo de la detección** — la fecha y hora exactas de la detección.
+- **ID de detección** — un identificador único corto para el registro.
+
+<Info>
+  Las barras de confianza están codificadas por colores según el nivel de precisión: **verde** para confianza muy alta (≥ 90%), **verde claro** para alta (≥ 75%), **amarillo** para media (≥ 60%), **naranja** para baja (≥ 45%) y **rojo** para confianza muy baja. Los caracteres en rojo son los que más probablemente contienen una lectura errónea.
+</Info>
+
+## Editar una matrícula
+
+Si el modelo ha leído mal un carácter, puedes corregirlo directamente en la aplicación.
+
+<Steps>
+  <Step title="Abre el detalle de la matrícula">
+    Haz clic o toca la matrícula que quieres editar en el historial.
+  </Step>
+  <Step title="Haz clic en Editar">
+    Haz clic en el botón **Editar** (icono de lápiz) junto al texto de la matrícula en el modal.
+  </Step>
+  <Step title="Corrige el texto">
+    El texto de la matrícula se convierte en un campo editable. Escribe tus correcciones. El campo acepta hasta 12 caracteres.
+  </Step>
+  <Step title="Guarda los cambios">
+    Haz clic en el botón **Guardar** (marca de verificación) o pulsa **Intro** para confirmar. Haz clic en **Cancelar** o pulsa **Escape** para descartar.
+  </Step>
+</Steps>
+
+## Copiar al portapapeles
+
+Para copiar el texto de una matrícula sin editarla:
+
+1. Abre el modal de detalle de la matrícula.
+2. Haz clic en el botón **Copiar** (icono de portapapeles) junto al texto de la matrícula.
+
+El texto se copia al portapapeles y está listo para pegar en cualquier lugar.
+
+## Borrar el historial
+
+Para eliminar todas las detecciones de una vez, haz clic en el botón **Borrar** en el encabezado del panel de historial. Esto elimina inmediatamente todas las matrículas de la lista. Esta acción no se puede deshacer, así que exporta tus datos primero si necesitas conservarlos.
+
+## Notificaciones emergentes
+
+Cada vez que la aplicación confirma una nueva detección de matrícula, aparece brevemente una notificación en la parte inferior de la pantalla con el texto de la matrícula reconocida. Desaparece automáticamente al cabo de un momento. Esto te permite saber que se ha capturado una matrícula sin necesidad de mirar el historial.

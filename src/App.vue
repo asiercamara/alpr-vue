@@ -119,11 +119,7 @@ const appStore = useAppStore()
 const showHelp = ref(false)
 const showSettings = ref(false)
 
-const docsUrl = computed(() =>
-  locale.value === 'es'
-    ? 'https://alpr-vue-docs.asier.uk/es/introduction'
-    : 'https://alpr-vue-docs.asier.uk/',
-)
+const docsUrl = computed(() => (locale.value === 'es' ? '/docs/es/introduction' : '/docs/'))
 
 useTheme()
 useLocale()

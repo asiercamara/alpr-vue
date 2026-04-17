@@ -16,6 +16,10 @@ dist/
 dist-ssr/
 *.local
 
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
+
 # Testing
 coverage/
 __screenshots__/

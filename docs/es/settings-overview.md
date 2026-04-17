@@ -1,0 +1,51 @@
+---
+title: 'Configurar los Ajustes de ALPR Vue'
+description: 'Guía de los ocho ajustes de ALPR Vue: sensibilidad de detección, tiempo de confirmación, modo continuo, filtrado de duplicados, tema, idioma y feedback.'
+---
+
+ALPR Vue te da control total sobre cómo se detectan las matrículas, cómo se ve la interfaz y en qué idioma se muestra. Todos los ajustes se encuentran en un único panel que abres directamente desde el encabezado de la aplicación, y cada cambio que hagas se guarda automáticamente — sin botón de guardar.
+
+## Abrir los ajustes
+
+Toca el **icono de engranaje (⚙️)** en el encabezado de la aplicación para abrir el panel de ajustes. El panel se desliza desde la parte inferior de la pantalla y permanece abierto hasta que lo cierras.
+
+## Categorías de ajustes
+
+El panel de ajustes cubre tres áreas:
+
+<CardGroup cols="3">
+  <Card title="Detección" icon="sliders" href="/es/detection-settings">
+    Umbral de confianza, tiempo de confirmación, modo continuo, filtrado de duplicados y feedback de audio/haptic.
+  </Card>
+  <Card title="Apariencia" icon="sun" href="/es/appearance-language">
+    Alterna entre los modos de tema claro, oscuro y del sistema.
+  </Card>
+  <Card title="Idioma" icon="language" href="/es/appearance-language">
+    Elige inglés, español o detección automática según tu navegador.
+  </Card>
+</CardGroup>
+
+## Persistencia de los ajustes
+
+Cada vez que cambias un ajuste, ALPR Vue lo guarda automáticamente en el `localStorage` de tu navegador bajo la clave `alpr-settings`. Tus preferencias sobreviven a recargas de página y reinicios del navegador sin que tengas que hacer nada más.
+
+<Note>
+  Los ajustes se almacenan localmente en tu navegador. Si borras los datos del sitio en tu navegador o usas el modo privado/incógnito con ajustes de almacenamiento estrictos, todos los ajustes volverán a sus valores predeterminados.
+</Note>
+
+## Restablecer los ajustes
+
+Puedes restablecer cualquier ajuste individual a su valor predeterminado usando el botón de reinicio que aparece junto a ese ajuste en el panel. Para restaurar todos los ajustes a la vez, toca **Restablecer todo** en la parte inferior del panel de ajustes.
+
+## Todos los ajustes de un vistazo
+
+| Ajuste                        | Predeterminado | Qué controla                                                                                   |
+| ----------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| Feedback de audio / haptic    | Activado       | Reproduce un pitido y vibra cuando se confirma una matrícula                                   |
+| Umbral de confianza           | 0,7            | Confianza OCR media mínima (0–1) requerida para guardar una detección                          |
+| Tiempo de confirmación        | 3 segundos     | Cuánto tiempo debe detectarse la misma matrícula de forma continua antes de confirmarse        |
+| Tiempo de confirmación rápida | 1 segundo      | Ventana de confirmación más corta para detecciones de alta confianza (media ≥ 0,8)             |
+| Modo continuo                 | Activado       | Mantiene la cámara escaneando tras cada matrícula confirmada                                   |
+| Omitir duplicados             | Activado       | Ignora silenciosamente las matrículas que ya están en tu historial de detecciones              |
+| Tema                          | Sistema        | Controla si la interfaz usa modo claro, oscuro o la preferencia del sistema operativo          |
+| Idioma                        | Auto           | Establece el idioma de la interfaz (inglés, español o detección automática desde el navegador) |

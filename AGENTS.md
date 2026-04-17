@@ -186,3 +186,15 @@ chmod +x scripts/deploy-surge.sh        # first time only
 ```
 
 The script runs `pnpm build` first, then calls `surge ./dist <domain>`. It auto-detects whether `surge` is installed globally or falls back to `npx`/`pnpm dlx`. Requires a Surge account (`surge login`).
+
+### Docs
+
+Docs built with VitePress, served at `/docs/` within the same app. Output goes to `dist/docs/`.
+
+```bash
+pnpm dev:docs      # VitePress dev server (docs only)
+pnpm build:docs    # builds docs into dist/docs/
+pnpm build:all     # builds app first, then docs into dist/docs/
+```
+
+Run `pnpm build:all` for production — app build runs first (clears `dist/`), docs build follows and writes into `dist/docs/`.
