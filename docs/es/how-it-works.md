@@ -5,6 +5,30 @@ description: 'Una explicación accesible del canal de IA en dos etapas que detec
 
 ALPR Vue usa dos modelos de IA que se ejecutan localmente en tu navegador — uno para encontrar matrículas en la imagen y un segundo para leer los caracteres de cada matrícula. Ambos modelos se ejecutan completamente en tu dispositivo, por lo que ningún dato de imagen se envía nunca a un servidor. Cada fotograma de tu cámara o archivo cargado pasa automáticamente por este canal de procesamiento.
 
+## Arquitectura de un vistazo
+
+Este diagrama de secuencia muestra como se mueve un fotograma por la aplicacion desde la captura hasta el resultado guardado.
+
+```mermaid
+sequenceDiagram
+  participant User as Usuario
+  participant Source as Camara o carga
+  participant Bitmap as createImageBitmap
+  participant Pipeline as processFrame
+  participant Worker as Web Worker
+  participant Plates as plateStore
+  participant UI as Historial y modal
+
+  User->>Source: Inicia la camara o selecciona un archivo
+  Source->>Bitmap: Entrega el siguiente fotograma
+  Bitmap->>Pipeline: Crea el image bitmap
+  Pipeline->>Worker: Ejecuta deteccion y OCR
+  Worker-->>Pipeline: Devuelve cajas, texto y confianza
+  Pipeline->>Plates: Confirma y agrupa la deteccion
+  Plates-->>UI: Actualiza matriculas y mejor resultado
+  UI-->>User: Muestra historial y vista detallada
+```
+
 ## El canal de procesamiento
 
 <Steps>

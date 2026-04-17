@@ -99,7 +99,13 @@ export default defineConfig({
   base: '/docs/',
   cleanUrls: true,
 
-  srcExclude: ['**/README.md', '**/CONTRIBUTING.md', '**/AGENTS.md', '**/LICENSE'],
+  srcExclude: [
+    '**/README.md',
+    '**/README.es.md',
+    '**/CONTRIBUTING.md',
+    '**/AGENTS.md',
+    '**/LICENSE',
+  ],
 
   locales: {
     root: {

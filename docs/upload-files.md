@@ -30,6 +30,30 @@ Upload mode lets you run license plate recognition on files you already have —
   </Step>
 </Steps>
 
+## Upload processing flow
+
+This flowchart shows how ALPR Vue handles images and videos after you choose a file.
+
+```mermaid
+flowchart TD
+  A[Select a file] --> B{File type}
+  B -->|Image| C[Load one image]
+  B -->|Video| D[Open video]
+  C --> E[Create image bitmap]
+  D --> F[Extract frames]
+  F --> E
+  E --> G[Run detection and OCR]
+  G --> H{Valid plate found}
+  H -->|Yes| I[Group and save to history]
+  H -->|No| J[Skip result]
+  I --> K[Update progress and results]
+  J --> K
+  K --> L{More frames left}
+  L -->|Yes| F
+  L -->|No| M[Finish analysis]
+  C --> M
+```
+
 ## Processing progress
 
 While a file is being analyzed, a status overlay is displayed on the preview area. It moves through three states:

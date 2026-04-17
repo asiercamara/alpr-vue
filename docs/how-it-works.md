@@ -5,6 +5,30 @@ description: 'A plain-English explanation of the two-stage AI pipeline that dete
 
 ALPR Vue uses two AI models running locally in your browser — one to find license plates in the image, and a second to read the characters on each plate. Both models run entirely on your device, so no image data is ever sent to a server. Every frame from your camera or uploaded file passes through this pipeline automatically.
 
+## Architecture at a glance
+
+This sequence diagram shows how a frame moves through the app from capture to a saved result.
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Source as Camera or Upload
+  participant Bitmap as createImageBitmap
+  participant Pipeline as processFrame
+  participant Worker as Web Worker
+  participant Plates as plateStore
+  participant UI as History and modal
+
+  User->>Source: Start camera or select a file
+  Source->>Bitmap: Provide the next frame
+  Bitmap->>Pipeline: Create image bitmap
+  Pipeline->>Worker: Run detection and OCR
+  Worker-->>Pipeline: Return boxes, text, and confidence
+  Pipeline->>Plates: Confirm and group the detection
+  Plates-->>UI: Update saved plates and best result
+  UI-->>User: Show history item and detail view
+```
+
 ## The processing pipeline
 
 <Steps>

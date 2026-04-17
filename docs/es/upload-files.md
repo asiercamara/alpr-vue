@@ -30,6 +30,30 @@ El modo de carga te permite ejecutar el reconocimiento de matrículas sobre arch
   </Step>
 </Steps>
 
+## Flujo de procesamiento de archivos
+
+Este diagrama muestra como ALPR Vue gestiona imagenes y videos despues de elegir un archivo.
+
+```mermaid
+flowchart TD
+  A[Selecciona un archivo] --> B{Tipo de archivo}
+  B -->|Imagen| C[Carga una imagen]
+  B -->|Video| D[Abre el video]
+  C --> E[Crea el image bitmap]
+  D --> F[Extrae fotogramas]
+  F --> E
+  E --> G[Ejecuta deteccion y OCR]
+  G --> H{Hay una matricula valida}
+  H -->|Si| I[Agrupa y guarda en el historial]
+  H -->|No| J[Omite el resultado]
+  I --> K[Actualiza progreso y resultados]
+  J --> K
+  K --> L{Quedan mas fotogramas}
+  L -->|Si| F
+  L -->|No| M[Finaliza el analisis]
+  C --> M
+```
+
 ## Progreso del procesamiento
 
 Mientras se analiza un archivo, se muestra una superposición de estado en el área de previsualización. Pasa por tres fases:

@@ -9,6 +9,28 @@ The detection settings let you tune how selective and how fast ALPR Vue is when 
   For busy car parks or traffic cameras, lower the confidence threshold slightly (try 0.6) and make sure continuous mode is on. This combination maximises capture rate without stopping the camera between plates.
 </Tip>
 
+## Detection timing logic
+
+This diagram shows how a candidate plate moves through validation, confirmation, duplicate filtering, and camera behavior.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Candidate
+  Candidate --> Rejected: Below confidence or quality rules
+  Candidate --> StandardWindow: Meets base threshold
+  StandardWindow --> FastWindow: Mean confidence >= 0.8
+  StandardWindow --> Confirmed: Seen for confirmation time
+  FastWindow --> Confirmed: Seen for fast confirmation time
+  Confirmed --> DuplicateCheck: Compare with history
+  DuplicateCheck --> SaveResult: New plate or better representative
+  DuplicateCheck --> ContinueScanning: Duplicate skipped
+  SaveResult --> StopCamera: Continuous mode off and new plate
+  SaveResult --> ContinueScanning: Continuous mode on
+  Rejected --> Candidate: Better frame arrives
+  ContinueScanning --> Candidate: Next detection
+  StopCamera --> [*]
+```
+
 <AccordionGroup>
   <Accordion title="Confidence threshold (default: 0.7)">
     The confidence threshold is a slider from 0 to 1. It sets the minimum mean OCR confidence score a detection must reach before ALPR Vue saves it to your history.

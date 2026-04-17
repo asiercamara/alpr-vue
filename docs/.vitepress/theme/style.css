@@ -435,3 +435,57 @@ details[open] .doc-accordion-chevron {
 .doc-accordion-body > :last-child {
   margin-bottom: 0;
 }
+
+/* ── Mermaid diagrams ───────────────────────────── */
+.vp-doc .mermaid-container {
+  margin: 24px 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+
+.vp-doc .mermaid-container .diagram-wrapper {
+  min-height: 22rem;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vp-doc .mermaid-container .controls {
+  border: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc .mermaid-container .mermaid {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.vp-doc .mermaid-container .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.vp-doc .mermaid-container.dialog-fullscreen-active .mermaid {
+  width: 100%;
+}
+
+.vp-doc .mermaid-container.dialog-fullscreen-active .mermaid svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: calc(88vh - 140px);
+}
+
+@media (max-width: 768px) {
+  .vp-doc .mermaid-container {
+    max-height: none;
+  }
+
+  .vp-doc .mermaid-container .diagram-wrapper {
+    min-height: 18rem;
+    padding: 12px;
+  }
+}

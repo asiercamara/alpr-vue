@@ -5,6 +5,35 @@ description: 'Detecta tu primera matrícula en minutos — abre la aplicación, 
 
 Esta guía te lleva paso a paso para detectar tu primera matrícula con ALPR Vue. Al final tendrás la cámara en funcionamiento, una matrícula guardada en el historial y sabrás cómo inspeccionar y copiar el resultado.
 
+## Resumen visual del flujo
+
+Este diagrama muestra las dos formas principales de probar ALPR Vue por primera vez: con la cámara en vivo o con contenido de muestra.
+
+```mermaid
+flowchart TD
+  A[Abre ALPR Vue en un navegador compatible] --> B{Como quieres probarla?}
+  B -->|Camara en vivo| C[Haz clic en Iniciar camara]
+  B -->|No tienes una camara a mano| D[Haz clic en Cargar archivo y abre la galeria de muestras]
+
+  C --> E{Se concede permiso de camara?}
+  E -->|No| F[Permite el acceso en los ajustes del navegador y recarga]
+  F --> C
+  E -->|Si| G[Apunta a una matricula visible]
+
+  G --> H{La matricula se ve con claridad?}
+  H -->|No| I[Acercate mas, mejora la luz o estabiliza la camara]
+  I --> G
+  H -->|Si| J[ALPR Vue detecta y confirma la matricula]
+
+  D --> K[Elige una imagen o un video de muestra]
+  K --> L[ALPR Vue procesa el contenido de muestra]
+
+  J --> M[El resultado se guarda en el historial]
+  L --> M
+  M --> N[Abre la vista detallada]
+  N --> O[Revisa, edita o copia el resultado]
+```
+
 ## Detectar una matrícula con la cámara en vivo
 
 <Steps>

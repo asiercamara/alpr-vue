@@ -5,6 +5,35 @@ description: 'Detect your first license plate in minutes — open the app, grant
 
 This guide walks you through detecting your first license plate with ALPR Vue. By the end, you'll have the camera running, a plate captured in the history list, and know how to inspect and copy the result.
 
+## Quick flow overview
+
+This diagram shows the two main ways to try ALPR Vue for the first time: live camera or sample media.
+
+```mermaid
+flowchart TD
+  A[Open ALPR Vue in a supported browser] --> B{How do you want to try it?}
+  B -->|Live camera| C[Click Start Camera]
+  B -->|No camera nearby| D[Click Upload File and open the sample gallery]
+
+  C --> E{Camera permission granted?}
+  E -->|No| F[Allow camera access in browser settings and reload]
+  F --> C
+  E -->|Yes| G[Point at a visible license plate]
+
+  G --> H{Plate clearly visible?}
+  H -->|No| I[Move closer, improve lighting, or hold the camera steadier]
+  I --> G
+  H -->|Yes| J[ALPR Vue detects and confirms the plate]
+
+  D --> K[Choose a sample image or video]
+  K --> L[ALPR Vue processes the sample media]
+
+  J --> M[Result is added to history]
+  L --> M
+  M --> N[Open the detail view]
+  N --> O[Review, edit, or copy the result]
+```
+
 ## Detect a plate with the live camera
 
 <Steps>

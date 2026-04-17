@@ -9,6 +9,28 @@ Los ajustes de detección te permiten configurar lo selectiva y lo rápida que e
   Para aparcamientos concurridos o cámaras de tráfico, baja el umbral de confianza ligeramente (prueba con 0,6) y asegúrate de tener el modo continuo activado. Esta combinación maximiza la tasa de captura sin detener la cámara entre matrículas.
 </Tip>
 
+## Logica de temporizacion de la deteccion
+
+Este diagrama muestra como una matricula candidata pasa por validacion, confirmacion, filtrado de duplicados y comportamiento de la camara.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Candidate
+  Candidate --> Rejected: Debajo del umbral o de las reglas de calidad
+  Candidate --> StandardWindow: Supera el umbral base
+  StandardWindow --> FastWindow: Confianza media >= 0.8
+  StandardWindow --> Confirmed: Visible durante el tiempo de confirmacion
+  FastWindow --> Confirmed: Visible durante la confirmacion rapida
+  Confirmed --> DuplicateCheck: Se compara con el historial
+  DuplicateCheck --> SaveResult: Matricula nueva o mejor representante
+  DuplicateCheck --> ContinueScanning: Duplicado omitido
+  SaveResult --> StopCamera: Modo continuo desactivado y nueva matricula
+  SaveResult --> ContinueScanning: Modo continuo activado
+  Rejected --> Candidate: Llega un fotograma mejor
+  ContinueScanning --> Candidate: Siguiente deteccion
+  StopCamera --> [*]
+```
+
 <AccordionGroup>
   <Accordion title="Umbral de confianza (predeterminado: 0,7)">
     El umbral de confianza es un control deslizante de 0 a 1. Establece la puntuación de confianza OCR media mínima que debe alcanzar una detección para que ALPR Vue la guarde en tu historial.

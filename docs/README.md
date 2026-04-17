@@ -1,60 +1,80 @@
 # ALPR Vue — Documentation
 
-This directory contains the Mintlify documentation site for [ALPR Vue](https://alpr-vue.surge.sh), a browser-based automatic license plate recognition app.
+This directory contains the VitePress documentation site for [ALPR Vue](https://alpr-vue.surge.sh), a browser-based automatic license plate recognition app.
+
+See also: [Spanish contributor README](./README.es.md)
 
 ## Published site
 
-**English:** https://mintlify.wiki/asiercamara/alpr-vue  
-**Spanish:** https://mintlify.wiki/asiercamara/alpr-vue/es
+The documentation is deployed inside the main app under `/docs/`.
+
+- **English:** https://alpr-vue.surge.sh/docs/
+- **Spanish:** https://alpr-vue.surge.sh/docs/es/
 
 ## Structure
 
-```
+```text
 docs/
-├── docs.json                # Mintlify configuration and navigation
-├── *.mdx                    # English pages
+├── .vitepress/              # VitePress config, theme, cache, and build output
+├── *.md                     # English pages
 └── es/
-    └── *.mdx                # Spanish pages
+    └── *.md                 # Spanish pages
 ```
 
-Pages are written in MDX (Markdown + JSX). Navigation is defined in `docs.json` under the `languages` array.
+Pages are written in Markdown. Site configuration and navigation live in `docs/.vitepress/config.ts`, and the custom theme is implemented in `docs/.vitepress/theme/`.
 
 ## Local preview
 
-Install the Mintlify CLI:
+From the repository root, run:
 
 ```bash
-npm i -g mint
+pnpm dev:docs
 ```
 
-Then run from this directory:
+VitePress serves the docs locally and rebuilds them on changes.
+
+## Build documentation
 
 ```bash
-mint dev
+pnpm build:docs
+pnpm preview:docs
 ```
 
-Preview is available at `http://localhost:3000`.
+The production docs output is written to `dist/docs/`.
+
+## Documentation stack
+
+- **Site generator:** VitePress
+- **Main config:** `docs/.vitepress/config.ts`
+- **Custom theme:** `docs/.vitepress/theme/index.ts`
+- **Theme styles:** `docs/.vitepress/theme/style.css`
+
+The docs are bilingual:
+
+- `docs/*.md` for English pages
+- `docs/es/*.md` for Spanish pages
+
+## Mermaid diagrams
+
+The docs include Mermaid diagrams powered by:
+
+- `vitepress-mermaid-renderer`
+- `mermaid`
+
+The integration is initialized in `docs/.vitepress/theme/index.ts` and styled in `docs/.vitepress/theme/style.css`.
+
+Custom behavior currently includes:
+
+- interactive toolbar controls
+- improved initial framing inside the docs layout
+- fullscreen fit-to-width behavior
+- support for flowcharts, sequence diagrams, state diagrams, and other Mermaid syntaxes used in the docs
 
 ## Adding or editing pages
 
-1. Fork and clone the repository
-2. Edit the relevant `.mdx` file in `docs/` (English) or `docs/es/` (Spanish)
-3. If adding a new page, register it in `docs.json` under the correct language navigation group
-4. Run `mint dev` to preview your changes
-5. Submit a pull request
+1. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish).
+2. If you add a new page, register it in `docs/.vitepress/config.ts` under the correct locale sidebar.
+3. Run `pnpm dev:docs` to preview your changes.
+4. Run `pnpm build:docs` before opening a pull request.
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for writing guidelines.
-
-## AI-assisted editing
-
-Install the Mintlify skill for Claude Code or other AI tools:
-
-```bash
-npx skills add https://mintlify.com/docs
-```
-
-## Checking for broken links
-
-```bash
-mint broken-links
-```
