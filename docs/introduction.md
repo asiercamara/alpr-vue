@@ -8,16 +8,16 @@ Welcome to ALPR Vue, a free browser-based tool for automatic license plate recog
 ## What you can do
 
 <CardGroup cols="2">
-  <Card title="Live camera" icon="camera" href="/camera-mode">
+  <Card title="Live camera" icon="camera" href="./camera-mode">
     Point your webcam or phone camera at a vehicle and the app detects the plate automatically in real time.
   </Card>
-  <Card title="Upload a photo" icon="image" href="/upload-files">
+  <Card title="Upload a photo" icon="image" href="./upload-files">
     Select an image file and the app finds and reads every plate in the photo.
   </Card>
-  <Card title="Upload a video" icon="video" href="/upload-files">
+  <Card title="Upload a video" icon="video" href="./upload-files">
     Upload a video clip and the app scans every frame, extracting all plates that appear.
   </Card>
-  <Card title="Results and export" icon="list-check" href="/viewing-results">
+  <Card title="Results and export" icon="list-check" href="./viewing-results">
     View detected plates with timestamps and confidence scores, inspect each character, edit misreads, and export everything to CSV.
   </Card>
 </CardGroup>
@@ -37,10 +37,10 @@ The app includes **10 sample images** and **3 sample videos** built into the gal
 ## What's next
 
 <CardGroup cols="2">
-  <Card title="Quick start" icon="rocket" href="/quickstart">
+  <Card title="Quick start" icon="rocket" href="./quickstart">
     Detect your first plate in a few steps.
   </Card>
-  <Card title="Browser requirements" icon="browser" href="/browser-requirements">
+  <Card title="Browser requirements" icon="browser" href="./browser-requirements">
     Check that your browser and device are supported.
   </Card>
 </CardGroup>

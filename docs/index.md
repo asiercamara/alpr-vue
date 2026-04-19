@@ -6,16 +6,16 @@ description: 'ALPR Vue detects and reads vehicle license plates in your browser 
 ALPR Vue is a free, browser-based tool for automatic license plate recognition (ALPR). Point your camera at a vehicle or upload a photo or video, and the app instantly detects and reads the plate — right on your device. No account needed, no internet connection required after the first load, and your images never leave your phone or computer.
 
 <CardGroup cols="2">
-  <Card title="Quick Start" icon="rocket" href="/quickstart">
+  <Card title="Quick Start" icon="rocket" href="./quickstart">
     Get up and running in minutes. Open the app, grant camera access, and start reading plates.
   </Card>
-  <Card title="Camera Mode" icon="camera" href="/camera-mode">
+  <Card title="Camera Mode" icon="camera" href="./camera-mode">
     Use your webcam or phone camera to detect plates in real time with live bounding boxes.
   </Card>
-  <Card title="Upload Files" icon="upload" href="/upload-files">
+  <Card title="Upload Files" icon="upload" href="./upload-files">
     Upload a photo or video to extract all license plates without a live camera.
   </Card>
-  <Card title="Export Data" icon="file-csv" href="/exporting-data">
+  <Card title="Export Data" icon="file-csv" href="./exporting-data">
     Download your detected plates as a CSV file for use in Excel or other tools.
   </Card>
 </CardGroup>
@@ -40,16 +40,16 @@ ALPR Vue is a free, browser-based tool for automatic license plate recognition (
 ## Key features
 
 <CardGroup cols="2">
-  <Card title="100% Private" icon="shield-halved" href="/privacy">
+  <Card title="100% Private" icon="shield-halved" href="./privacy">
     All AI processing happens locally on your device. Your images and videos are never uploaded anywhere.
   </Card>
-  <Card title="Three Input Modes" icon="sliders" href="/camera-mode">
+  <Card title="Three Input Modes" icon="sliders" href="./camera-mode">
     Live camera, photo upload, and video upload — all processed through the same AI pipeline.
   </Card>
-  <Card title="Editable Results" icon="pen" href="/viewing-results">
+  <Card title="Editable Results" icon="pen" href="./viewing-results">
     Tap any detected plate to view character-level confidence scores and manually correct misreads.
   </Card>
-  <Card title="Configurable Settings" icon="gear" href="/settings-overview">
+  <Card title="Configurable Settings" icon="gear" href="./settings-overview">
     Adjust detection sensitivity, confirmation timing, theme, and language to fit your workflow.
   </Card>
 </CardGroup>

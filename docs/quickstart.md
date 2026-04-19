@@ -40,7 +40,7 @@ flowchart TD
   <Step title="Open the app in a supported browser">
     Open ALPR Vue in a modern browser such as Chrome, Edge, Firefox, or Safari 16+. For the camera to work, the page must be served over **HTTPS or localhost** — this is a browser security requirement, not something specific to ALPR Vue. If you're accessing a self-hosted instance, make sure it uses a secure connection.
 
-    Not sure your browser is supported? See [Supported Browsers and Device Requirements](/browser-requirements).
+    Not sure your browser is supported? See [Supported Browsers and Device Requirements](./browser-requirements).
 
   </Step>
   <Step title="Grant camera permissions">
@@ -58,7 +58,7 @@ flowchart TD
     When the app confirms a detection, it adds the plate to the history list on the right (or below the camera on mobile). Each entry shows the plate text, a confidence score, and the time it was detected. The camera stops scanning automatically after confirmation.
 
     <Note>
-      The camera auto-stops after **3 seconds** of continuous detection. If the detection has a high mean confidence (0.8 or above), it stops after just **1 second**. This prevents duplicate captures. You can change this timing — or turn on continuous mode — in [Detection Settings](/detection-settings).
+      The camera auto-stops after **3 seconds** of continuous detection. If the detection has a high mean confidence (0.8 or above), it stops after just **1 second**. This prevents duplicate captures. You can change this timing — or turn on continuous mode — in [Detection Settings](./detection-settings).
     </Note>
 
   </Step>

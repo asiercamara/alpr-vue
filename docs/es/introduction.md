@@ -8,16 +8,16 @@ Bienvenido a ALPR Vue, una herramienta gratuita basada en el navegador para el r
 ## Qué puedes hacer
 
 <CardGroup cols="2">
-  <Card title="Cámara en vivo" icon="camera" href="/es/camera-mode">
+  <Card title="Cámara en vivo" icon="camera" href="./camera-mode">
     Apunta la cámara web o la del móvil hacia un vehículo y la aplicación detecta la matrícula automáticamente en tiempo real.
   </Card>
-  <Card title="Cargar una foto" icon="image" href="/es/upload-files">
+  <Card title="Cargar una foto" icon="image" href="./upload-files">
     Selecciona un archivo de imagen y la aplicación encuentra y lee todas las matrículas de la foto.
   </Card>
-  <Card title="Cargar un vídeo" icon="video" href="/es/upload-files">
+  <Card title="Cargar un vídeo" icon="video" href="./upload-files">
     Sube un clip de vídeo y la aplicación analiza cada fotograma extrayendo todas las matrículas que aparecen.
   </Card>
-  <Card title="Resultados y exportación" icon="list-check" href="/es/viewing-results">
+  <Card title="Resultados y exportación" icon="list-check" href="./viewing-results">
     Consulta las matrículas detectadas con marcas de tiempo y puntuaciones de confianza, inspecciona cada carácter, edita lecturas erróneas y exporta todo a CSV.
   </Card>
 </CardGroup>
@@ -37,10 +37,10 @@ La aplicación incluye **10 imágenes de muestra** y **3 vídeos de muestra** in
 ## Próximos pasos
 
 <CardGroup cols="2">
-  <Card title="Inicio rápido" icon="rocket" href="/es/quickstart">
+  <Card title="Inicio rápido" icon="rocket" href="./quickstart">
     Detecta tu primera matrícula en unos pocos pasos.
   </Card>
-  <Card title="Requisitos del navegador" icon="browser" href="/es/browser-requirements">
+  <Card title="Requisitos del navegador" icon="browser" href="./browser-requirements">
     Comprueba que tu navegador y dispositivo son compatibles.
   </Card>
 </CardGroup>
