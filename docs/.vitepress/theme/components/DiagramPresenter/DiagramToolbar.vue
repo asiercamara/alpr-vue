@@ -156,3 +156,120 @@ defineEmits([
   'close',
 ])
 </script>
+
+<style scoped>
+/* ================================================================
+ * Toolbar layout
+ * ================================================================ */
+.dp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--dp-border);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--dp-bg-raised) 60%, transparent),
+    transparent
+  );
+  flex-wrap: wrap;
+}
+.dp-modal-toolbar {
+  border-radius: 0;
+  flex-shrink: 0;
+}
+.dp-controls {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  background: var(--dp-bg-raised);
+  border: 1px solid var(--dp-border);
+  border-radius: 10px;
+}
+.dp-toolbar-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ================================================================
+ * Buttons
+ * ================================================================ */
+.dp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--dp-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+  line-height: 1;
+}
+.dp-btn:hover:not(:disabled) {
+  color: var(--dp-text);
+  background: var(--dp-accent-soft);
+}
+.dp-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.dp-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.dp-btn-primary {
+  color: var(--dp-accent);
+  background: var(--dp-accent-soft);
+}
+.dp-btn-primary:hover:not(:disabled) {
+  color: var(--dp-text);
+  background: color-mix(in srgb, var(--dp-accent) 20%, var(--dp-accent-soft));
+}
+.dp-btn-ghost {
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  justify-content: center;
+  font-size: 0.95rem;
+  border: 1px solid var(--dp-border);
+  border-radius: 8px;
+}
+.dp-btn-active {
+  color: var(--dp-accent) !important;
+  background: var(--dp-accent-soft) !important;
+}
+.dp-speed-btn {
+  font-variant-numeric: tabular-nums;
+  min-width: 2.4em;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+.dp-icon {
+  display: inline-block;
+  width: 0.9em;
+  text-align: center;
+  color: var(--dp-accent);
+  font-weight: 700;
+}
+.dp-badge {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dp-text-muted);
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--dp-border);
+  border-radius: 999px;
+}
+</style>
