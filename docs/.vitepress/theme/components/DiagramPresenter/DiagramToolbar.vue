@@ -36,10 +36,10 @@
         type="button"
         class="dp-btn dp-btn-primary"
         :disabled="!canStart"
+        aria-label="Reproducir"
         @click="$emit('play')"
       >
-        <span class="dp-icon" aria-hidden="true">▶</span>
-        <span>Reproducir</span>
+        <span aria-hidden="true">▶</span>
       </button>
     </div>
 

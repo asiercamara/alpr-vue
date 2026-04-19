@@ -610,19 +610,18 @@ defineExpose({
 }
 
 /* ================================================================
- * Maximize modal
+ * Maximize modal — true fullscreen overlay
  * ================================================================ */
 .dp-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 9999;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  padding: 1.5rem;
 }
 
 .dp-modal-figure {
@@ -630,20 +629,16 @@ defineExpose({
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: min(1200px, calc(100vw - 3rem));
-  max-height: calc(100vh - 3rem);
-  border-radius: 14px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow:
-    0 32px 80px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .dp-modal-stage {
   flex: 1;
   overflow: hidden;
   position: relative;
-  min-height: 320px;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -662,8 +657,7 @@ defineExpose({
 
 .dp-modal-canvas :deep(svg) {
   max-width: none !important;
-  width: auto;
-  height: auto;
+  display: block;
 }
 
 .dp-modal-hint {
