@@ -20,7 +20,7 @@ import DocTabs from './components/DocTabs.vue'
 import DocTab from './components/DocTab.vue'
 import DocAccordionGroup from './components/DocAccordionGroup.vue'
 import DocAccordion from './components/DocAccordion.vue'
-import DiagramPresenter from './components/DiagramPresenter.vue'
+import DiagramPresenter from './components/DiagramPresenter/DiagramPresenter.vue'
 import DiagramPlayground from './components/DiagramPlayground.vue'
 
 let mermaidFullscreenObserverInitialized = false
