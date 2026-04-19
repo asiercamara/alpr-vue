@@ -9,7 +9,8 @@ Esta guía te lleva paso a paso para detectar tu primera matrícula con ALPR Vue
 
 Este diagrama muestra las dos formas principales de probar ALPR Vue por primera vez: con la cámara en vivo o con contenido de muestra.
 
-```mermaid
+<script setup>
+const quickstartFlow = `
 flowchart TD
   A[Abre ALPR Vue en un navegador compatible] --> B{Como quieres probarla?}
   B -->|Camara en vivo| C[Haz clic en Iniciar camara]
@@ -32,7 +33,10 @@ flowchart TD
   L --> M
   M --> N[Abre la vista detallada]
   N --> O[Revisa, edita o copia el resultado]
-```
+`
+</script>
+
+<DiagramPresenter :code="quickstartFlow" autoPlay="intersect" :highlight="['M', 'O']" />
 
 ## Detectar una matrícula con la cámara en vivo
 

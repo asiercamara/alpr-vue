@@ -9,7 +9,8 @@ This guide walks you through detecting your first license plate with ALPR Vue. B
 
 This diagram shows the two main ways to try ALPR Vue for the first time: live camera or sample media.
 
-```mermaid
+<script setup>
+const quickstartFlow = `
 flowchart TD
   A[Open ALPR Vue in a supported browser] --> B{How do you want to try it?}
   B -->|Live camera| C[Click Start Camera]
@@ -32,7 +33,10 @@ flowchart TD
   L --> M
   M --> N[Open the detail view]
   N --> O[Review, edit, or copy the result]
-```
+`
+</script>
+
+<DiagramPresenter :code="quickstartFlow" autoPlay="intersect" :highlight="['M', 'O']" />
 
 ## Detect a plate with the live camera
 

@@ -61,6 +61,21 @@ export default [
       'no-empty': ['error', { allowEmptyCatch: false }],
     },
   },
+  // VitePress docs theme components — browser environment (Vue + JS, no TypeScript strict)
+  {
+    files: ['docs/.vitepress/**/*.vue', 'docs/.vitepress/**/*.js', 'docs/.vitepress/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.es2022,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'vue/block-order': ['error', { order: ['template', 'script', 'style'] }],
+    },
+  },
   {
     ignores: ['dist/**', 'node_modules/**', 'public/**'],
   },

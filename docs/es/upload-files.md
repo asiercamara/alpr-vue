@@ -34,7 +34,8 @@ El modo de carga te permite ejecutar el reconocimiento de matrículas sobre arch
 
 Este diagrama muestra como ALPR Vue gestiona imagenes y videos despues de elegir un archivo.
 
-```mermaid
+<script setup>
+const uploadFlow = `
 flowchart TD
   A[Selecciona un archivo] --> B{Tipo de archivo}
   B -->|Imagen| C[Carga una imagen]
@@ -52,7 +53,10 @@ flowchart TD
   L -->|Si| F
   L -->|No| M[Finaliza el analisis]
   C --> M
-```
+`
+</script>
+
+<DiagramPresenter :code="uploadFlow" autoPlay="intersect" :highlight="['I']" />
 
 ## Progreso del procesamiento
 

@@ -15,10 +15,21 @@ The documentation is deployed inside the main app under `/docs/`.
 
 ```text
 docs/
-├── .vitepress/              # VitePress config, theme, cache, and build output
-├── *.md                     # English pages
+├── .vitepress/
+│   ├── config.ts              # VitePress config, sidebar navigation
+│   ├── theme/
+│   │   ├── index.ts           # Theme setup, global component registration
+│   │   ├── style.css          # Theme styles
+│   │   └── components/
+│   │       ├── DiagramPresenter.vue    # Animated Mermaid wrapper (GSAP)
+│   │       ├── diagram-adapters.js     # Flowchart/state/sequence adapters
+│   │       ├── DiagramPlayground.vue   # Interactive prop explorer
+│   │       └── Doc*.vue                # Other shared UI components
+├── *.md                       # English pages (public)
+├── diagram-presenter.md       # DiagramPresenter dev guide (not in sidebar)
+├── diagram-playground.md      # Live playground (not in sidebar)
 └── es/
-    └── *.md                 # Spanish pages
+    └── *.md                   # Spanish pages (public)
 ```
 
 Pages are written in Markdown. Site configuration and navigation live in `docs/.vitepress/config.ts`, and the custom theme is implemented in `docs/.vitepress/theme/`.
@@ -54,21 +65,48 @@ The docs are bilingual:
 - `docs/*.md` for English pages
 - `docs/es/*.md` for Spanish pages
 
-## Mermaid diagrams
+## Mermaid diagrams — DiagramPresenter
 
-The docs include Mermaid diagrams powered by:
+All diagrams in the docs are powered by the custom `DiagramPresenter` component (`docs/.vitepress/theme/components/DiagramPresenter.vue`), backed by GSAP timelines and a type-aware adapter system.
 
-- `vitepress-mermaid-renderer`
-- `mermaid`
+### Quick usage
 
-The integration is initialized in `docs/.vitepress/theme/index.ts` and styled in `docs/.vitepress/theme/style.css`.
+```md
+<script setup>
+const myDiagram = `
+flowchart TD
+  A[Start] --> B{OK?}
+  B -->|Yes| C[Done]
+  B -->|No|  D[Retry]
+  D --> B
+`
+</script>
 
-Custom behavior currently includes:
+<DiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
+```
 
-- interactive toolbar controls
-- improved initial framing inside the docs layout
-- fullscreen fit-to-width behavior
-- support for flowcharts, sequence diagrams, state diagrams, and other Mermaid syntaxes used in the docs
+### Key props
+
+| Prop        | Default  | Description                                     |
+| ----------- | -------- | ----------------------------------------------- |
+| `preset`    | `'auto'` | `'auto'` \| `'soft'` \| `'neon'` — visual style |
+| `autoPlay`  | `'none'` | `'intersect'` recommended for production pages  |
+| `highlight` | `[]`     | Node keys to pulse after animation              |
+| `controls`  | `true`   | Show speed/loop/play toolbar                    |
+| `caption`   | `''`     | Optional figcaption text                        |
+
+### Full reference
+
+See **[`docs/diagram-presenter.md`](./diagram-presenter.md)** for the complete prop reference, adapter system, highlight usage, and troubleshooting guide.
+
+### Interactive playground
+
+Open `docs/diagram-playground.md` (not in the sidebar) to experiment with all props live in the browser:
+
+```bash
+pnpm dev:docs
+# then open http://localhost:5173/docs/diagram-playground
+```
 
 ## Adding or editing pages
 

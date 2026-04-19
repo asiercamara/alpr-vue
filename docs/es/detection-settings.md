@@ -13,7 +13,8 @@ Los ajustes de detección te permiten configurar lo selectiva y lo rápida que e
 
 Este diagrama muestra como una matricula candidata pasa por validacion, confirmacion, filtrado de duplicados y comportamiento de la camara.
 
-```mermaid
+<script setup>
+const detectionFlow = `
 stateDiagram-v2
   [*] --> Candidate
   Candidate --> Rejected: Debajo del umbral o de las reglas de calidad
@@ -29,7 +30,10 @@ stateDiagram-v2
   Rejected --> Candidate: Llega un fotograma mejor
   ContinueScanning --> Candidate: Siguiente deteccion
   StopCamera --> [*]
-```
+`
+</script>
+
+<DiagramPresenter :code="detectionFlow" preset="neon" autoPlay="intersect" :highlight="['Confirmed', 'SaveResult']" />
 
 <AccordionGroup>
   <Accordion title="Umbral de confianza (predeterminado: 0,7)">

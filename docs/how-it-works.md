@@ -9,7 +9,8 @@ ALPR Vue uses two AI models running locally in your browser — one to find lice
 
 This sequence diagram shows how a frame moves through the app from capture to a saved result.
 
-```mermaid
+<script setup>
+const architectureFlow = `
 sequenceDiagram
   participant User
   participant Source as Camera or Upload
@@ -27,7 +28,10 @@ sequenceDiagram
   Pipeline->>Plates: Confirm and group the detection
   Plates-->>UI: Update saved plates and best result
   UI-->>User: Show history item and detail view
-```
+`
+</script>
+
+<DiagramPresenter :code="architectureFlow" preset="neon" autoPlay="intersect" />
 
 ## The processing pipeline
 

@@ -34,7 +34,8 @@ Upload mode lets you run license plate recognition on files you already have —
 
 This flowchart shows how ALPR Vue handles images and videos after you choose a file.
 
-```mermaid
+<script setup>
+const uploadFlow = `
 flowchart TD
   A[Select a file] --> B{File type}
   B -->|Image| C[Load one image]
@@ -52,7 +53,10 @@ flowchart TD
   L -->|Yes| F
   L -->|No| M[Finish analysis]
   C --> M
-```
+`
+</script>
+
+<DiagramPresenter :code="uploadFlow" autoPlay="intersect" :highlight="['I']" />
 
 ## Processing progress
 

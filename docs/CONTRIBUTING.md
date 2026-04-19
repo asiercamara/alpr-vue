@@ -13,11 +13,11 @@ Thank you for your interest in contributing to the ALPR Vue documentation! This 
 ### Option 2: Local development
 
 1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
+2. Install dependencies from the repository root: `pnpm install`
 3. Create a branch for your changes
-4. Make changes to the relevant `.mdx` file in `docs/` (English) or `docs/es/` (Spanish)
-5. Navigate to the docs directory and run `mint dev`
-6. Preview your changes at `http://localhost:3000`
+4. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish)
+5. From the repository root, run `pnpm dev:docs`
+6. Preview your changes at the URL shown in the terminal (typically `http://localhost:5173/docs/`)
 7. Commit your changes and submit a pull request
 
 ## Writing guidelines
@@ -29,11 +29,35 @@ Thank you for your interest in contributing to the ALPR Vue documentation! This 
 - **Use consistent terminology**: See [AGENTS.md](./AGENTS.md) for the preferred term list
 - **Include examples**: Show, don't just tell
 
+## Adding or editing pages
+
+1. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish).
+2. If you add a new page, register it in `docs/.vitepress/config.ts` under the correct locale sidebar.
+3. Run `pnpm dev:docs` to preview your changes.
+4. Run `pnpm build:docs` before opening a pull request.
+
 ## Adding a Spanish translation
 
 Spanish pages live in `docs/es/` and must have the same filename as their English counterpart. When translating:
 
 - Keep all technical terms in their original form (ONNX, WebAssembly, localStorage, CSV, etc.)
-- Translate navigation group names as defined in `docs.json`
+- Translate navigation group names as defined in `docs/.vitepress/config.ts`
 - Update all internal links to use the `/es/` prefix (e.g., `/camera-mode` → `/es/camera-mode`)
 - See [AGENTS.md](./AGENTS.md) for the preferred Spanish terminology
+
+## Adding Mermaid diagrams
+
+All diagrams use the `DiagramPresenter` component. See [diagram-presenter.md](./diagram-presenter.md) for the full usage guide. Quick example:
+
+```md
+<script setup>
+const myDiagram = `
+flowchart TD
+  A[Start] --> B[Done]
+`
+</script>
+
+<DiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
+```
+
+To experiment with all diagram props interactively, run `pnpm dev:docs` and open `/docs/diagram-playground`.

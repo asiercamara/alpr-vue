@@ -9,7 +9,8 @@ Camera mode turns your device's camera into a live license plate scanner. Point 
 
 This state diagram shows the main camera lifecycle while live scanning is active.
 
-```mermaid
+<script setup>
+const cameraStates = `
 stateDiagram-v2
   [*] --> Idle
   Idle --> RequestingPermission: Start Camera
@@ -24,7 +25,10 @@ stateDiagram-v2
   AutoStopped --> Idle: User restarts camera
   CameraActive --> Idle: Stop Camera
   CameraError --> Idle: Retry
-```
+`
+</script>
+
+<DiagramPresenter :code="cameraStates" preset="soft" autoPlay="intersect" :highlight="['Confirmed', 'AutoStopped']" />
 
 ## Starting the camera
 

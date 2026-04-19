@@ -13,7 +13,8 @@ The detection settings let you tune how selective and how fast ALPR Vue is when 
 
 This diagram shows how a candidate plate moves through validation, confirmation, duplicate filtering, and camera behavior.
 
-```mermaid
+<script setup>
+const detectionFlow = `
 stateDiagram-v2
   [*] --> Candidate
   Candidate --> Rejected: Below confidence or quality rules
@@ -29,7 +30,10 @@ stateDiagram-v2
   Rejected --> Candidate: Better frame arrives
   ContinueScanning --> Candidate: Next detection
   StopCamera --> [*]
-```
+`
+</script>
+
+<DiagramPresenter :code="detectionFlow" preset="neon" autoPlay="intersect" :highlight="['Confirmed', 'SaveResult']" />
 
 <AccordionGroup>
   <Accordion title="Confidence threshold (default: 0.7)">

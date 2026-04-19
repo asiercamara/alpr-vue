@@ -9,7 +9,8 @@ El modo cámara convierte la cámara de tu dispositivo en un escáner de matríc
 
 Este diagrama de estados muestra el ciclo principal de la camara mientras el escaneo en vivo esta activo.
 
-```mermaid
+<script setup>
+const cameraStates = `
 stateDiagram-v2
   [*] --> Idle
   Idle --> RequestingPermission: Iniciar camara
@@ -24,7 +25,10 @@ stateDiagram-v2
   AutoStopped --> Idle: El usuario reinicia la camara
   CameraActive --> Idle: Detener camara
   CameraError --> Idle: Reintentar
-```
+`
+</script>
+
+<DiagramPresenter :code="cameraStates" preset="soft" autoPlay="intersect" :highlight="['Confirmed', 'AutoStopped']" />
 
 ## Iniciar la cámara
 

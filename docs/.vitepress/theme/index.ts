@@ -20,6 +20,8 @@ import DocTabs from './components/DocTabs.vue'
 import DocTab from './components/DocTab.vue'
 import DocAccordionGroup from './components/DocAccordionGroup.vue'
 import DocAccordion from './components/DocAccordion.vue'
+import DiagramPresenter from './components/DiagramPresenter.vue'
+import DiagramPlayground from './components/DiagramPlayground.vue'
 
 let mermaidFullscreenObserverInitialized = false
 
@@ -150,5 +152,7 @@ export default {
     app.component('Tab', DocTab)
     app.component('AccordionGroup', DocAccordionGroup)
     app.component('Accordion', DocAccordion)
+    app.component('DiagramPresenter', DiagramPresenter)
+    app.component('DiagramPlayground', DiagramPlayground)
   },
 } satisfies Theme
