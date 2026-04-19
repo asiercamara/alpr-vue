@@ -14,13 +14,13 @@ Toca el **icono de engranaje (⚙️)** en el encabezado de la aplicación para 
 El panel de ajustes cubre tres áreas:
 
 <CardGroup cols="3">
-  <Card title="Detección" icon="sliders" href="/es/detection-settings">
+  <Card title="Detección" icon="sliders" href="./detection-settings">
     Umbral de confianza, tiempo de confirmación, modo continuo, filtrado de duplicados y feedback de audio/haptic.
   </Card>
-  <Card title="Apariencia" icon="sun" href="/es/appearance-language">
+  <Card title="Apariencia" icon="sun" href="./appearance-language">
     Alterna entre los modos de tema claro, oscuro y del sistema.
   </Card>
-  <Card title="Idioma" icon="language" href="/es/appearance-language">
+  <Card title="Idioma" icon="language" href="./appearance-language">
     Elige inglés, español o detección automática según tu navegador.
   </Card>
 </CardGroup>

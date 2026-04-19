@@ -40,7 +40,7 @@ flowchart TD
   <Step title="Abre la aplicación en un navegador compatible">
     Abre ALPR Vue en un navegador moderno como Chrome, Edge, Firefox o Safari 16+. Para que la cámara funcione, la página debe servirse mediante **HTTPS o localhost** — este es un requisito de seguridad del navegador, no algo específico de ALPR Vue. Si accedes a una instancia propia, asegúrate de que usa una conexión segura.
 
-    ¿No sabes si tu navegador es compatible? Consulta [Navegadores compatibles y requisitos del dispositivo](/es/browser-requirements).
+    ¿No sabes si tu navegador es compatible? Consulta [Navegadores compatibles y requisitos del dispositivo](./browser-requirements).
 
   </Step>
   <Step title="Concede permisos a la cámara">
@@ -58,7 +58,7 @@ flowchart TD
     Cuando la aplicación confirma una detección, añade la matrícula al historial de la derecha (o debajo de la cámara en móvil). Cada entrada muestra el texto de la matrícula, una puntuación de confianza y la hora de detección. La cámara se detiene automáticamente tras la confirmación.
 
     <Note>
-      La cámara se detiene automáticamente después de **3 segundos** de detección continua. Si la detección tiene una confianza media alta (0,8 o superior), se detiene tras solo **1 segundo**. Esto evita capturas duplicadas. Puedes cambiar este tiempo — o activar el modo continuo — en [Ajustes de detección](/es/detection-settings).
+      La cámara se detiene automáticamente después de **3 segundos** de detección continua. Si la detección tiene una confianza media alta (0,8 o superior), se detiene tras solo **1 segundo**. Esto evita capturas duplicadas. Puedes cambiar este tiempo — o activar el modo continuo — en [Ajustes de detección](./detection-settings).
     </Note>
 
   </Step>

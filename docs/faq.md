@@ -3,7 +3,7 @@ title: 'Frequently Asked Questions About ALPR Vue'
 description: 'Quick answers to common questions about ALPR Vue: offline use, privacy, supported plate formats, mobile camera controls, auto-stop behavior, and self-hosting.'
 ---
 
-Here are quick answers to the questions users ask most often. If you don't find what you're looking for, check the [troubleshooting guide](/troubleshooting) for step-by-step help with specific problems.
+Here are quick answers to the questions users ask most often. If you don't find what you're looking for, check the [troubleshooting guide](./troubleshooting) for step-by-step help with specific problems.
 
 <AccordionGroup>
   <Accordion title="Does ALPR Vue work offline?">
@@ -11,7 +11,7 @@ Here are quick answers to the questions users ask most often. If you don't find 
   </Accordion>
 
   <Accordion title="Do my images or camera feed get uploaded anywhere?">
-    No. All processing happens entirely within your browser using WebAssembly. Your camera feed, uploaded photos, and uploaded videos never leave your device — they are not sent to any server. See [how it works](/how-it-works) for a technical explanation of the local processing pipeline.
+    No. All processing happens entirely within your browser using WebAssembly. Your camera feed, uploaded photos, and uploaded videos never leave your device — they are not sent to any server. See [how it works](./how-it-works) for a technical explanation of the local processing pipeline.
   </Accordion>
 
   <Accordion title="Which license plate formats are supported?">
@@ -30,7 +30,7 @@ Here are quick answers to the questions users ask most often. If you don't find 
     - Use the **Zoom in / Zoom out** buttons to adjust the view (hardware zoom when supported by your device, digital zoom otherwise).
     - Add the app to your home screen from your browser menu for an app-like, full-screen experience.
 
-    See [camera mode](/camera-mode) for details on all camera controls.
+    See [camera mode](./camera-mode) for details on all camera controls.
 
   </Accordion>
 
@@ -50,7 +50,7 @@ Here are quick answers to the questions users ask most often. If you don't find 
 
     You can also browse the built-in sample gallery, which includes 10 real car photos and 3 traffic video clips — useful for trying the app without needing a vehicle nearby.
 
-    See [uploading files](/upload-files) for full instructions.
+    See [uploading files](./upload-files) for full instructions.
 
   </Accordion>
 
@@ -72,7 +72,7 @@ Here are quick answers to the questions users ask most often. If you don't find 
 
     Disable **Skip Duplicates** in Settings if you need to record every detection event individually — for example, if you are logging the same plate appearing at different times throughout a shift.
 
-    You can find this toggle in **Settings > Skip duplicate alerts**. See [detection settings](/detection-settings) for all detection-related options.
+    You can find this toggle in **Settings > Skip duplicate alerts**. See [detection settings](./detection-settings) for all detection-related options.
 
   </Accordion>
 

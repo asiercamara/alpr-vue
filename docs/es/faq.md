@@ -3,7 +3,7 @@ title: 'Preguntas Frecuentes sobre ALPR Vue'
 description: 'Respuestas rápidas a las preguntas más comunes sobre ALPR Vue: uso sin conexión, privacidad, formatos de matrícula compatibles, controles de cámara en móvil, comportamiento de detención automática y alojamiento propio.'
 ---
 
-Aquí encontrarás respuestas rápidas a las preguntas que los usuarios hacen con más frecuencia. Si no encuentras lo que buscas, consulta la [guía de solución de problemas](/es/troubleshooting) para obtener ayuda paso a paso con problemas específicos.
+Aquí encontrarás respuestas rápidas a las preguntas que los usuarios hacen con más frecuencia. Si no encuentras lo que buscas, consulta la [guía de solución de problemas](./troubleshooting) para obtener ayuda paso a paso con problemas específicos.
 
 <AccordionGroup>
   <Accordion title="¿Funciona ALPR Vue sin conexión?">
@@ -11,7 +11,7 @@ Aquí encontrarás respuestas rápidas a las preguntas que los usuarios hacen co
   </Accordion>
 
   <Accordion title="¿Mis imágenes o la imagen de la cámara se suben a algún lugar?">
-    No. Todo el procesamiento ocurre completamente dentro de tu navegador usando WebAssembly. Tu imagen de la cámara, las fotos cargadas y los vídeos cargados nunca salen de tu dispositivo — no se envían a ningún servidor. Consulta [cómo funciona](/es/how-it-works) para una explicación técnica del canal de procesamiento local.
+    No. Todo el procesamiento ocurre completamente dentro de tu navegador usando WebAssembly. Tu imagen de la cámara, las fotos cargadas y los vídeos cargados nunca salen de tu dispositivo — no se envían a ningún servidor. Consulta [cómo funciona](./how-it-works) para una explicación técnica del canal de procesamiento local.
   </Accordion>
 
   <Accordion title="¿Qué formatos de matrícula son compatibles?">
@@ -30,7 +30,7 @@ Aquí encontrarás respuestas rápidas a las preguntas que los usuarios hacen co
     - Usar los botones **Zoom +** / **Zoom −** para ajustar la vista (zoom de hardware cuando tu dispositivo lo admite, zoom digital en caso contrario).
     - Añadir la aplicación a la pantalla de inicio desde el menú de tu navegador para una experiencia a pantalla completa similar a una app nativa.
 
-    Consulta [modo cámara](/es/camera-mode) para obtener detalles sobre todos los controles de la cámara.
+    Consulta [modo cámara](./camera-mode) para obtener detalles sobre todos los controles de la cámara.
 
   </Accordion>
 
@@ -50,7 +50,7 @@ Aquí encontrarás respuestas rápidas a las preguntas que los usuarios hacen co
 
     También puedes explorar la galería de muestras integrada, que incluye 10 fotos reales de coches y 3 clips de vídeo de tráfico — útil para probar la aplicación sin necesitar un vehículo cerca.
 
-    Consulta [cargar archivos](/es/upload-files) para obtener instrucciones completas.
+    Consulta [cargar archivos](./upload-files) para obtener instrucciones completas.
 
   </Accordion>
 
@@ -72,7 +72,7 @@ Aquí encontrarás respuestas rápidas a las preguntas que los usuarios hacen co
 
     Desactiva **Omitir duplicados** en Ajustes si necesitas registrar cada evento de detección individualmente — por ejemplo, si estás registrando la misma matrícula apareciendo en diferentes momentos a lo largo de un turno.
 
-    Puedes encontrar este interruptor en **Ajustes > Omitir alertas de duplicados**. Consulta [ajustes de detección](/es/detection-settings) para todas las opciones relacionadas con la detección.
+    Puedes encontrar este interruptor en **Ajustes > Omitir alertas de duplicados**. Consulta [ajustes de detección](./detection-settings) para todas las opciones relacionadas con la detección.
 
   </Accordion>
 

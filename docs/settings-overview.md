@@ -14,13 +14,13 @@ Tap the **gear icon (⚙️)** in the app header to open the settings panel. The
 The settings panel covers three areas:
 
 <CardGroup cols="3">
-  <Card title="Detection" icon="sliders" href="/detection-settings">
+  <Card title="Detection" icon="sliders" href="./detection-settings">
     Confidence threshold, confirmation timing, continuous mode, duplicate filtering, and audio/haptic feedback.
   </Card>
-  <Card title="Appearance" icon="sun" href="/appearance-language">
+  <Card title="Appearance" icon="sun" href="./appearance-language">
     Switch between light, dark, and system theme modes.
   </Card>
-  <Card title="Language" icon="language" href="/appearance-language">
+  <Card title="Language" icon="language" href="./appearance-language">
     Choose English, Spanish, or automatic detection from your browser.
   </Card>
 </CardGroup>

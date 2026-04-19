@@ -6,16 +6,16 @@ description: 'ALPR Vue detecta y lee matrículas de vehículos en tu navegador �
 ALPR Vue es una herramienta gratuita basada en el navegador para el reconocimiento automático de matrículas (ALPR). Apunta la cámara hacia un vehículo o sube una foto o un vídeo, y la aplicación detecta y lee la matrícula al instante, directamente en tu dispositivo. Sin cuenta, sin conexión a internet tras la primera carga, y tus imágenes nunca salen de tu teléfono u ordenador.
 
 <CardGroup cols="2">
-  <Card title="Inicio rápido" icon="rocket" href="/es/quickstart">
+  <Card title="Inicio rápido" icon="rocket" href="./quickstart">
     Comienza en minutos. Abre la aplicación, permite el acceso a la cámara y empieza a leer matrículas.
   </Card>
-  <Card title="Modo cámara" icon="camera" href="/es/camera-mode">
+  <Card title="Modo cámara" icon="camera" href="./camera-mode">
     Usa tu cámara web o la cámara del móvil para detectar matrículas en tiempo real con recuadros de detección en vivo.
   </Card>
-  <Card title="Cargar archivos" icon="upload" href="/es/upload-files">
+  <Card title="Cargar archivos" icon="upload" href="./upload-files">
     Carga una foto o un vídeo para extraer matrículas sin necesidad de una cámara en directo.
   </Card>
-  <Card title="Exportar datos" icon="file-csv" href="/es/exporting-data">
+  <Card title="Exportar datos" icon="file-csv" href="./exporting-data">
     Descarga las matrículas detectadas como un archivo CSV para usar en Excel u otras herramientas.
   </Card>
 </CardGroup>
@@ -40,16 +40,16 @@ ALPR Vue es una herramienta gratuita basada en el navegador para el reconocimien
 ## Funcionalidades principales
 
 <CardGroup cols="2">
-  <Card title="100% Privado" icon="shield-halved" href="/es/privacy">
+  <Card title="100% Privado" icon="shield-halved" href="./privacy">
     Todo el procesamiento de IA ocurre localmente en tu dispositivo. Tus imágenes y vídeos nunca se suben a ningún servidor.
   </Card>
-  <Card title="Tres modos de entrada" icon="sliders" href="/es/camera-mode">
+  <Card title="Tres modos de entrada" icon="sliders" href="./camera-mode">
     Cámara en vivo, carga de fotos y carga de vídeos — todos procesados a través del mismo canal de IA.
   </Card>
-  <Card title="Resultados editables" icon="pen" href="/es/viewing-results">
+  <Card title="Resultados editables" icon="pen" href="./viewing-results">
     Toca cualquier matrícula detectada para ver la confianza carácter por carácter y corregir lecturas erróneas manualmente.
   </Card>
-  <Card title="Ajustes configurables" icon="gear" href="/es/settings-overview">
+  <Card title="Ajustes configurables" icon="gear" href="./settings-overview">
     Ajusta la sensibilidad de detección, el tiempo de confirmación, el tema y el idioma según tu flujo de trabajo.
   </Card>
 </CardGroup>

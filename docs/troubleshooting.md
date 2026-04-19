@@ -55,10 +55,10 @@ If something isn't working as expected, start here. Most issues fall into a hand
     Open **Settings** (gear icon in the header) and lower the **Confidence Threshold** from its default of 0.7. Trying a value of 0.6 or 0.5 may allow more marginal detections through.
 
     **Consider regional limitations:**
-    The AI models are optimized for European license plates. Plates from other regions may be detected with lower accuracy or not at all. See [how the AI models work](/how-it-works) for more detail.
+    The AI models are optimized for European license plates. Plates from other regions may be detected with lower accuracy or not at all. See [how the AI models work](./how-it-works) for more detail.
 
     **Try uploading a photo instead:**
-    If live camera detection isn't working, try using the **Upload File** button to process a still image of the plate. This rules out camera-related issues and gives the model more processing time per frame. See [uploading files](/upload-files) for instructions.
+    If live camera detection isn't working, try using the **Upload File** button to process a still image of the plate. This rules out camera-related issues and gives the model more processing time per frame. See [uploading files](./upload-files) for instructions.
 
     <Tip>
       A straight-on view of the plate at close range gives the best detection results. Extreme angles, rain-streaked plates, or partial obstructions significantly reduce accuracy.
@@ -94,7 +94,7 @@ If something isn't working as expected, start here. Most issues fall into a hand
     The app runs AI inference in a background Web Worker thread so the UI stays responsive. On the first detection after opening the app, there may be a brief delay while the models initialize — this is normal and improves after the first few frames.
 
     **Use a supported browser:**
-    Chrome and Edge generally offer the best WebAssembly performance. If you are using a different browser and experiencing lag, try switching. See [browser requirements](/browser-requirements) for the full compatibility list.
+    Chrome and Edge generally offer the best WebAssembly performance. If you are using a different browser and experiencing lag, try switching. See [browser requirements](./browser-requirements) for the full compatibility list.
 
     **Understand device limits:**
     On older or lower-powered devices — particularly budget smartphones — the models may run slowly regardless of optimizations. In this case, consider using the **Upload File** mode instead of live camera, which processes each frame at its own pace without a real-time constraint.
@@ -113,7 +113,7 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Re-run detection if needed:**
     If you cleared history before exporting, tap **Clear** in the history panel and run another detection session. Once plates appear in the list, use **Export CSV** to download them.
 
-    See [exporting data](/exporting-data) for full details on the CSV format and what each column contains.
+    See [exporting data](./exporting-data) for full details on the CSV format and what each column contains.
 
   </Accordion>
 
