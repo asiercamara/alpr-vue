@@ -13,6 +13,7 @@
  */
 
 import { ref, nextTick } from 'vue'
+import { gsap } from 'gsap'
 
 /**
  * Provides modal open/close state and zoom/pan interaction handlers.
@@ -32,9 +33,10 @@ import { ref, nextTick } from 'vue'
  *   svgHeight: import('vue').Ref<number>,
  *   stageWidth: import('vue').Ref<number>,
  *   stageHeight: import('vue').Ref<number>,
- *   openMaximized: () => void,
+ *   openMaximized: (handlers?: object) => void,
  *   closeMaximized: () => void,
  *   resetZoom: () => void,
+ *   zoomToElement: (nodeEl: Element, stageEl: Element) => void,
  *   onModalWheel: (e: WheelEvent) => void,
  *   onStagePointerDown: (e: PointerEvent) => void,
  *   onStagePointerMove: (e: PointerEvent) => void,
@@ -62,6 +64,9 @@ export function useModalZoom({ container, modalContainer }) {
   /** Initial pan offsets computed on open (align diagram to top-left corner). */
   let fitPanX = 0
   let fitPanY = 0
+
+  /** Playback callbacks injected by DiagramPresenter when opening the modal. */
+  let keyHandlers = {}
 
   // ── Drag state (single pointer) ──────────────────────────────────────────
   let dragPointerId = -1
@@ -111,9 +116,13 @@ export function useModalZoom({ container, modalContainer }) {
    * browser has completed at least one full layout pass before reading stage
    * dimensions — single rAF can still return stale values on some mobile browsers.
    *
+   * @param {object} [handlers] - Optional playback callbacks:
+   *   `{ onTogglePause, onSeekForward, onSeekBack, onSpeed, onReset }`.
+   *   All are optional — missing keys are simply ignored.
    * @returns {void}
    */
-  function openMaximized() {
+  function openMaximized(handlers = {}) {
+    keyHandlers = handlers
     isMaximized.value = true
     panX.value = 0
     panY.value = 0
@@ -244,13 +253,22 @@ export function useModalZoom({ container, modalContainer }) {
   }
 
   /**
-   * Keyboard handler: closes the modal on Escape.
+   * Keyboard handler: Escape closes the modal; other keys delegate to
+   * the playback handlers injected via openMaximized({ … }).
    *
    * @param {KeyboardEvent} e
    * @returns {void}
    */
   function handleModalKey(e) {
-    if (e.key === 'Escape') closeMaximized()
+    if (e.key === 'Escape')           { closeMaximized(); return }
+    if (e.key === ' ')                { e.preventDefault(); keyHandlers.onTogglePause?.() }
+    else if (e.key === 'ArrowRight')  { e.preventDefault(); keyHandlers.onSeekForward?.() }
+    else if (e.key === 'ArrowLeft')   { e.preventDefault(); keyHandlers.onSeekBack?.() }
+    else if (e.key === '1')           { keyHandlers.onSpeed?.('slow') }
+    else if (e.key === '2')           { keyHandlers.onSpeed?.('normal') }
+    else if (e.key === '3')           { keyHandlers.onSpeed?.('fast') }
+    else if (e.key === 'r' || e.key === 'R') { keyHandlers.onReset?.() }
+    else if (e.key === 'f' || e.key === 'F') { resetZoom() }
   }
 
   /**
@@ -394,6 +412,36 @@ export function useModalZoom({ container, modalContainer }) {
     }
   }
 
+  /**
+   * Animated pan+zoom to center a specific SVG node element in the modal stage.
+   *
+   * GSAP cannot animate Vue refs directly, so we animate a plain state object
+   * and sync the refs in onUpdate. Double-clicking empty space calls resetZoom
+   * for an intuitive toggle.
+   *
+   * @param {Element} nodeEl - The <g.node> element to zoom to.
+   * @param {Element} stageEl - The modal stage element (used for its bounding rect).
+   * @returns {void}
+   */
+  function zoomToElement(nodeEl, stageEl) {
+    if (!nodeEl || !stageEl) return
+    const stageRect = stageEl.getBoundingClientRect()
+    const nodeRect  = nodeEl.getBoundingClientRect()
+    const offsetX = (nodeRect.left + nodeRect.width  / 2) - (stageRect.left + stageRect.width  / 2)
+    const offsetY = (nodeRect.top  + nodeRect.height / 2) - (stageRect.top  + stageRect.height / 2)
+    const targetZoom = Math.max(2.5, zoom.value)
+    const zoomRatio  = targetZoom / zoom.value
+    const state = { x: panX.value, y: panY.value, z: zoom.value }
+    gsap.to(state, {
+      x: panX.value - offsetX * zoomRatio,
+      y: panY.value - offsetY * zoomRatio,
+      z: targetZoom,
+      duration: 0.65,
+      ease: 'power3.inOut',
+      onUpdate() { panX.value = state.x; panY.value = state.y; zoom.value = state.z },
+    })
+  }
+
   return {
     isMaximized,
     zoom,
@@ -410,6 +458,7 @@ export function useModalZoom({ container, modalContainer }) {
     openMaximized,
     closeMaximized,
     resetZoom,
+    zoomToElement,
     onModalWheel,
     onStagePointerDown,
     onStagePointerMove,

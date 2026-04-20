@@ -59,20 +59,26 @@ export function getMermaidTheme(dark) {
       fontSize: '14px',
     }
   }
+  // Read the brand color at runtime so Mermaid stays in sync with the VitePress
+  // theme (style.css may override --vp-c-brand-1). Mermaid's color parser only
+  // accepts concrete hex/rgb values — CSS custom properties are not supported.
+  const accent = typeof document !== 'undefined'
+    ? getComputedStyle(document.documentElement).getPropertyValue('--vp-c-brand-1').trim() || '#7c3aed'
+    : '#7c3aed'
   return {
     fontFamily: 'Inter, system-ui, sans-serif',
-    primaryColor: '#f1f5f9',
-    primaryTextColor: '#1e293b',
-    primaryBorderColor: '#94a3b8',
-    lineColor: '#64748b',
-    secondaryColor: '#e2e8f0',
-    tertiaryColor: '#f8fafc',
+    primaryColor: '#f5f3ff',
+    primaryTextColor: '#1e1b4b',
+    primaryBorderColor: accent,
+    lineColor: accent,
+    secondaryColor: '#ede9fe',
+    tertiaryColor: '#f5f3ff',
     background: '#ffffff',
-    mainBkg: '#f1f5f9',
-    nodeBorder: '#94a3b8',
-    clusterBkg: '#f8fafc',
-    titleColor: '#0f172a',
-    edgeLabelBackground: '#f8fafc',
+    mainBkg: '#f5f3ff',
+    nodeBorder: accent,
+    clusterBkg: '#f5f3ff',
+    titleColor: '#1e1b4b',
+    edgeLabelBackground: '#faf9ff',
     fontSize: '14px',
   }
 }

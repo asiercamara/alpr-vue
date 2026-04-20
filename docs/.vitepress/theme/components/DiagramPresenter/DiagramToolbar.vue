@@ -18,6 +18,9 @@
     adapterLabel  (string)   — adapter name to display in the badge
     ready         (boolean)  — diagram is fully rendered
     isModal       (boolean)  — true → show resetZoom + close buttons
+    phaseNav      (boolean)  — true → show ‹/› phase buttons, hide Play
+    canPrev       (boolean)  — whether Prev phase button is enabled
+    canNext       (boolean)  — whether Next phase button is enabled
 
   Emits:
     play          — user clicked Play
@@ -28,11 +31,38 @@
     maximize      — user clicked Maximize (inline only, isModal=false)
     resetZoom     — user clicked Reset Zoom (modal only, isModal=true)
     close         — user clicked Close (modal only, isModal=true)
+    export        — user clicked Export (modal only, isModal=true)
+    prevPhase     — user clicked ‹ (phaseNav=true)
+    nextPhase     — user clicked › (phaseNav=true)
 -->
 <template>
   <header class="dp-toolbar" :class="{ 'dp-modal-toolbar': isModal }">
     <div class="dp-controls" role="group" aria-label="Controles de animación">
+      <!-- Phase nav mode: prev/next buttons replace Play -->
+      <template v-if="phaseNav">
+        <button
+          type="button"
+          class="dp-btn dp-btn-ghost"
+          :disabled="!canPrev"
+          aria-label="Fase anterior"
+          @click="$emit('prevPhase')"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          class="dp-btn dp-btn-ghost"
+          :disabled="!canNext"
+          aria-label="Fase siguiente"
+          @click="$emit('nextPhase')"
+        >
+          ›
+        </button>
+      </template>
+
+      <!-- Normal mode: Play button -->
       <button
+        v-else
         type="button"
         class="dp-btn dp-btn-primary"
         :disabled="!canStart"
@@ -61,6 +91,7 @@
 
       <!-- Loop toggle -->
       <button
+        v-if="!phaseNav"
         type="button"
         class="dp-btn dp-btn-ghost"
         :class="{ 'dp-btn-active': isLooping }"
@@ -105,6 +136,19 @@
         ⛶
       </button>
 
+      <!-- Export SVG — modal toolbar only -->
+      <button
+        v-if="isModal"
+        type="button"
+        class="dp-btn dp-btn-ghost"
+        :disabled="!ready"
+        title="Exportar SVG"
+        aria-label="Descargar diagrama como SVG"
+        @click="$emit('export')"
+      >
+        ⬇
+      </button>
+
       <!-- Reset zoom — modal toolbar only -->
       <button
         v-if="isModal"
@@ -143,6 +187,9 @@ defineProps({
   adapterLabel: { type: String, default: '' },
   ready: { type: Boolean, required: true },
   isModal: { type: Boolean, default: false },
+  phaseNav: { type: Boolean, default: false },
+  canPrev: { type: Boolean, default: false },
+  canNext: { type: Boolean, default: false },
 })
 
 defineEmits([
@@ -154,6 +201,9 @@ defineEmits([
   'maximize',
   'resetZoom',
   'close',
+  'export',
+  'prevPhase',
+  'nextPhase',
 ])
 </script>
 

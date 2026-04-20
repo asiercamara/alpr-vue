@@ -50,6 +50,7 @@
 -->
 <template>
   <figure
+    ref="figureEl"
     class="dp-root"
     :class="[
       `dp-preset-${resolvedPreset}`,
@@ -68,32 +69,62 @@
       :adapter-label="adapterLabel"
       :ready="ready"
       :is-modal="false"
+      :phase-nav="phaseNav"
+      :can-prev="currentPhaseIndex >= 0"
+      :can-next="ready && currentPhaseIndex < phaseNavTotalPhases - 1"
       @play="playAll"
-      @cycle-speed="cycleSpeed"
+      @cycle-speed="handleCycleSpeed"
       @toggle-pause="togglePause"
       @toggle-loop="isLooping = !isLooping"
       @reset="reset"
       @maximize="openMaximized"
+      @prev-phase="playPrevPhase"
+      @next-phase="playNextPhase"
     />
 
+    <!-- Scrubber (replaces progress bar — interactive seek) -->
     <div
-      v-if="controls && (isPlaying || progress > 0)"
-      class="dp-progress"
-      role="progressbar"
+      v-if="controls && !phaseNav && (isPlaying || isPaused || progress > 0)"
+      class="dp-scrubber"
+      role="slider"
+      tabindex="0"
       :aria-valuenow="Math.round(progress * 100)"
       aria-valuemin="0"
       aria-valuemax="100"
+      aria-label="Progreso de animación"
+      @pointerdown="onScrubDown"
+      @keydown="onScrubKeydown"
     >
-      <div class="dp-progress-bar" :style="{ width: `${progress * 100}%` }" />
+      <div class="dp-scrubber-track">
+        <div class="dp-scrubber-fill" :style="{ width: `${progress * 100}%` }" />
+        <div class="dp-scrubber-thumb" :style="{ left: `${progress * 100}%` }" />
+      </div>
     </div>
 
+    <!-- Phase dots indicator -->
+    <DiagramPhaseIndicator
+      v-if="phaseNav"
+      :total="phaseNavTotalPhases"
+      :current-index="currentPhaseIndex"
+    />
+
     <div
-      ref="container"
       class="dp-stage"
       aria-live="polite"
       title="Doble clic para maximizar"
       @dblclick="openMaximized"
-    />
+    >
+      <div v-if="!ready" class="dp-skeleton" aria-hidden="true" />
+      <!-- Mermaid injects SVG here via innerHTML — Vue must not own any children of this div -->
+      <div ref="container" class="dp-stage-canvas" />
+    </div>
+
+    <!-- Speed toast -->
+    <Transition name="dp-toast">
+      <div v-if="speedToastVisible" class="dp-speed-toast" aria-live="polite">
+        {{ speedToastText }}
+      </div>
+    </Transition>
 
     <figcaption v-if="caption" class="dp-caption">{{ caption }}</figcaption>
   </figure>
@@ -125,36 +156,58 @@
             :adapter-label="adapterLabel"
             :ready="ready"
             :is-modal="true"
+            :phase-nav="phaseNav"
+            :can-prev="currentPhaseIndex >= 0"
+            :can-next="ready && currentPhaseIndex < phaseNavTotalPhases - 1"
             @play="playAll"
-            @cycle-speed="cycleSpeed"
+            @cycle-speed="handleCycleSpeed"
             @toggle-pause="togglePause"
             @toggle-loop="isLooping = !isLooping"
             @reset="reset"
             @reset-zoom="resetZoom"
             @close="closeMaximized"
+            @export="exportDiagram('svg')"
+            @prev-phase="playPrevPhase"
+            @next-phase="playNextPhase"
           />
 
-          <!-- Progress bar (modal) -->
+          <!-- Scrubber (modal) -->
           <div
-            v-if="isPlaying || progress > 0"
-            class="dp-progress"
-            role="progressbar"
+            v-if="!phaseNav && (isPlaying || isPaused || progress > 0)"
+            class="dp-scrubber"
+            role="slider"
+            tabindex="0"
             :aria-valuenow="Math.round(progress * 100)"
             aria-valuemin="0"
             aria-valuemax="100"
+            aria-label="Progreso de animación"
+            @pointerdown="onScrubDown"
+            @keydown="onScrubKeydown"
           >
-            <div class="dp-progress-bar" :style="{ width: `${progress * 100}%` }" />
+            <div class="dp-scrubber-track">
+              <div class="dp-scrubber-fill" :style="{ width: `${progress * 100}%` }" />
+              <div class="dp-scrubber-thumb" :style="{ left: `${progress * 100}%` }" />
+            </div>
           </div>
+
+          <!-- Phase dots indicator (modal) -->
+          <DiagramPhaseIndicator
+            v-if="phaseNav"
+            :total="phaseNavTotalPhases"
+            :current-index="currentPhaseIndex"
+          />
 
           <!-- Stage: hosts the SVG (moved from inline container while modal is open) -->
           <div
             ref="modalContainer"
             class="dp-stage dp-modal-stage"
             :style="{ cursor: isPinching ? 'default' : isDragging ? 'grabbing' : 'grab' }"
+            style="touch-action: manipulation"
             @pointerdown="onStagePointerDown"
             @pointermove="onStagePointerMove"
             @pointerup="onStagePointerUp"
             @pointercancel="onStagePointerUp"
+            @dblclick="onModalDblClick"
           >
             <div
               class="dp-modal-canvas"
@@ -176,10 +229,19 @@
             :visible="showMinimap"
           />
 
+          <!-- Speed toast (modal) -->
+          <Transition name="dp-toast">
+            <div v-if="speedToastVisible" class="dp-speed-toast" aria-live="polite">
+              {{ speedToastText }}
+            </div>
+          </Transition>
+
           <!-- Zoom hint -->
           <footer class="dp-modal-hint">
             <span
-              >Pellizca o rueda para zoom · Arrastra para mover · <kbd>Esc</kbd> para cerrar</span
+              >Pellizca o rueda para zoom · Arrastra para mover · Doble clic en nodo para enfocar ·
+              <kbd>Space</kbd> pausar · <kbd>←/→</kbd> seek · <kbd>1/2/3</kbd> velocidad ·
+              <kbd>R</kbd> reiniciar · <kbd>F</kbd> zoom · <kbd>Esc</kbd> cerrar</span
             >
           </footer>
         </figure>
@@ -191,13 +253,19 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useData } from 'vitepress'
+import { gsap } from 'gsap'
 import DiagramToolbar from './DiagramToolbar.vue'
 import DiagramViewportMap from './DiagramViewportMap.vue'
+import DiagramPhaseIndicator from './DiagramPhaseIndicator.vue'
 import { useRenderer } from './useRenderer.js'
 import { usePlayback } from './usePlayback.js'
 import { useModalZoom } from './useModalZoom.js'
 import { useMinimap } from './useMinimap.js'
 import { useIntersectionAutoplay } from './useIntersectionAutoplay.js'
+import { usePhaseNav } from './usePhaseNav.js'
+import { useHoverSpotlight } from './useHoverSpotlight.js'
+import { isReducedMotion } from './dp-utils.js'
+import { inlineStylesForExport, triggerDownload, exportSvgToPng } from './export-utils.js'
 
 const props = defineProps({
   code: { type: String, required: true },
@@ -210,6 +278,8 @@ const props = defineProps({
   speed: { type: String, default: 'normal' }, // 'slow' | 'normal' | 'fast'
   loop: { type: Boolean, default: false },
   caption: { type: String, default: '' },
+  phaseNav: { type: Boolean, default: false },
+  spotlight: { type: Boolean, default: false },
   timing: {
     type: Object,
     default: () => ({
@@ -229,6 +299,7 @@ const { isDark } = useData()
 /* ----------------------------------------------------------------
  * Stage refs
  * ---------------------------------------------------------------- */
+const figureEl = ref(null)
 const container = ref(null)
 const modalContainer = ref(null)
 
@@ -265,9 +336,10 @@ const {
   stageWidth,
   stageHeight,
   svgElement,
-  openMaximized,
+  openMaximized: openMaximizedModal,
   closeMaximized,
   resetZoom,
+  zoomToElement,
   onModalWheel,
   onStagePointerDown,
   onStagePointerMove,
@@ -305,11 +377,51 @@ const {
   killTimeline,
   killHighlightTweens,
   pulseHighlighted,
+  hideNodes,
+  hideEdges,
+  showAllNodes,
+  showAllEdges,
+  tweenNodes,
+  tweenEdges,
+  restoreMarker,
 } = usePlayback({
   container,
   props,
+  resolvedPreset,
   emitPlayStart: () => emit('play-start'),
   emitPlayComplete: () => emit('play-complete'),
+})
+
+/* Phase navigation (C1) */
+const {
+  currentPhaseIndex,
+  totalPhases: phaseNavTotalPhases,
+  setPrepared: setPhaseNavPrepared,
+  playNextPhase,
+  playPrevPhase,
+} = usePhaseNav({
+  playbackAPI: {
+    hideNodes,
+    hideEdges,
+    showAllNodes,
+    showAllEdges,
+    tweenNodes,
+    tweenEdges,
+    restoreMarker,
+    isPlaying,
+    killTimeline,
+  },
+})
+
+/* Hover spotlight (C2) */
+const {
+  setPrepared: setSpotlightPrepared,
+  onNodeEnter,
+  onNodeLeave,
+  killSpotlight,
+} = useHoverSpotlight({
+  container,
+  getIsPlaying: () => isPlaying.value,
 })
 
 const { setupIntersectionObserver, teardownIntersectionObserver } = useIntersectionAutoplay()
@@ -324,11 +436,15 @@ const { render } = useRenderer({
   onAdapterReady(resolvedAdapter, prepared) {
     adapter = resolvedAdapter
     setPrepared(prepared, ready)
+    setPhaseNavPrepared(prepared)
+    setSpotlightPrepared(prepared)
     killTimeline()
     killHighlightTweens()
+    killSpotlight()
     teardownIntersectionObserver()
   },
   onAutoPlay(mode) {
+    if (props.phaseNav) return
     if (mode === 'nodes') playNodes()
     else if (mode === 'edges') playEdges()
     else if (mode === 'all') playAll()
@@ -341,17 +457,58 @@ const { render } = useRenderer({
 /* ----------------------------------------------------------------
  * Lifecycle
  * ---------------------------------------------------------------- */
-onMounted(render)
+onMounted(() => {
+  // A5 — entrance animation (skipped when user prefers reduced motion)
+  if (figureEl.value && !isReducedMotion()) {
+    gsap.from(figureEl.value, {
+      y: 24,
+      opacity: 0,
+      duration: 0.5,
+      ease: 'power2.out',
+      clearProps: 'all',
+    })
+  }
+
+  // C2 — spotlight event delegation (survives SVG re-renders)
+  container.value?.addEventListener('mouseover', (e) => {
+    if (!props.spotlight) return
+    const gNode = e.target.closest('g.node')
+    if (gNode) onNodeEnter(gNode)
+  })
+  container.value?.addEventListener('mouseout', (e) => {
+    if (!props.spotlight) return
+    if (e.target.closest('g.node') && !e.relatedTarget?.closest('g.node')) onNodeLeave()
+  })
+  // Touch: tap on node toggles spotlight, tap outside clears it
+  container.value?.addEventListener('click', (e) => {
+    if (!props.spotlight) return
+    const gNode = e.target.closest('g.node')
+    if (gNode) onNodeEnter(gNode)
+    else onNodeLeave()
+  })
+
+  render()
+})
+
 onBeforeUnmount(() => {
   if (isMaximized.value) closeMaximized()
   killTimeline()
   killHighlightTweens()
+  killSpotlight()
   teardownIntersectionObserver()
   cleanupListeners()
+  clearTimeout(speedToastTimer)
 })
 watch(() => props.code, render)
 watch(() => props.preset, render)
 watch(isDark, render)
+watch(
+  () => props.phaseNav,
+  (enabled) => {
+    if (enabled) isLooping.value = false
+  },
+  { immediate: true },
+)
 watch(
   () => props.highlight,
   () => {
@@ -365,6 +522,118 @@ watch(
  * ---------------------------------------------------------------- */
 function reset() {
   render()
+}
+
+/* ----------------------------------------------------------------
+ * A1 — openMaximized wrapper passes playback keyboard handlers
+ * ---------------------------------------------------------------- */
+function openMaximized() {
+  openMaximizedModal({
+    onTogglePause: togglePause,
+    onSeekForward: () => seek(Math.min(1, progress.value + 0.1)),
+    onSeekBack: () => seek(Math.max(0, progress.value - 0.1)),
+    onSpeed: (s) => {
+      currentSpeed.value = s
+    },
+    onReset: reset,
+  })
+}
+
+/* ----------------------------------------------------------------
+ * A6 — Scrubber interaction
+ * ---------------------------------------------------------------- */
+function onScrubKeydown(e) {
+  const step = e.shiftKey ? 0.05 : 0.01
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+    e.preventDefault()
+    seek(Math.min(1, progress.value + step))
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+    e.preventDefault()
+    seek(Math.max(0, progress.value - step))
+  } else if (e.key === 'Home') {
+    e.preventDefault()
+    seek(0)
+  } else if (e.key === 'End') {
+    e.preventDefault()
+    seek(1)
+  }
+}
+
+function onScrubDown(e) {
+  e.currentTarget.setPointerCapture(e.pointerId)
+  const wasAlreadyPaused = isPaused.value
+  if (isPlaying.value && !isPaused.value) togglePause()
+  const track = e.currentTarget
+  const doSeek = (evt) => {
+    const rect = track.getBoundingClientRect()
+    seek(Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width)))
+  }
+  doSeek(e)
+  const onMove = (evt) => doSeek(evt)
+  const onUp = () => {
+    track.removeEventListener('pointermove', onMove)
+    track.removeEventListener('pointerup', onUp)
+    // Resume only if we paused it — don't resume if user had already paused
+    if (!wasAlreadyPaused && isPaused.value) togglePause()
+  }
+  track.addEventListener('pointermove', onMove)
+  track.addEventListener('pointerup', onUp)
+}
+
+/* ----------------------------------------------------------------
+ * B1 — Speed toast
+ * ---------------------------------------------------------------- */
+const speedToastText = ref('')
+const speedToastVisible = ref(false)
+let speedToastTimer = null
+
+function handleCycleSpeed() {
+  cycleSpeed()
+  speedToastText.value = speedLabel.value
+  speedToastVisible.value = true
+  clearTimeout(speedToastTimer)
+  speedToastTimer = setTimeout(() => {
+    speedToastVisible.value = false
+  }, 1100)
+}
+
+/* ----------------------------------------------------------------
+ * B2 — Export diagram
+ * ---------------------------------------------------------------- */
+function getActiveSvg() {
+  return isMaximized.value
+    ? modalContainer.value?.querySelector('svg')
+    : container.value?.querySelector('svg')
+}
+
+function exportDiagram(format = 'svg') {
+  const svgEl = getActiveSvg()
+  if (!svgEl) return
+  const clone = inlineStylesForExport(svgEl)
+  const svgStr = new XMLSerializer().serializeToString(clone)
+  if (format === 'svg') {
+    triggerDownload(new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' }), 'diagram.svg')
+    return
+  }
+  const vb = svgEl.viewBox.baseVal
+  const W = (vb.width || 800) * 2
+  const H = (vb.height || 600) * 2
+  exportSvgToPng(
+    svgStr,
+    W,
+    H,
+    (blob) => triggerDownload(blob, 'diagram.png'),
+    () => exportDiagram('svg'), // fallback: foreignObject taint in Chrome
+  )
+}
+
+/* ----------------------------------------------------------------
+ * C3 — Double-click to zoom to node in modal
+ * ---------------------------------------------------------------- */
+function onModalDblClick(e) {
+  const gNode = e.target.closest('g.node')
+  if (gNode) zoomToElement(gNode, e.currentTarget)
+  else resetZoom()
 }
 
 /* ----------------------------------------------------------------
@@ -387,6 +656,7 @@ defineExpose({
   },
   getTimeline: () => timeline.value,
   getAdapter: () => adapter?.name,
+  exportDiagram,
 })
 </script>
 
@@ -398,17 +668,17 @@ defineExpose({
   --dp-radius: 14px;
   --dp-bg: var(--vp-c-bg-soft, #f6f8fa);
   --dp-bg-raised: var(--vp-c-bg-elv, #ffffff);
-  --dp-border: var(--vp-c-divider, rgba(60, 60, 60, 0.12));
+  --dp-border: var(--vp-c-divider, rgba(60, 60, 60, 0.22));
   --dp-text: var(--vp-c-text-1, #1f2937);
   --dp-text-muted: var(--vp-c-text-2, #64748b);
   --dp-accent: var(--vp-c-brand-1, #3451b2);
-  --dp-accent-soft: var(--vp-c-brand-soft, rgba(52, 81, 178, 0.1));
+  --dp-accent-soft: color-mix(in srgb, var(--dp-accent) 18%, transparent);
 
   --dp-process-fill: var(--dp-bg-raised);
   --dp-process-stroke: var(--dp-accent);
-  --dp-decision-fill: color-mix(in srgb, #eab308 10%, var(--dp-bg-raised));
+  --dp-decision-fill: color-mix(in srgb, #eab308 28%, var(--dp-bg-raised));
   --dp-decision-stroke: #eab308;
-  --dp-terminus-fill: color-mix(in srgb, #8b5cf6 10%, var(--dp-bg-raised));
+  --dp-terminus-fill: color-mix(in srgb, #8b5cf6 28%, var(--dp-bg-raised));
   --dp-terminus-stroke: #8b5cf6;
 
   --dp-edge: var(--dp-accent);
@@ -430,9 +700,31 @@ defineExpose({
 .dp-preset-soft {
   --dp-process-fill: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--dp-accent) 8%, var(--dp-bg-raised)),
+    color-mix(in srgb, var(--dp-accent) 14%, var(--dp-bg-raised)),
     var(--dp-bg-raised)
   );
+}
+
+/* E2 — slightly heavier stroke in light mode for better contrast */
+.dp-preset-soft :deep(svg g.node > rect),
+.dp-preset-soft :deep(svg g.node > polygon),
+.dp-preset-soft :deep(svg g.node > circle),
+.dp-preset-soft :deep(svg g.node > ellipse) {
+  stroke-width: 2px;
+}
+
+/* E3 — subtle edge glow in light mode */
+.dp-preset-soft :deep(svg .edgePath path),
+.dp-preset-soft :deep(svg path.flowchart-link),
+.dp-preset-soft :deep(svg path.transition) {
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--dp-accent) 45%, transparent));
+}
+
+/* E5 — stage inner depth in light mode */
+.dp-preset-soft .dp-stage {
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.06),
+    0 0 0 1px var(--dp-border);
 }
 
 /* ----------------------------------------------------------------
@@ -480,7 +772,7 @@ defineExpose({
   background:
     radial-gradient(
       ellipse at top,
-      color-mix(in srgb, var(--dp-accent) 6%, transparent),
+      color-mix(in srgb, var(--dp-accent) 14%, transparent),
       transparent 70%
     ),
     var(--dp-bg);
@@ -489,6 +781,7 @@ defineExpose({
   min-height: 260px;
   overflow: auto;
   cursor: zoom-in;
+  position: relative;
 }
 .dp-preset-neon .dp-stage {
   background:
@@ -501,7 +794,7 @@ defineExpose({
   max-width: 100%;
   height: auto;
   color: var(--dp-text);
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.08));
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.22));
 }
 .dp-preset-neon :deep(svg) {
   filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.35));
@@ -761,6 +1054,138 @@ defineExpose({
   opacity: 0;
 }
 
+/* ================================================================
+ * A4 — Skeleton placeholder
+ * ================================================================ */
+.dp-skeleton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 480px;
+  height: 200px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--dp-border) 25%,
+    color-mix(in srgb, var(--dp-border) 45%, transparent) 50%,
+    var(--dp-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: dp-shimmer 1.6s infinite linear;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Mermaid SVG host — must never have Vue-managed children */
+.dp-stage-canvas {
+  display: contents;
+}
+@keyframes dp-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ================================================================
+ * A6 — Scrubber
+ * ================================================================ */
+.dp-scrubber {
+  touch-action: none;
+  padding: 0 0.75rem;
+  cursor: pointer;
+  outline: none;
+}
+.dp-scrubber:focus-visible {
+  outline: 2px solid var(--dp-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.dp-scrubber-track {
+  position: relative;
+  height: 4px;
+  background: var(--dp-border);
+  border-radius: 999px;
+  overflow: visible;
+}
+.dp-scrubber-fill {
+  height: 100%;
+  background: var(--dp-accent);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.dp-scrubber-thumb {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--dp-accent);
+  border: 2px solid var(--dp-bg-raised);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.1s;
+  box-shadow: 0 0 0 2px var(--dp-accent-soft);
+}
+.dp-scrubber:hover .dp-scrubber-thumb {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+@media (pointer: coarse) {
+  .dp-scrubber-track {
+    height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .dp-scrubber-fill {
+    position: absolute;
+    height: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .dp-scrubber-thumb {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ================================================================
+ * B1 — Speed toast
+ * ================================================================ */
+.dp-speed-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 3.5rem;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--dp-bg-raised) 92%, transparent);
+  color: var(--dp-text);
+  border: 1px solid var(--dp-border);
+  border-radius: 8px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+}
+.dp-toast-enter-active,
+.dp-toast-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.dp-toast-enter-from,
+.dp-toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(6px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dp-root :deep(svg) {
     transition: none !important;
@@ -769,6 +1194,14 @@ defineExpose({
   .dp-modal-leave-active,
   .dp-modal-enter-active .dp-modal-figure,
   .dp-modal-leave-active .dp-modal-figure {
+    transition: none !important;
+  }
+  .dp-skeleton {
+    animation: none;
+    opacity: 0.4;
+  }
+  .dp-toast-enter-active,
+  .dp-toast-leave-active {
     transition: none !important;
   }
 }

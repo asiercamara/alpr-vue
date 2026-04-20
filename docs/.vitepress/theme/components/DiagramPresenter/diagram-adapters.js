@@ -194,7 +194,22 @@ export const flowchartAdapter = {
     const orphans = edges.filter(e => !phasedPaths.has(e.path))
     if (orphans.length) phases.push({ kind: 'edges', elements: orphans.map(e => e.path) })
 
-    return { nodes, edges, phases, kind: this.name }
+    // Build connectivity map for hover spotlight (C2).
+    // sequenceAdapter and fallbackAdapter intentionally omit this.
+    const connectivity = new Map()
+    edges.forEach(({ path, from, to }) => {
+      if (!from || !to) return
+      ;[from, to].forEach(k => {
+        if (!connectivity.has(k))
+          connectivity.set(k, { outPaths: [], inPaths: [], neighbors: new Set() })
+      })
+      connectivity.get(from).outPaths.push(path)
+      connectivity.get(to).inPaths.push(path)
+      connectivity.get(from).neighbors.add(to)
+      connectivity.get(to).neighbors.add(from)
+    })
+
+    return { nodes, edges, phases, connectivity, kind: this.name }
   }
 }
 
@@ -294,7 +309,21 @@ export const stateAdapter = {
       if (edges.length) phases.push({ kind: 'edges', elements: edges.map(e => e.path) })
     }
 
-    return { nodes, edges, phases, kind: this.name }
+    // Build connectivity map for hover spotlight (C2).
+    const connectivity = new Map()
+    edges.forEach(({ path, from, to }) => {
+      if (!from || !to) return
+      ;[from, to].forEach(k => {
+        if (!connectivity.has(k))
+          connectivity.set(k, { outPaths: [], inPaths: [], neighbors: new Set() })
+      })
+      connectivity.get(from).outPaths.push(path)
+      connectivity.get(to).inPaths.push(path)
+      connectivity.get(from).neighbors.add(to)
+      connectivity.get(to).neighbors.add(from)
+    })
+
+    return { nodes, edges, phases, connectivity, kind: this.name }
   }
 }
 

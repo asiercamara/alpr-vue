@@ -20,6 +20,7 @@
 
 import { ref, shallowRef, computed } from 'vue'
 import { gsap } from 'gsap'
+import { isReducedMotion, getNodeSvgOrigin, resolveAccentColor } from './dp-utils.js'
 
 /* ================================================================
  * Constants
@@ -40,6 +41,7 @@ const SPEED_FACTORS = { slow: 2.2, normal: 1, fast: 0.35 }
  * @param {object} options
  * @param {import('vue').Ref<HTMLElement|null>} options.container - The active stage element (inline or modal).
  * @param {object} options.props - Component props: `timing`, `speed`, `loop`, `highlight`, `highlightMode`.
+ * @param {import('vue').ComputedRef<string>} options.resolvedPreset - Resolved preset ('soft'|'neon').
  * @param {Function} options.emitPlayStart - Forwards `emit('play-start')`.
  * @param {Function} options.emitPlayComplete - Forwards `emit('play-complete')`.
  * @returns {{
@@ -60,9 +62,16 @@ const SPEED_FACTORS = { slow: 2.2, normal: 1, fast: 0.35 }
  *   killTimeline: () => void,
  *   killHighlightTweens: () => void,
  *   pulseHighlighted: () => void,
+ *   hideNodes: () => void,
+ *   hideEdges: () => void,
+ *   showAllNodes: () => void,
+ *   showAllEdges: () => void,
+ *   tweenNodes: (tl: gsap.core.Timeline, elements: Element[], position: string|number) => gsap.core.Timeline,
+ *   tweenEdges: (tl: gsap.core.Timeline, paths: SVGPathElement[], position: string|number) => gsap.core.Timeline,
+ *   restoreMarker: (path: SVGPathElement) => void,
  * }}
  */
-export function usePlayback({ container, props, emitPlayStart, emitPlayComplete }) {
+export function usePlayback({ container, props, resolvedPreset, emitPlayStart, emitPlayComplete }) {
   /* ----------------------------------------------------------------
    * Speed state
    * ---------------------------------------------------------------- */
@@ -139,11 +148,13 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
 
   /**
    * Hide all diagram nodes (opacity 0) as the starting state for animation.
+   * Also clears leftover transforms from previous animation cycles.
    *
    * @returns {void}
    */
   function hideNodes() {
     if (!prepared) return
+    gsap.set(prepared.nodes, { clearProps: 'filter' })
     gsap.set(prepared.nodes, { opacity: 0 })
   }
 
@@ -228,26 +239,44 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
    * ---------------------------------------------------------------- */
 
   /**
-   * Append a staggered node fade-in tween to the given timeline.
+   * Append differentiated node entrance tweens to the given timeline.
+   *
+   * Animation varies by node kind (data-dp-kind attribute):
+   *   - terminus / actor → elastic pop-in from scale 0
+   *   - decision         → rotate-in from -90°
+   *   - process (default) → slide in from above (y: -12 SVG units)
    *
    * @param {gsap.core.Timeline} tl
    * @param {Element[]} elements - Node elements to animate.
-   * @param {string|number} position - GSAP timeline position label/offset.
+   * @param {string|number} position - GSAP timeline position for the first element.
    * @returns {gsap.core.Timeline}
    */
   function tweenNodes(tl, elements, position) {
     if (!elements.length) return tl
     const t = getEffectiveTiming()
-    tl.to(
-      elements,
-      {
-        opacity: 1,
-        duration: t.nodeDuration,
-        stagger: t.nodeStagger,
-        ease: 'power2.out',
-      },
-      position,
-    )
+    elements.forEach((el, i) => {
+      const pos = i === 0 ? position : `<+${t.nodeStagger}`
+      const kind = el.dataset?.dpKind || 'process'
+      const dur = t.nodeDuration
+      if (kind === 'terminus' || kind === 'actor') {
+        const origin = getNodeSvgOrigin(el)
+        tl.fromTo(el,
+          { opacity: 0, scale: 0, ...(origin ? { svgOrigin: origin } : {}) },
+          { opacity: 1, scale: 1, duration: dur * 1.2, ease: 'elastic.out(0.8, 0.5)' },
+          pos)
+      } else if (kind === 'decision') {
+        const origin = getNodeSvgOrigin(el)
+        tl.fromTo(el,
+          { opacity: 0, rotation: -90, ...(origin ? { svgOrigin: origin } : {}) },
+          { opacity: 1, rotation: 0, duration: dur, ease: 'back.out(1.7)' },
+          pos)
+      } else {
+        tl.fromTo(el,
+          { opacity: 0 },
+          { opacity: 1, duration: dur, ease: 'power2.out' },
+          pos)
+      }
+    })
     return tl
   }
 
@@ -321,6 +350,7 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
       progress.value = 1
       emitPlayComplete()
       if (props.highlight?.length) pulseHighlighted()
+      if (resolvedPreset?.value === 'neon') pulseEdgesGlow()
       if (isLooping.value) {
         loopTimer = setTimeout(() => {
           if (isLooping.value && readyRef?.value) playAll()
@@ -385,6 +415,14 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
   function playNodes() {
     if (!readyRef?.value || isPlaying.value) return
     killTimeline()
+    if (isReducedMotion()) {
+      showAllNodes()
+      showAllEdges()
+      emitPlayStart()
+      emitPlayComplete()
+      if (props.highlight?.length) pulseHighlighted()
+      return
+    }
     hideNodes()
     showAllEdges()
     const tl = gsap.timeline()
@@ -400,6 +438,14 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
   function playEdges() {
     if (!readyRef?.value || isPlaying.value) return
     killTimeline()
+    if (isReducedMotion()) {
+      showAllNodes()
+      showAllEdges()
+      emitPlayStart()
+      emitPlayComplete()
+      if (props.highlight?.length) pulseHighlighted()
+      return
+    }
     showAllNodes()
     hideEdges()
     const tl = gsap.timeline()
@@ -423,6 +469,14 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
   function playAll() {
     if (!readyRef?.value || isPlaying.value) return
     killTimeline()
+    if (isReducedMotion()) {
+      showAllNodes()
+      showAllEdges()
+      emitPlayStart()
+      emitPlayComplete()
+      if (props.highlight?.length) pulseHighlighted()
+      return
+    }
     hideNodes()
     hideEdges()
     const t = getEffectiveTiming()
@@ -469,13 +523,19 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
 
     killHighlightTweens()
 
-    // Resolve accent colour: CSS custom properties are not interpolatable by
-    // GSAP, so we read the computed value and fall back to a safe default.
-    const rootEl = container.value
-    let accent = rootEl ? getComputedStyle(rootEl).getPropertyValue('--dp-accent').trim() : '#818cf8'
-    if (!accent || accent.startsWith('var(')) {
-      accent = rootEl ? getComputedStyle(rootEl).getPropertyValue('--vp-c-brand-1').trim() : ''
-      if (!accent || accent.startsWith('var(')) accent = '#818cf8'
+    const accent = resolveAccentColor(container.value)
+
+    // Reduced motion: apply final glow state instantly without animation cycles
+    if (isReducedMotion()) {
+      targets.forEach((gNode) => {
+        gNode.querySelectorAll('rect, polygon, circle, ellipse').forEach((shape) => {
+          gsap.set(shape, {
+            attr: { stroke: accent, 'stroke-width': parseFloat(shape.getAttribute('stroke-width') || '1') + 2 },
+            filter: `drop-shadow(0 0 8px ${accent})`,
+          })
+        })
+      })
+      return
     }
 
     const infinite = props.highlightMode === 'glow'
@@ -517,6 +577,35 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
     })
   }
 
+  /**
+   * Pulse a glow effect on all edges — called automatically after playAll
+   * completes when the resolved preset is 'neon'.
+   *
+   * Firefox may ignore filter on <path> elements; strokeOpacity provides a
+   * visible fallback for those cases.
+   *
+   * @returns {void}
+   */
+  function pulseEdgesGlow() {
+    if (!prepared || !container.value) return
+    const color = resolveAccentColor(container.value)
+    prepared.edges.map(e => e.path).filter(Boolean).forEach((path, i) => {
+      gsap.fromTo(path,
+        { strokeOpacity: 1 },
+        {
+          strokeOpacity: 0.3,
+          filter: `drop-shadow(0 0 6px ${color})`,
+          duration: 0.55,
+          repeat: 2,
+          yoyo: true,
+          ease: 'sine.inOut',
+          delay: i * 0.04,
+          onComplete: () => gsap.set(path, { clearProps: 'filter,strokeOpacity' }),
+        }
+      )
+    })
+  }
+
   return {
     currentSpeed,
     speedLabel,
@@ -535,5 +624,13 @@ export function usePlayback({ container, props, emitPlayStart, emitPlayComplete 
     killTimeline,
     killHighlightTweens,
     pulseHighlighted,
+    // Exported for usePhaseNav (C1) — internal animation primitives
+    hideNodes,
+    hideEdges,
+    showAllNodes,
+    showAllEdges,
+    tweenNodes,
+    tweenEdges,
+    restoreMarker,
   }
 }
