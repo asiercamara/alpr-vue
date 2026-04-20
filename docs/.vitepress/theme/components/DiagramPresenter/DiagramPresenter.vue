@@ -166,6 +166,16 @@
             />
           </div>
 
+          <!-- Minimap — outside the stage (which has overflow:hidden) so it isn't clipped -->
+          <DiagramViewportMap
+            :viewport-norm="viewportNorm"
+            :svg-w="svgWidth"
+            :svg-h="svgHeight"
+            :svg-el="svgElement"
+            :zoom="fitZoom > 0 ? zoom / fitZoom : zoom"
+            :visible="showMinimap"
+          />
+
           <!-- Zoom hint -->
           <footer class="dp-modal-hint">
             <span
@@ -182,9 +192,11 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useData } from 'vitepress'
 import DiagramToolbar from './DiagramToolbar.vue'
+import DiagramViewportMap from './DiagramViewportMap.vue'
 import { useRenderer } from './useRenderer.js'
 import { usePlayback } from './usePlayback.js'
 import { useModalZoom } from './useModalZoom.js'
+import { useMinimap } from './useMinimap.js'
 import { useIntersectionAutoplay } from './useIntersectionAutoplay.js'
 
 const props = defineProps({
@@ -247,6 +259,12 @@ const {
   panY,
   isDragging,
   isPinching,
+  fitZoom,
+  svgWidth,
+  svgHeight,
+  stageWidth,
+  stageHeight,
+  svgElement,
   openMaximized,
   closeMaximized,
   resetZoom,
@@ -256,6 +274,18 @@ const {
   onStagePointerUp,
   cleanupListeners,
 } = useModalZoom({ container, modalContainer })
+
+const { showMinimap, viewportNorm } = useMinimap({
+  zoom,
+  panX,
+  panY,
+  fitZoom,
+  svgWidth,
+  svgHeight,
+  stageWidth,
+  stageHeight,
+  isMaximized,
+})
 
 const {
   currentSpeed,

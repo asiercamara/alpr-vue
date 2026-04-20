@@ -171,6 +171,16 @@ The component uses an **adapter system** — each adapter handles one Mermaid di
 
 All diagrams support double-click to open a full-screen modal with pan (drag) and zoom (scroll wheel). This is enabled by default and requires no configuration.
 
+### Viewport minimap
+
+When you zoom in past the initial fit level, a **minimap overlay** appears in the bottom-right corner of the modal. It shows:
+
+- The full diagram at a glance as a small thumbnail.
+- A highlighted rectangle representing the currently visible area.
+- A zoom level label (e.g. `2.4×`).
+
+The minimap disappears automatically when you zoom back out so the entire diagram fits the screen again. It is purely informational — all navigation is still done by dragging and scrolling on the main stage.
+
 ## Interactive playground
 
 Experiment with all props live at [DiagramPresenter Playground](/diagram-playground).

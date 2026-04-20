@@ -28,6 +28,10 @@ import { ref, nextTick } from 'vue'
  *   isDragging: import('vue').Ref<boolean>,
  *   isPinching: import('vue').Ref<boolean>,
  *   fitZoom: import('vue').Ref<number>,
+ *   svgWidth: import('vue').Ref<number>,
+ *   svgHeight: import('vue').Ref<number>,
+ *   stageWidth: import('vue').Ref<number>,
+ *   stageHeight: import('vue').Ref<number>,
  *   openMaximized: () => void,
  *   closeMaximized: () => void,
  *   resetZoom: () => void,
@@ -45,8 +49,16 @@ export function useModalZoom({ container, modalContainer }) {
   const panY = ref(0)
   const isDragging = ref(false)
   const isPinching = ref(false)
-  /** Last computed fit-to-stage zoom level; used by resetZoom. */
+  /** Last computed fit-to-stage zoom level; used by resetZoom and the minimap threshold. */
   const fitZoom = ref(1)
+  /** SVG natural dimensions from its viewBox; set on modal open, reset on close. */
+  const svgWidth = ref(0)
+  const svgHeight = ref(0)
+  /** Modal stage pixel dimensions at the time the modal opened. */
+  const stageWidth = ref(0)
+  const stageHeight = ref(0)
+  /** The SVG DOM element currently hosted in the modal canvas; used by the minimap to clone a thumbnail. */
+  const svgElement = ref(null)
   /** Initial pan offsets computed on open (align diagram to top-left corner). */
   let fitPanX = 0
   let fitPanY = 0
@@ -144,6 +156,13 @@ export function useModalZoom({ container, modalContainer }) {
         const stageW = stageEl.offsetWidth || window.innerWidth
         const stageH = stageEl.offsetHeight || window.innerHeight
 
+        // Expose stage and SVG dimensions for the minimap composable.
+        svgWidth.value = vb.width
+        svgHeight.value = vb.height
+        stageWidth.value = stageW
+        stageHeight.value = stageH
+        svgElement.value = svgEl
+
         // Responsive constants: tighter margins and lower min-zoom on mobile
         // to maximise the available screen area.
         const isMobile = stageW < 768
@@ -215,6 +234,11 @@ export function useModalZoom({ container, modalContainer }) {
     isPinching.value = false
     dragPointerId = -1
     isMaximized.value = false
+    svgWidth.value = 0
+    svgHeight.value = 0
+    stageWidth.value = 0
+    stageHeight.value = 0
+    svgElement.value = null
     document.body.style.overflow = ''
     document.removeEventListener('keydown', handleModalKey)
   }
@@ -378,6 +402,11 @@ export function useModalZoom({ container, modalContainer }) {
     isDragging,
     isPinching,
     fitZoom,
+    svgWidth,
+    svgHeight,
+    stageWidth,
+    stageHeight,
+    svgElement,
     openMaximized,
     closeMaximized,
     resetZoom,
