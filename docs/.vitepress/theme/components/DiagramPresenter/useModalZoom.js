@@ -26,13 +26,15 @@ import { ref, nextTick } from 'vue'
  *   panX: import('vue').Ref<number>,
  *   panY: import('vue').Ref<number>,
  *   isDragging: import('vue').Ref<boolean>,
+ *   isPinching: import('vue').Ref<boolean>,
  *   fitZoom: import('vue').Ref<number>,
  *   openMaximized: () => void,
  *   closeMaximized: () => void,
  *   resetZoom: () => void,
  *   onModalWheel: (e: WheelEvent) => void,
- *   onModalPointerDown: (e: PointerEvent) => void,
- *   onModalPointerUp: () => void,
+ *   onStagePointerDown: (e: PointerEvent) => void,
+ *   onStagePointerMove: (e: PointerEvent) => void,
+ *   onStagePointerUp: (e: PointerEvent) => void,
  *   cleanupListeners: () => void,
  * }}
  */
@@ -42,16 +44,31 @@ export function useModalZoom({ container, modalContainer }) {
   const panX = ref(0)
   const panY = ref(0)
   const isDragging = ref(false)
+  const isPinching = ref(false)
   /** Last computed fit-to-stage zoom level; used by resetZoom. */
   const fitZoom = ref(1)
   /** Initial pan offsets computed on open (align diagram to top-left corner). */
   let fitPanX = 0
   let fitPanY = 0
 
+  // ── Drag state (single pointer) ──────────────────────────────────────────
+  let dragPointerId = -1
   let dragStartX = 0
   let dragStartY = 0
   let dragStartPanX = 0
   let dragStartPanY = 0
+
+  // ── Pinch state (two pointers) ────────────────────────────────────────────
+  /** All active pointers keyed by pointerId → {x, y}. */
+  const activePointers = new Map()
+  let pinchInitDist = 1
+  let pinchInitZoom = 1
+  let pinchInitPanX = 0
+  let pinchInitPanY = 0
+  let pinchInitMidX = 0
+  let pinchInitMidY = 0
+  /** Bounding rect of the stage element at pinch start, for coord conversion. */
+  let pinchStageRect = null
 
   /** Original SVG attribute values saved before overriding for modal display. */
   let savedSvgWidth = ''
@@ -193,6 +210,10 @@ export function useModalZoom({ container, modalContainer }) {
       else svgEl.removeAttribute('height')
       if (container.value) container.value.appendChild(svgEl)
     }
+    activePointers.clear()
+    isDragging.value = false
+    isPinching.value = false
+    dragPointerId = -1
     isMaximized.value = false
     document.body.style.overflow = ''
     document.removeEventListener('keydown', handleModalKey)
@@ -243,42 +264,110 @@ export function useModalZoom({ container, modalContainer }) {
   }
 
   /**
-   * Pointer-down handler: starts a drag operation (primary button only).
+   * Pointer-down handler on the stage element.
+   *
+   * Uses `setPointerCapture` so all subsequent events for that pointer are
+   * routed here even if the finger moves outside the element. Supports both
+   * single-finger drag and two-finger pinch-to-zoom.
    *
    * @param {PointerEvent} e
    * @returns {void}
    */
-  function onModalPointerDown(e) {
-    if (e.button !== 0) return
-    isDragging.value = true
-    dragStartX = e.clientX
-    dragStartY = e.clientY
-    dragStartPanX = panX.value
-    dragStartPanY = panY.value
-    window.addEventListener('pointermove', onModalPointerMove)
-    window.addEventListener('pointerup', onModalPointerUp, { once: true })
+  function onStagePointerDown(e) {
+    // Only track touch / primary-button mouse
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    if (activePointers.size === 1) {
+      // Start drag
+      isDragging.value = true
+      dragPointerId = e.pointerId
+      dragStartX = e.clientX
+      dragStartY = e.clientY
+      dragStartPanX = panX.value
+      dragStartPanY = panY.value
+    } else if (activePointers.size === 2) {
+      // Second finger landed → switch to pinch
+      isDragging.value = false
+      isPinching.value = true
+      const pts = [...activePointers.values()]
+      pinchInitDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) || 1
+      pinchInitZoom = zoom.value
+      pinchInitPanX = panX.value
+      pinchInitPanY = panY.value
+      pinchInitMidX = (pts[0].x + pts[1].x) / 2
+      pinchInitMidY = (pts[0].y + pts[1].y) / 2
+      pinchStageRect = e.currentTarget.getBoundingClientRect()
+    }
   }
 
   /**
-   * Pointer-move handler: updates pan offsets while dragging.
+   * Pointer-move handler on the stage element.
+   *
+   * Handles both drag (1 pointer) and pinch (2 pointers).
    *
    * @param {PointerEvent} e
    * @returns {void}
    */
-  function onModalPointerMove(e) {
-    if (!isDragging.value) return
-    panX.value = dragStartPanX + (e.clientX - dragStartX)
-    panY.value = dragStartPanY + (e.clientY - dragStartY)
+  function onStagePointerMove(e) {
+    if (!activePointers.has(e.pointerId)) return
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    if (isPinching.value && activePointers.size >= 2) {
+      const pts = [...activePointers.values()]
+      const currentDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) || 1
+      const currentMidX = (pts[0].x + pts[1].x) / 2
+      const currentMidY = (pts[0].y + pts[1].y) / 2
+
+      const scaleFactor = currentDist / pinchInitDist
+      const next = Math.min(Math.max(pinchInitZoom * scaleFactor, 0.25), 8)
+
+      // Convert initial and current midpoints to stage-center-relative coords
+      const stageW = pinchStageRect.width
+      const stageH = pinchStageRect.height
+      const initOx = pinchInitMidX - pinchStageRect.left - stageW / 2
+      const initOy = pinchInitMidY - pinchStageRect.top - stageH / 2
+      const curOx = currentMidX - pinchStageRect.left - stageW / 2
+      const curOy = currentMidY - pinchStageRect.top - stageH / 2
+
+      // Scale around the initial midpoint + translate by finger movement delta
+      panX.value = initOx + (pinchInitPanX - initOx) * (next / pinchInitZoom) + (curOx - initOx)
+      panY.value = initOy + (pinchInitPanY - initOy) * (next / pinchInitZoom) + (curOy - initOy)
+      zoom.value = next
+    } else if (isDragging.value && e.pointerId === dragPointerId) {
+      panX.value = dragStartPanX + (e.clientX - dragStartX)
+      panY.value = dragStartPanY + (e.clientY - dragStartY)
+    }
   }
 
   /**
-   * Pointer-up handler: ends the drag operation.
+   * Pointer-up / cancel handler on the stage element.
    *
+   * When one finger lifts during pinch, falls back to drag with the remaining
+   * finger so the gesture feels continuous.
+   *
+   * @param {PointerEvent} e
    * @returns {void}
    */
-  function onModalPointerUp() {
-    isDragging.value = false
-    window.removeEventListener('pointermove', onModalPointerMove)
+  function onStagePointerUp(e) {
+    activePointers.delete(e.pointerId)
+
+    if (activePointers.size === 0) {
+      isDragging.value = false
+      isPinching.value = false
+      dragPointerId = -1
+    } else if (activePointers.size === 1) {
+      // One finger lifted during pinch → switch back to drag
+      isPinching.value = false
+      const [remainId, remainPos] = [...activePointers.entries()][0]
+      isDragging.value = true
+      dragPointerId = remainId
+      dragStartX = remainPos.x
+      dragStartY = remainPos.y
+      dragStartPanX = panX.value
+      dragStartPanY = panY.value
+    }
   }
 
   return {
@@ -287,14 +376,16 @@ export function useModalZoom({ container, modalContainer }) {
     panX,
     panY,
     isDragging,
+    isPinching,
     fitZoom,
     openMaximized,
     closeMaximized,
     resetZoom,
     onModalWheel,
-    onModalPointerDown,
-    onModalPointerUp,
-    /** Remove any dangling pointermove listener (call in onBeforeUnmount). */
-    cleanupListeners: () => window.removeEventListener('pointermove', onModalPointerMove),
+    onStagePointerDown,
+    onStagePointerMove,
+    onStagePointerUp,
+    /** Clear any active pointer state (call in onBeforeUnmount). */
+    cleanupListeners: () => { activePointers.clear(); isDragging.value = false; isPinching.value = false },
   }
 }

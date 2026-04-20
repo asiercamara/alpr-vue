@@ -112,8 +112,7 @@
         <figure
           class="dp-modal-figure dp-root"
           :class="`dp-preset-${resolvedPreset}`"
-          @wheel.passive="onModalWheel"
-          @pointerdown="onModalPointerDown"
+          @wheel="onModalWheel"
         >
           <DiagramToolbar
             :can-start="canStart"
@@ -151,20 +150,27 @@
           <div
             ref="modalContainer"
             class="dp-stage dp-modal-stage"
-            :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
+            :style="{ cursor: isPinching ? 'default' : isDragging ? 'grabbing' : 'grab' }"
+            @pointerdown="onStagePointerDown"
+            @pointermove="onStagePointerMove"
+            @pointerup="onStagePointerUp"
+            @pointercancel="onStagePointerUp"
           >
             <div
               class="dp-modal-canvas"
               :style="{
                 transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
                 transformOrigin: '50% 50%',
+                transition: isDragging || isPinching ? 'none' : undefined,
               }"
             />
           </div>
 
           <!-- Zoom hint -->
           <footer class="dp-modal-hint">
-            <span>Rueda para hacer zoom · Arrastra para mover · <kbd>Esc</kbd> para cerrar</span>
+            <span
+              >Pellizca o rueda para zoom · Arrastra para mover · <kbd>Esc</kbd> para cerrar</span
+            >
           </footer>
         </figure>
       </div>
@@ -240,11 +246,14 @@ const {
   panX,
   panY,
   isDragging,
+  isPinching,
   openMaximized,
   closeMaximized,
   resetZoom,
   onModalWheel,
-  onModalPointerDown,
+  onStagePointerDown,
+  onStagePointerMove,
+  onStagePointerUp,
   cleanupListeners,
 } = useModalZoom({ container, modalContainer })
 
