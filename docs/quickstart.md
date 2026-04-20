@@ -42,38 +42,54 @@ flowchart TD
 
 <Steps>
   <Step title="Open the app in a supported browser">
-    Open ALPR Vue in a modern browser such as Chrome, Edge, Firefox, or Safari 16+. For the camera to work, the page must be served over **HTTPS or localhost** — this is a browser security requirement, not something specific to ALPR Vue. If you're accessing a self-hosted instance, make sure it uses a secure connection.
-
-    Not sure your browser is supported? See [Supported Browsers and Device Requirements](./browser-requirements).
-
+    <p>
+      Open ALPR Vue in a modern browser such as Chrome, Edge, Firefox, or Safari 16+. For the camera to work, the page must
+      be served over <strong>HTTPS or localhost</strong> — this is a browser security requirement, not something specific to
+      ALPR Vue. If you're accessing a self-hosted instance, make sure it uses a secure connection.
+    </p>
+    <p>
+      Not sure your browser is supported? See
+      <a href="./browser-requirements">Supported Browsers and Device Requirements</a>.
+    </p>
   </Step>
   <Step title="Grant camera permissions">
-    Click **Start Camera**. Your browser will ask whether ALPR Vue can access your camera. Click **Allow**.
-
+    <p>
+      Click <strong>Start Camera</strong>. Your browser will ask whether ALPR Vue can access your camera. Click
+      <strong>Allow</strong>.
+    </p>
     <Tip>
-      If you accidentally clicked **Block**, or if the permission prompt never appeared, you can reset it in your browser settings. In Chrome, click the lock icon in the address bar and set **Camera** to **Allow**. In Safari, go to **Settings → Websites → Camera** and allow access for the site. Then reload the page.
+      If you accidentally clicked <strong>Block</strong>, or if the permission prompt never appeared, you can reset it in
+      your browser settings. In Chrome, click the lock icon in the address bar and set <strong>Camera</strong> to
+      <strong>Allow</strong>. In Safari, go to <strong>Settings → Websites → Camera</strong> and allow access for the site.
+      Then reload the page.
     </Tip>
-
   </Step>
   <Step title="Point the camera at a vehicle">
-    Once the camera is active, hold your phone or position your webcam so the license plate is clearly visible. The app scans automatically — you don't need to press anything. A bounding box appears on screen when a plate is detected.
+    <p>
+      Once the camera is active, hold your phone or position your webcam so the license plate is clearly visible. The app scans
+      automatically — you don't need to press anything. A bounding box appears on screen when a plate is detected.
+    </p>
   </Step>
   <Step title="View the detected plate in the history list">
-    When the app confirms a detection, it adds the plate to the history list on the right (or below the camera on mobile). Each entry shows the plate text, a confidence score, and the time it was detected. The camera stops scanning automatically after confirmation.
-
+    <p>
+      When the app confirms a detection, it adds the plate to the history list on the right (or below the camera on mobile).
+      Each entry shows the plate text, a confidence score, and the time it was detected. The camera stops scanning automatically
+      after confirmation.
+    </p>
     <Note>
-      The camera auto-stops after **3 seconds** of continuous detection. If the detection has a high mean confidence (0.8 or above), it stops after just **1 second**. This prevents duplicate captures. You can change this timing — or turn on continuous mode — in [Detection Settings](./detection-settings).
+      The camera auto-stops after <strong>3 seconds</strong> of continuous detection. If the detection has a high mean
+      confidence (0.8 or above), it stops after just <strong>1 second</strong>. This prevents duplicate captures. You can
+      change this timing — or turn on continuous mode — in <a href="./detection-settings">Detection Settings</a>.
     </Note>
-
   </Step>
   <Step title="Inspect, edit, and copy the result">
-    Tap or click any plate in the history list to open the detail view. Here you can:
-
-    - See a cropped image of the detected plate
-    - Review the confidence score for each individual character, shown as color-coded bars
-    - Click **Edit** to correct any misread character
-    - Click **Copy** to copy the plate text to your clipboard
-
+    <p>Tap or click any plate in the history list to open the detail view. Here you can:</p>
+    <ul>
+      <li>See a cropped image of the detected plate</li>
+      <li>Review the confidence score for each individual character, shown as color-coded bars</li>
+      <li>Click <strong>Edit</strong> to correct any misread character</li>
+      <li>Click <strong>Copy</strong> to copy the plate text to your clipboard</li>
+    </ul>
   </Step>
 </Steps>
 
