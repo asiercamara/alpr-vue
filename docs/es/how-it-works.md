@@ -9,7 +9,8 @@ ALPR Vue usa dos modelos de IA que se ejecutan localmente en tu navegador — un
 
 Este diagrama de secuencia muestra como se mueve un fotograma por la aplicacion desde la captura hasta el resultado guardado.
 
-```mermaid
+<script setup>
+const architectureFlow = `
 sequenceDiagram
   participant User as Usuario
   participant Source as Camara o carga
@@ -27,7 +28,10 @@ sequenceDiagram
   Pipeline->>Plates: Confirma y agrupa la deteccion
   Plates-->>UI: Actualiza matriculas y mejor resultado
   UI-->>User: Muestra historial y vista detallada
-```
+`
+</script>
+
+<DiagramPresenter :code="architectureFlow" preset="neon" autoPlay="intersect" />
 
 ## El canal de procesamiento
 

@@ -12,11 +12,20 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/tests/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,js,vue}'],
     globals: true,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,vue}'],
-      exclude: ['src/tests/**', 'src/types/**', 'src/workers/**', 'src/vite-env.d.ts', 'src/main.js', 'src/App.vue', 'src/components/icons/*.vue'],
+      exclude: [
+        'src/tests/**',
+        'src/types/**',
+        'src/workers/**',
+        'src/vite-env.d.ts',
+        'src/main.js',
+        'src/App.vue',
+        'src/components/icons/*.vue',
+      ],
     },
   },
 })

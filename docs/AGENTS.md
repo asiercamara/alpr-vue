@@ -3,11 +3,10 @@
 ## About this project
 
 - This is a documentation site for **ALPR Vue**, a browser-based automatic license plate recognition app
-- Pages are MDX files with YAML frontmatter, built on [Mintlify](https://mintlify.com)
-- Configuration lives in `docs.json`
-- Run `mint dev` to preview locally
-- Run `mint broken-links` to check links
-- The live site is published at https://mintlify.wiki/asiercamara/alpr-vue
+- Pages are Markdown files with YAML frontmatter, built on [VitePress](https://vitepress.dev)
+- Configuration lives in `docs/.vitepress/config.ts`
+- Run `pnpm dev:docs` to preview locally
+- Run `pnpm build:docs` to build
 - The app itself is at https://alpr-vue.surge.sh
 
 ## Terminology
@@ -57,7 +56,7 @@ In Spanish pages, use:
 - Code formatting for file names, commands, paths, setting keys, and localStorage references
 - When describing a setting, always state its default value
 - Do not document internal implementation details (worker internals, model architecture beyond what is shown in ai-models.mdx)
-- Use Mintlify Note/Tip/Warning/Check callouts deliberately — not as decoration
+- Use Note/Tip/Warning/Check callouts deliberately — not as decoration
 
 ## Content boundaries
 

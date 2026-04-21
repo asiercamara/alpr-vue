@@ -15,7 +15,14 @@ La documentación se despliega dentro de la aplicación principal bajo `/docs/`.
 
 ```text
 docs/
-├── .vitepress/              # Configuración, tema, caché y salida de build
+├── .vitepress/
+│   ├── config.ts            # Config VitePress, sidebar dinámico (buildSidebar + i18n)
+│   ├── theme/               # Tema personalizado y componentes
+│   └── tests/               # Suite de tests Vitest para componentes del tema
+├── public/                  # Assets estáticos (favicon, logo) — servidos en /docs/
+├── dev/
+│   ├── diagram-presenter.md # Guía de contribución de DiagramPresenter (no en sidebar)
+│   └── diagram-playground.md# Playground interactivo (no en sidebar)
 ├── *.md                     # Páginas en inglés
 └── es/
     └── *.md                 # Páginas en español
@@ -73,7 +80,7 @@ El comportamiento personalizado actual incluye:
 ## Añadir o editar páginas
 
 1. Edita el archivo `.md` correspondiente en `docs/` (inglés) o `docs/es/` (español).
-2. Si añades una página nueva, regístrala en `docs/.vitepress/config.ts` dentro del sidebar del locale correcto.
+2. Si añades una página nueva, regístrala en `docs/.vitepress/config.ts`: añade una entrada en `sections[]` y una clave de traducción en cada locale del objeto `i18n`.
 3. Ejecuta `pnpm dev:docs` para previsualizar los cambios.
 4. Ejecuta `pnpm build:docs` antes de abrir una pull request.
 

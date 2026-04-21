@@ -50,3 +50,9 @@ Thumbs.db
 *.tsbuildinfo
 .eslintcache
 *.timestamp-*-*.mjs
+
+# Playwright recordings and metadata used by local tests/tools
+.playwright-mcp/
+
+# Analysis artifacts
+.atlas-analysis.json

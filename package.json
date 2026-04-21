@@ -11,6 +11,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:docs": "vitest --config vitest.docs.config.ts",
+    "test:docs:run": "vitest run --config vitest.docs.config.ts",
+    "test:docs:coverage": "vitest run --config vitest.docs.config.ts --coverage",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src",
@@ -24,6 +27,7 @@
     "security:audit:ci": "pnpm audit --audit-level high --prod"
   },
   "dependencies": {
+    "gsap": "^3.15.0",
     "onnxruntime-web": "^1.24.3",
     "pinia": "^3.0.4",
     "vue": "^3.5.31",
