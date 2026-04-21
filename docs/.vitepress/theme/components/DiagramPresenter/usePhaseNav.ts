@@ -1,5 +1,5 @@
 /**
- * usePhaseNav.js
+ * usePhaseNav
  * ==================================================================
  * Composable for step-by-step phase navigation (Prev / Next) in
  * DiagramPresenter. Intended as an alternative to continuous playback
@@ -8,36 +8,39 @@
  * "Go back" strategy: rather than reversing animation, we instantly
  * restore all phases up to the target via gsap.set, then animate
  * only the target phase. This avoids timeline reversal complexity.
- *
- * @module usePhaseNav
  */
 
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { gsap } from 'gsap'
+import type { PreparedData } from './diagram-adapters.ts'
 
-/**
- * @param {object} options
- * @param {object} options.playbackAPI - The object returned by usePlayback, exposing:
- *   hideNodes, hideEdges, tweenNodes, tweenEdges, restoreMarker,
- *   isPlaying, killTimeline.
- * @returns {{
- *   currentPhaseIndex: import('vue').Ref<number>,
- *   totalPhases: import('vue').ComputedRef<number>,
- *   setPrepared: (p: object) => void,
- *   playNextPhase: () => void,
- *   playPrevPhase: () => void,
- * }}
- */
-export function usePhaseNav({ playbackAPI }) {
+interface PlaybackAPI {
+  hideNodes: () => void
+  hideEdges: () => void
+  tweenNodes: (
+    tl: gsap.core.Timeline,
+    elements: Element[],
+    position: number | string,
+  ) => gsap.core.Timeline
+  tweenEdges: (
+    tl: gsap.core.Timeline,
+    paths: SVGPathElement[],
+    position: number | string,
+  ) => gsap.core.Timeline
+  restoreMarker: (path: SVGPathElement) => void
+  isPlaying: Ref<boolean>
+  killTimeline: () => void
+}
+
+interface UsePhaseNavOptions {
+  playbackAPI: PlaybackAPI
+}
+
+export function usePhaseNav({ playbackAPI }: UsePhaseNavOptions) {
   const currentPhaseIndex = ref(-1)
-  let prepared = null
+  let prepared: PreparedData | null = null
 
-  /**
-   * Update prepared data after each render cycle.
-   *
-   * @param {object} p
-   */
-  function setPrepared(p) {
+  function setPrepared(p: PreparedData): void {
     prepared = p
     currentPhaseIndex.value = -1
   }
@@ -45,28 +48,24 @@ export function usePhaseNav({ playbackAPI }) {
   /**
    * Instantly reveal all phases up to (but not including) `targetIdx`
    * via gsap.set, then animate the target phase.
-   *
-   * @param {number} targetIdx
    */
-  function restoreUpTo(targetIdx) {
+  function restoreUpTo(targetIdx: number): void {
     if (!prepared) return
-    prepared.phases.slice(0, targetIdx).forEach(phase => {
+    prepared.phases.slice(0, targetIdx).forEach((phase) => {
       if (phase.kind === 'nodes') {
         gsap.set(phase.elements, { opacity: 1 })
       } else {
-        phase.elements.forEach(path => {
-          path.style.strokeDashoffset = '0'
-          path.style.strokeDasharray = 'none'
-          playbackAPI.restoreMarker(path)
+        phase.elements.forEach((path) => {
+          const p = path as SVGPathElement
+          p.style.strokeDashoffset = '0'
+          p.style.strokeDasharray = 'none'
+          playbackAPI.restoreMarker(p)
         })
       }
     })
   }
 
-  /**
-   * Advance to the next phase and animate it.
-   */
-  function playNextPhase() {
+  function playNextPhase(): void {
     if (!prepared || playbackAPI.isPlaying.value) return
     const next = currentPhaseIndex.value + 1
     if (next >= prepared.phases.length) return
@@ -78,21 +77,19 @@ export function usePhaseNav({ playbackAPI }) {
 
     const phase = prepared.phases[next]
     const tl = gsap.timeline({
-      onComplete: () => { currentPhaseIndex.value = next },
+      onComplete: () => {
+        currentPhaseIndex.value = next
+      },
     })
 
     if (phase.kind === 'nodes') {
       playbackAPI.tweenNodes(tl, phase.elements, 0)
     } else {
-      playbackAPI.tweenEdges(tl, phase.elements, 0)
+      playbackAPI.tweenEdges(tl, phase.elements as SVGPathElement[], 0)
     }
   }
 
-  /**
-   * Go back one phase by instantly restoring phases up to target,
-   * hiding everything beyond it.
-   */
-  function playPrevPhase() {
+  function playPrevPhase(): void {
     if (!prepared || currentPhaseIndex.value < 0) return
     const target = currentPhaseIndex.value - 1
 
@@ -105,7 +102,9 @@ export function usePhaseNav({ playbackAPI }) {
 
   return {
     currentPhaseIndex,
-    get totalPhases() { return prepared?.phases.length ?? 0 },
+    get totalPhases() {
+      return prepared?.phases.length ?? 0
+    },
     setPrepared,
     playNextPhase,
     playPrevPhase,

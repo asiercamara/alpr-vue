@@ -1,7 +1,7 @@
 import { ref, nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useModalZoom } from '@docs-theme/components/DiagramPresenter/useModalZoom.js'
+import { useModalZoom } from '@docs-theme/components/DiagramPresenter/useModalZoom.ts'
 import { gsapToSpy } from '@docs-tests/mocks/runtime'
 
 function makeStageEvent(overrides: Record<string, unknown> = {}) {

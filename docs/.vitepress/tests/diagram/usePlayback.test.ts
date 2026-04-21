@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import { usePlayback } from '@docs-theme/components/DiagramPresenter/usePlayback.js'
+import { usePlayback } from '@docs-theme/components/DiagramPresenter/usePlayback.ts'
 import { gsapSetSpy, gsapToSpy, gsapFromToSpy, gsapTimelineSpy } from '@docs-tests/mocks/runtime'
 
 /* ── helpers ──────────────────────────────────────────────────────── */

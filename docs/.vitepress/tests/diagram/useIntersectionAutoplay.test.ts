@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useIntersectionAutoplay } from '@docs-theme/components/DiagramPresenter/useIntersectionAutoplay.js'
+import { useIntersectionAutoplay } from '@docs-theme/components/DiagramPresenter/useIntersectionAutoplay.ts'
 import { intersectionObserverInstances } from '@docs-tests/mocks/runtime'
 
 describe('useIntersectionAutoplay', () => {

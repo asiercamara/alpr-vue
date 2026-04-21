@@ -16,18 +16,25 @@ The documentation is deployed inside the main app under `/docs/`.
 ```text
 docs/
 ├── .vitepress/
-│   ├── config.ts              # VitePress config, sidebar navigation
+│   ├── config.ts              # VitePress config, dynamic sidebar (buildSidebar + i18n)
 │   ├── theme/
 │   │   ├── index.ts           # Theme setup, global component registration
 │   │   ├── style.css          # Theme styles
 │   │   └── components/
-│   │       ├── DiagramPresenter.vue    # Animated Mermaid wrapper (GSAP)
-│   │       ├── diagram-adapters.js     # Flowchart/state/sequence adapters
+│   │       ├── DiagramPresenter/       # Animated Mermaid wrapper (GSAP)
+│   │       │   ├── DiagramPresenter.vue
+│   │       │   ├── diagram-adapters.ts # Flowchart/state/sequence adapters
+│   │       │   ├── usePlayback.ts      # GSAP timeline composable
+│   │       │   ├── useRenderer.ts      # Mermaid render + adapter selection
+│   │       │   └── *.ts                # Other composables (modal, minimap, …)
 │   │       ├── DiagramPlayground.vue   # Interactive prop explorer
-│   │       └── Doc*.vue                # Other shared UI components
+│   │       └── Doc*.vue                # Shared UI components
+│   └── tests/                 # Vitest test suite for theme components
+├── public/                    # Static assets (favicon, logo) — served at /docs/
+├── dev/
+│   ├── diagram-presenter.md   # DiagramPresenter contributor guide (not in sidebar)
+│   └── diagram-playground.md  # Live playground (not in sidebar)
 ├── *.md                       # English pages (public)
-├── diagram-presenter.md       # DiagramPresenter dev guide (not in sidebar)
-├── diagram-playground.md      # Live playground (not in sidebar)
 └── es/
     └── *.md                   # Spanish pages (public)
 ```
@@ -67,7 +74,7 @@ The docs are bilingual:
 
 ## Mermaid diagrams — DiagramPresenter
 
-All diagrams in the docs are powered by the custom `DiagramPresenter` component (`docs/.vitepress/theme/components/DiagramPresenter.vue`), backed by GSAP timelines and a type-aware adapter system.
+All diagrams in the docs are powered by the custom `DiagramPresenter` component (`docs/.vitepress/theme/components/DiagramPresenter/DiagramPresenter.vue`), backed by GSAP timelines and a type-aware adapter system.
 
 ### Quick usage
 
@@ -97,21 +104,21 @@ flowchart TD
 
 ### Full reference
 
-See **[`docs/diagram-presenter.md`](./diagram-presenter.md)** for the complete prop reference, adapter system, highlight usage, and troubleshooting guide.
+See **[`docs/dev/diagram-presenter.md`](./dev/diagram-presenter.md)** for the complete prop reference, adapter system, highlight usage, and troubleshooting guide.
 
 ### Interactive playground
 
-Open `docs/diagram-playground.md` (not in the sidebar) to experiment with all props live in the browser:
+Open `docs/dev/diagram-playground.md` (not in the sidebar) to experiment with all props live in the browser:
 
 ```bash
 pnpm dev:docs
-# then open http://localhost:5173/docs/diagram-playground
+# then open http://localhost:5173/docs/dev/diagram-playground
 ```
 
 ## Adding or editing pages
 
 1. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish).
-2. If you add a new page, register it in `docs/.vitepress/config.ts` under the correct locale sidebar.
+2. If you add a new page, register it in `docs/.vitepress/config.ts`: add an entry to `sections[]` and a translation key to every locale in `i18n`.
 3. Run `pnpm dev:docs` to preview your changes.
 4. Run `pnpm build:docs` before opening a pull request.
 

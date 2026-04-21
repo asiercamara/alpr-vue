@@ -5,7 +5,7 @@ import {
   escapeHtml,
   getMermaidTheme,
   useRenderer,
-} from '@docs-theme/components/DiagramPresenter/useRenderer.js'
+} from '@docs-theme/components/DiagramPresenter/useRenderer.ts'
 import { mermaidInitializeSpy, mermaidRenderSpy } from '@docs-tests/mocks/runtime'
 
 describe('useRenderer', () => {

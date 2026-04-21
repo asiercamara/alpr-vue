@@ -4,7 +4,7 @@ import {
   getNodeSvgOrigin,
   isReducedMotion,
   resolveAccentColor,
-} from '@docs-theme/components/DiagramPresenter/dp-utils.js'
+} from '@docs-theme/components/DiagramPresenter/dp-utils.ts'
 
 describe('dp-utils', () => {
   it('reads reduced motion preference from matchMedia', () => {

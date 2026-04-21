@@ -4,7 +4,7 @@ import {
   exportSvgToPng,
   inlineStylesForExport,
   triggerDownload,
-} from '@docs-theme/components/DiagramPresenter/export-utils.js'
+} from '@docs-theme/components/DiagramPresenter/export-utils.ts'
 
 describe('export-utils', () => {
   it('clones SVG and inlines computed styles on relevant descendants', () => {

@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { describe, expect, it } from 'vitest'
 
-import { useMinimap } from '@docs-theme/components/DiagramPresenter/useMinimap.js'
+import { useMinimap } from '@docs-theme/components/DiagramPresenter/useMinimap.ts'
 
 describe('useMinimap', () => {
   it('shows minimap only when maximized and zoomed beyond fit threshold', () => {

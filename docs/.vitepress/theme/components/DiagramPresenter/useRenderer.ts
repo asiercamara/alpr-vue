@@ -1,5 +1,5 @@
 /**
- * useRenderer.js
+ * useRenderer
  * ==================================================================
  * Composable that handles Mermaid initialization, SVG rendering, and
  * adapter selection for DiagramPresenter.
@@ -9,26 +9,18 @@
  *   - Call mermaid.render() and inject the resulting SVG.
  *   - Pick and run the correct diagram adapter via pickAdapter().
  *   - Emit Vue events: 'ready', and surface errors as inline pre blocks.
- *
- * @module useRenderer
  */
 
 import mermaid from 'mermaid'
-import { nextTick } from 'vue'
-import { pickAdapter } from './diagram-adapters.js'
+import { nextTick, type Ref } from 'vue'
+import { pickAdapter, type Adapter, type PreparedData } from './diagram-adapters.ts'
 
 /* ----------------------------------------------------------------
  * Helpers
  * ---------------------------------------------------------------- */
 
-/**
- * Escape special HTML characters in a string.
- *
- * @param {string} s - Raw string that may contain `&`, `<`, or `>`.
- * @returns {string} HTML-safe string.
- */
-export function escapeHtml(s) {
-  return s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
+export function escapeHtml(s: string): string {
+  return s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c)
 }
 
 /**
@@ -36,11 +28,8 @@ export function escapeHtml(s) {
  *
  * Mermaid's color parser only accepts concrete hex/rgb values — CSS custom
  * properties and `currentColor` are not supported, so we supply explicit hex.
- *
- * @param {boolean} dark - `true` to return dark-mode variables.
- * @returns {object} A plain object suitable for `mermaid.initialize({ themeVariables })`.
  */
-export function getMermaidTheme(dark) {
+export function getMermaidTheme(dark: boolean): Record<string, string> {
   if (dark) {
     return {
       fontFamily: 'Inter, system-ui, sans-serif',
@@ -62,9 +51,11 @@ export function getMermaidTheme(dark) {
   // Read the brand color at runtime so Mermaid stays in sync with the VitePress
   // theme (style.css may override --vp-c-brand-1). Mermaid's color parser only
   // accepts concrete hex/rgb values — CSS custom properties are not supported.
-  const accent = typeof document !== 'undefined'
-    ? getComputedStyle(document.documentElement).getPropertyValue('--vp-c-brand-1').trim() || '#7c3aed'
-    : '#7c3aed'
+  const accent =
+    typeof document !== 'undefined'
+      ? getComputedStyle(document.documentElement).getPropertyValue('--vp-c-brand-1').trim() ||
+        '#7c3aed'
+      : '#7c3aed'
   return {
     fontFamily: 'Inter, system-ui, sans-serif',
     primaryColor: '#f5f3ff',
@@ -84,25 +75,38 @@ export function getMermaidTheme(dark) {
 }
 
 /* ----------------------------------------------------------------
+ * Types
+ * ---------------------------------------------------------------- */
+
+interface RendererState {
+  ready: Ref<boolean>
+  adapterLabel: Ref<string>
+}
+
+interface RendererProps {
+  code: string
+  autoPlay: string
+  highlight?: string[]
+  [key: string]: unknown
+}
+
+interface UseRendererOptions {
+  container: Ref<HTMLElement | null>
+  modalContainer: Ref<HTMLElement | null>
+  isDark: Ref<boolean>
+  isMaximized: Ref<boolean>
+  props: RendererProps
+  state: RendererState
+  onAdapterReady: (adapter: Adapter, prepared: PreparedData) => void
+  onAutoPlay: (mode: string) => void
+  emitReady: (payload: { adapter: string; nodes: number; edges: number; phases: number }) => void
+  onError?: (message: string) => void
+}
+
+/* ----------------------------------------------------------------
  * Composable
  * ---------------------------------------------------------------- */
 
-/**
- * Provides the `render` function for a DiagramPresenter instance.
- *
- * @param {object} options
- * @param {import('vue').Ref<HTMLElement|null>} options.container - The inline stage div ref.
- * @param {import('vue').Ref<HTMLElement|null>} options.modalContainer - The modal stage div ref.
- * @param {import('vue').Ref<boolean>} options.isDark - VitePress dark-mode signal.
- * @param {import('vue').Ref<boolean>} options.isMaximized - Whether the modal is open.
- * @param {object} options.props - Component props (code, autoPlay, highlight, flowchart options…).
- * @param {object} options.state - Reactive state refs to update: `{ ready, adapterLabel }`.
- * @param {Function} options.onAdapterReady - Called with `(adapter, prepared)` after SVG is ready.
- * @param {Function} options.onAutoPlay - Called with the resolved autoPlay mode once ready.
- * @param {Function} options.emitReady - `emit('ready', payload)` forwarded from the component.
- * @param {Function} options.onError - Called when rendering fails; receives `(errorMessage)`.
- * @returns {{ render: () => Promise<void> }}
- */
 export function useRenderer({
   container,
   modalContainer,
@@ -114,17 +118,8 @@ export function useRenderer({
   onAutoPlay,
   emitReady,
   onError,
-}) {
-  /**
-   * Render the Mermaid diagram into `container`.
-   *
-   * Initializes Mermaid with the current theme, renders the `props.code` source
-   * to SVG, picks the right adapter, calls `adapter.prepare()`, updates reactive
-   * state, and delegates autoPlay/highlight logic to `onAutoPlay`.
-   *
-   * @returns {Promise<void>}
-   */
-  async function render() {
+}: UseRendererOptions) {
+  async function render(): Promise<void> {
     if (!container.value) return
 
     // If the SVG lives in the modal canvas, move it back before re-rendering
@@ -159,7 +154,7 @@ export function useRenderer({
       container.value.innerHTML = svg
       await nextTick()
 
-      const svgEl = container.value.querySelector('svg')
+      const svgEl = container.value.querySelector('svg') as SVGSVGElement | null
       if (!svgEl) return
 
       svgEl.removeAttribute('style')
@@ -182,7 +177,6 @@ export function useRenderer({
 
       onAutoPlay(props.autoPlay)
 
-      // If the modal was open during a re-render, put the new SVG back
       if (isMaximized.value) {
         await nextTick()
         const canvas = modalContainer.value?.querySelector('.dp-modal-canvas')
@@ -190,9 +184,10 @@ export function useRenderer({
         if (canvas && newSvg) canvas.appendChild(newSvg)
       }
     } catch (err) {
-      container.value.innerHTML = `<pre class="dp-error">${escapeHtml(err?.message || String(err))}</pre>`
+      const msg = (err as Error)?.message ?? String(err)
+      container.value.innerHTML = `<pre class="dp-error">${escapeHtml(msg)}</pre>`
       console.error('[DiagramPresenter]', err)
-      onError?.(err?.message || String(err))
+      onError?.(msg)
     }
   }
 

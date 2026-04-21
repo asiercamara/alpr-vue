@@ -53,3 +53,6 @@ Thumbs.db
 
 # Playwright recordings and metadata used by local tests/tools
 .playwright-mcp/
+
+# Analysis artifacts
+.atlas-analysis.json

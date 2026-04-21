@@ -6,7 +6,7 @@ import {
   pickAdapter,
   sequenceAdapter,
   stateAdapter,
-} from '@docs-theme/components/DiagramPresenter/diagram-adapters.js'
+} from '@docs-theme/components/DiagramPresenter/diagram-adapters.ts'
 
 function parseSvg(markup: string) {
   const container = document.createElement('div')

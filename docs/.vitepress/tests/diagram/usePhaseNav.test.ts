@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 
-import { usePhaseNav } from '@docs-theme/components/DiagramPresenter/usePhaseNav.js'
+import { usePhaseNav } from '@docs-theme/components/DiagramPresenter/usePhaseNav.ts'
 import { gsapSetSpy } from '@docs-tests/mocks/runtime'
 
 describe('usePhaseNav', () => {

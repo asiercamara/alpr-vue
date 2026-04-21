@@ -1,96 +1,147 @@
 import { defineConfig } from 'vitepress'
 
-const enSidebar = [
+/* ----------------------------------------------------------------
+ * Sidebar structure — defined once, shared across all locales.
+ * Each section and item has a translation key looked up in `i18n`.
+ * ---------------------------------------------------------------- */
+
+interface SidebarItem {
+  key: string
+  baseLink: string
+}
+
+interface SidebarSection {
+  key: string
+  items: SidebarItem[]
+}
+
+const sections: SidebarSection[] = [
   {
-    text: 'Get Started',
+    key: 'get_started',
     items: [
-      { text: 'ALPR Vue: Read License Plates Directly in Browser', link: '/introduction' },
-      { text: 'Get Started with ALPR Vue', link: '/quickstart' },
-      { text: 'Supported Browsers and Device Requirements', link: '/browser-requirements' },
+      { key: 'introduction', baseLink: '/introduction' },
+      { key: 'quickstart', baseLink: '/quickstart' },
+      { key: 'browser_requirements', baseLink: '/browser-requirements' },
     ],
   },
   {
-    text: 'Using the App',
+    key: 'using_the_app',
     items: [
-      { text: 'Detect License Plates Live with Your Camera', link: '/camera-mode' },
-      { text: 'Upload Images and Videos for Plate Recognition', link: '/upload-files' },
-      { text: 'View and Edit Detected License Plates', link: '/viewing-results' },
-      { text: 'Export License Plate Detections to CSV', link: '/exporting-data' },
+      { key: 'camera_mode', baseLink: '/camera-mode' },
+      { key: 'upload_files', baseLink: '/upload-files' },
+      { key: 'viewing_results', baseLink: '/viewing-results' },
+      { key: 'exporting_data', baseLink: '/exporting-data' },
     ],
   },
   {
-    text: 'Settings',
+    key: 'settings',
     items: [
-      { text: 'Configuring ALPR Vue Settings', link: '/settings-overview' },
-      { text: 'Tuning Detection Sensitivity and Timing', link: '/detection-settings' },
-      { text: 'Theme and Language Preferences', link: '/appearance-language' },
+      { key: 'settings_overview', baseLink: '/settings-overview' },
+      { key: 'detection_settings', baseLink: '/detection-settings' },
+      { key: 'appearance_language', baseLink: '/appearance-language' },
     ],
   },
   {
-    text: 'How It Works',
+    key: 'how_it_works_section',
     items: [
-      { text: 'How ALPR Vue Detects and Reads License Plates', link: '/how-it-works' },
-      { text: 'AI Models Used for License Plate Recognition', link: '/ai-models' },
-      { text: 'Privacy and Data: What Stays on Your Device', link: '/privacy' },
+      { key: 'how_it_works', baseLink: '/how-it-works' },
+      { key: 'ai_models', baseLink: '/ai-models' },
+      { key: 'privacy', baseLink: '/privacy' },
     ],
   },
   {
-    text: 'Troubleshooting',
+    key: 'troubleshooting_section',
     items: [
-      { text: 'Troubleshooting ALPR Vue Issues', link: '/troubleshooting' },
-      { text: 'Frequently Asked Questions About ALPR Vue', link: '/faq' },
+      { key: 'troubleshooting', baseLink: '/troubleshooting' },
+      { key: 'faq', baseLink: '/faq' },
     ],
   },
 ]
 
-const esSidebar = [
-  {
-    text: 'Primeros pasos',
-    items: [
-      { text: 'ALPR Vue: Lee Matrículas Directamente en el Navegador', link: '/es/introduction' },
-      { text: 'Primeros pasos con ALPR Vue', link: '/es/quickstart' },
-      {
-        text: 'Navegadores Compatibles y Requisitos del Dispositivo',
-        link: '/es/browser-requirements',
-      },
-    ],
+/* ----------------------------------------------------------------
+ * Translations — add a new locale by adding a key here.
+ * ---------------------------------------------------------------- */
+
+type TranslationKey =
+  | 'get_started'
+  | 'using_the_app'
+  | 'settings'
+  | 'how_it_works_section'
+  | 'troubleshooting_section'
+  | 'introduction'
+  | 'quickstart'
+  | 'browser_requirements'
+  | 'camera_mode'
+  | 'upload_files'
+  | 'viewing_results'
+  | 'exporting_data'
+  | 'settings_overview'
+  | 'detection_settings'
+  | 'appearance_language'
+  | 'how_it_works'
+  | 'ai_models'
+  | 'privacy'
+  | 'troubleshooting'
+  | 'faq'
+
+type Translations = Record<TranslationKey, string>
+
+const i18n: Record<string, Translations> = {
+  en: {
+    get_started: 'Get Started',
+    using_the_app: 'Using the App',
+    settings: 'Settings',
+    how_it_works_section: 'How It Works',
+    troubleshooting_section: 'Troubleshooting',
+    introduction: 'ALPR Vue: Read License Plates Directly in Browser',
+    quickstart: 'Get Started with ALPR Vue',
+    browser_requirements: 'Supported Browsers and Device Requirements',
+    camera_mode: 'Detect License Plates Live with Your Camera',
+    upload_files: 'Upload Images and Videos for Plate Recognition',
+    viewing_results: 'View and Edit Detected License Plates',
+    exporting_data: 'Export License Plate Detections to CSV',
+    settings_overview: 'Configuring ALPR Vue Settings',
+    detection_settings: 'Tuning Detection Sensitivity and Timing',
+    appearance_language: 'Theme and Language Preferences',
+    how_it_works: 'How ALPR Vue Detects and Reads License Plates',
+    ai_models: 'AI Models Used for License Plate Recognition',
+    privacy: 'Privacy and Data: What Stays on Your Device',
+    faq: 'Frequently Asked Questions About ALPR Vue',
   },
-  {
-    text: 'Usar la aplicación',
-    items: [
-      { text: 'Detectar Matrículas en Vivo con la Cámara', link: '/es/camera-mode' },
-      {
-        text: 'Cargar Imágenes y Vídeos para el Reconocimiento de Matrículas',
-        link: '/es/upload-files',
-      },
-      { text: 'Ver y Editar las Matrículas Detectadas', link: '/es/viewing-results' },
-      { text: 'Exportar Detecciones de Matrículas a CSV', link: '/es/exporting-data' },
-    ],
+  es: {
+    get_started: 'Primeros pasos',
+    using_the_app: 'Usar la aplicación',
+    settings: 'Ajustes',
+    how_it_works_section: 'Cómo funciona',
+    troubleshooting_section: 'Solución de problemas',
+    introduction: 'ALPR Vue: Lee Matrículas Directamente en el Navegador',
+    quickstart: 'Primeros pasos con ALPR Vue',
+    browser_requirements: 'Navegadores Compatibles y Requisitos del Dispositivo',
+    camera_mode: 'Detectar Matrículas en Vivo con la Cámara',
+    upload_files: 'Cargar Imágenes y Vídeos para el Reconocimiento de Matrículas',
+    viewing_results: 'Ver y Editar las Matrículas Detectadas',
+    exporting_data: 'Exportar Detecciones de Matrículas a CSV',
+    settings_overview: 'Configurar los Ajustes de ALPR Vue',
+    detection_settings: 'Ajustar la Sensibilidad y el Tiempo de Detección',
+    appearance_language: 'Preferencias de Tema e Idioma',
+    how_it_works: 'Cómo Detecta y Lee Matrículas ALPR Vue',
+    ai_models: 'Modelos de IA para el Reconocimiento de Matrículas',
+    privacy: 'Privacidad y Datos: Lo Que Queda en Tu Dispositivo',
+    faq: 'Preguntas Frecuentes sobre ALPR Vue',
   },
-  {
-    text: 'Ajustes',
-    items: [
-      { text: 'Configurar los Ajustes de ALPR Vue', link: '/es/settings-overview' },
-      { text: 'Ajustar la Sensibilidad y el Tiempo de Detección', link: '/es/detection-settings' },
-      { text: 'Preferencias de Tema e Idioma', link: '/es/appearance-language' },
-    ],
-  },
-  {
-    text: 'Cómo funciona',
-    items: [
-      { text: 'Cómo Detecta y Lee Matrículas ALPR Vue', link: '/es/how-it-works' },
-      { text: 'Modelos de IA para el Reconocimiento de Matrículas', link: '/es/ai-models' },
-      { text: 'Privacidad y Datos: Lo Que Queda en Tu Dispositivo', link: '/es/privacy' },
-    ],
-  },
-  {
-    text: 'Solución de problemas',
-    items: [
-      { text: 'Solución de Problemas de ALPR Vue', link: '/es/troubleshooting' },
-      { text: 'Preguntas Frecuentes sobre ALPR Vue', link: '/es/faq' },
-    ],
-  },
-]
+}
+
+function buildSidebar(locale: string) {
+  const t = i18n[locale] ?? i18n.en
+  const prefix = locale === 'en' ? '' : `/${locale}`
+  return sections.map((section) => ({
+    text: t[section.key as TranslationKey],
+    items: section.items.map((item) => ({
+      text: t[item.key as TranslationKey],
+      link: `${prefix}${item.baseLink}`,
+    })),
+  }))
+}
 
 export default defineConfig({
   srcDir: '.',
@@ -119,7 +170,7 @@ export default defineConfig({
           { text: 'Home', link: '/' },
           { text: 'Quick Start', link: '/quickstart' },
         ],
-        sidebar: enSidebar,
+        sidebar: buildSidebar('en'),
       },
     },
     es: {
@@ -133,7 +184,7 @@ export default defineConfig({
           { text: 'Inicio', link: '/es/' },
           { text: 'Inicio rápido', link: '/es/quickstart' },
         ],
-        sidebar: esSidebar,
+        sidebar: buildSidebar('es'),
         docFooter: { prev: 'Anterior', next: 'Siguiente' },
         outlineTitle: 'En esta página',
         sidebarMenuLabel: 'Menú',
@@ -152,7 +203,7 @@ export default defineConfig({
   },
 
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
-    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }],
+    ['link', { rel: 'icon', href: '/docs/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/docs/favicon-32x32.png' }],
   ],
 })

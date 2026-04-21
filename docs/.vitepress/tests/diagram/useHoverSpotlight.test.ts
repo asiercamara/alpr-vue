@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { describe, expect, it } from 'vitest'
 
-import { useHoverSpotlight } from '@docs-theme/components/DiagramPresenter/useHoverSpotlight.js'
+import { useHoverSpotlight } from '@docs-theme/components/DiagramPresenter/useHoverSpotlight.ts'
 import { gsapToSpy } from '@docs-tests/mocks/runtime'
 
 describe('useHoverSpotlight', () => {

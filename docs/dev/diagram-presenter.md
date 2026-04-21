@@ -280,7 +280,7 @@ The adapter system currently supports:
 
 ## Interactive playground
 
-Use the [DiagramPresenter Playground](/diagram-playground) to:
+Use the [DiagramPresenter Playground](/dev/diagram-playground) to:
 
 - edit props live
 - switch between preconfigured feature presets
