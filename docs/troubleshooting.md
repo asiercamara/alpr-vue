@@ -5,8 +5,8 @@ description: 'Fix common ALPR Vue problems: camera permission errors, model load
 
 If something isn't working as expected, start here. Most issues fall into a handful of categories — camera permissions, the AI model loading, detection quality, or browser support. Work through the relevant section below, and if the problem persists, check the browser console (press F12 and open the **Console** tab) for any error messages that can help narrow things down.
 
-<AccordionGroup>
-  <Accordion title="Camera won't start / 'Camera access denied'">
+<VTDocAccordionGroup>
+  <VTDocAccordion title="Camera won't start / 'Camera access denied'">
     Camera errors are almost always caused by a missing permission, an insecure page URL, or a system-level block.
 
     **Check the browser permission:**
@@ -18,13 +18,13 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Verify you are on HTTPS or localhost:**
     Browsers only allow camera access in a secure context. If the URL in your address bar starts with `http://` (not `https://`), camera access is blocked by the browser itself. Use the `https://` version of the URL, or access the app on `localhost` during local testing.
 
-    <Warning>
+    <VTDocWarning>
       Even if you previously allowed the camera, some browsers reset permissions when you clear site data or switch to a private browsing window.
-    </Warning>
+    </VTDocWarning>
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="'Model loading' spinner that never goes away">
+  <VTDocAccordion title="'Model loading' spinner that never goes away">
     The first time you open ALPR Vue, the app downloads the ONNX AI model files (several megabytes). On a slow connection this can take a minute or two before the spinner disappears.
 
     **Wait and retry:**
@@ -36,13 +36,13 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Check the browser console:**
     Press **F12**, open the **Console** tab, and look for any red error messages. A `Failed to fetch` or `WebAssembly` error points to a network or browser compatibility issue.
 
-    <Note>
+    <VTDocNote>
       Model files are cached by your browser after the first successful load. If the spinner appeared once but the app worked on your next visit, no further action is needed.
-    </Note>
+    </VTDocNote>
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="No plates detected">
+  <VTDocAccordion title="No plates detected">
     If the camera starts and scanning appears active, but no plates appear in your history, a few factors could be responsible.
 
     **Improve visibility and lighting:**
@@ -60,13 +60,13 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Try uploading a photo instead:**
     If live camera detection isn't working, try using the **Upload File** button to process a still image of the plate. This rules out camera-related issues and gives the model more processing time per frame. See [uploading files](./upload-files) for instructions.
 
-    <Tip>
+    <VTDocTip>
       A straight-on view of the plate at close range gives the best detection results. Extreme angles, rain-streaked plates, or partial obstructions significantly reduce accuracy.
-    </Tip>
+    </VTDocTip>
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Plates detected but text is wrong or garbled">
+  <VTDocAccordion title="Plates detected but text is wrong or garbled">
     The OCR model reads characters one at a time and assigns a confidence score to each. Low-contrast, dirty, or partially covered plates often result in one or more characters being misread.
 
     **Edit the plate text manually:**
@@ -78,13 +78,13 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Improve the source image:**
     If accuracy is consistently poor, try capturing the plate in better lighting, at a closer distance, and with a straighter angle. Even a slight tilt can cause the OCR model to misread a character.
 
-    <Note>
+    <VTDocNote>
       Some OCR errors are expected, especially for low-contrast, dirty, or aged plates. Manual editing is the intended way to correct them.
-    </Note>
+    </VTDocNote>
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Poor performance — app is slow or laggy">
+  <VTDocAccordion title="Poor performance — app is slow or laggy">
     ALPR Vue runs two AI models locally, which is CPU and GPU intensive. Performance depends heavily on your device's processing power.
 
     **Free up device resources:**
@@ -99,9 +99,9 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Understand device limits:**
     On older or lower-powered devices — particularly budget smartphones — the models may run slowly regardless of optimizations. In this case, consider using the **Upload File** mode instead of live camera, which processes each frame at its own pace without a real-time constraint.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Export CSV is empty or missing plates">
+  <VTDocAccordion title="Export CSV is empty or missing plates">
     The **Export CSV** button exports only the plates currently shown in your history list.
 
     **Make sure detections were confirmed:**
@@ -115,9 +115,9 @@ If something isn't working as expected, start here. Most issues fall into a hand
 
     See [exporting data](./exporting-data) for full details on the CSV format and what each column contains.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Settings not saving between sessions">
+  <VTDocAccordion title="Settings not saving between sessions">
     ALPR Vue saves your settings automatically to your browser's `localStorage`. If settings appear to reset every time you open the app, one of the following is likely the cause.
 
     **Avoid private or incognito mode:**
@@ -129,9 +129,9 @@ If something isn't working as expected, start here. Most issues fall into a hand
     **Do not clear site data between visits:**
     Clearing your browser's site data (cookies, cache, storage) deletes saved settings. If you use a browser extension that automatically clears site data, add an exception for the ALPR Vue site.
 
-    <Note>
+    <VTDocNote>
       Settings are stored locally in your browser, not in any cloud account. They are not shared between devices or browser profiles.
-    </Note>
+    </VTDocNote>
 
-  </Accordion>
-</AccordionGroup>
+  </VTDocAccordion>
+</VTDocAccordionGroup>

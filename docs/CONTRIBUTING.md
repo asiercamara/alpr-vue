@@ -57,7 +57,7 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
+<VTDocDiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
 ```
 
-To experiment with all diagram props interactively, run `pnpm dev:docs` and open `/docs/diagram-playground`.
+To experiment with all diagram props interactively, run `pnpm dev:docs` and open `/docs/dev/diagram-playground`.

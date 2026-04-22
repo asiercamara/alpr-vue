@@ -11,9 +11,6 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:docs": "vitest --config vitest.docs.config.ts",
-    "test:docs:run": "vitest run --config vitest.docs.config.ts",
-    "test:docs:coverage": "vitest run --config vitest.docs.config.ts --coverage",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src",
@@ -34,12 +31,14 @@
     "vue-i18n": "^11.3.2"
   },
   "devDependencies": {
+    "vitepress-theme-app-docs": "^0.2.0",
     "@eslint/js": "^10.0.1",
     "@heroicons/vue": "^2.2.0",
     "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.3",
     "@vue/test-utils": "^2.4.6",
+    "esbuild": "^0.28.0",
     "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.8.0",
@@ -65,7 +64,7 @@
   "pnpm": {
     "overrides": {
       "vite": ">=8.0.5",
-      "vitepress>vite": "^5.4 || ^6.0",
+      "vitepress>vite": ">=8.0.5",
       "protobufjs": ">=7.5.5"
     }
   },

@@ -15,9 +15,9 @@ ALPR Vue ejecuta modelos de IA directamente en tu navegador usando **WebAssembly
 | Safari 16+                         | ✅ Compatible | ✅ Compatible |
 | Safari (versiones anteriores a 16) | ⚠️ Parcial    | ⚠️ Parcial    |
 
-<Warning>
+<VTDocWarning>
   Los navegadores que no admiten **WebAssembly** u **OffscreenCanvas** no podrán ejecutar ALPR Vue. Esto incluye Internet Explorer y versiones antiguas de Safari. Si la aplicación no carga o los modelos nunca se inicializan, comprueba que tu navegador esté actualizado.
-</Warning>
+</VTDocWarning>
 
 ## Funcionalidades requeridas del navegador
 
@@ -27,9 +27,9 @@ ALPR Vue depende de tres capacidades del navegador:
 - **OffscreenCanvas** — procesa fotogramas de vídeo fuera del hilo principal para que la interfaz permanezca receptiva
 - **Contexto seguro (HTTPS o localhost)** — requerido por los navegadores antes de conceder acceso a la cámara
 
-<Note>
+<VTDocNote>
   El acceso a la cámara requiere un **contexto seguro** — la página debe servirse mediante HTTPS o desde localhost. Si abres ALPR Vue mediante una conexión HTTP simple, el botón de cámara no funcionará. La carga de imágenes y vídeos sí funciona sin contexto seguro.
-</Note>
+</VTDocNote>
 
 ## Especificaciones recomendadas del dispositivo
 

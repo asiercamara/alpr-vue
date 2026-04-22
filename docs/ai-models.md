@@ -5,8 +5,8 @@ description: 'Learn about the YOLOv9 plate detector and MobileViT v2 OCR model t
 
 ALPR Vue relies on two ONNX models that run locally in your browser — no cloud API, no remote inference. The first model detects where license plates are in the image; the second reads the characters on each plate. Both models load directly in your browser tab using ONNX Runtime Web.
 
-<Tabs>
-  <Tab title="Plate detector">
+<VTDocTabs>
+  <VTDocTab title="Plate detector">
     The plate detector scans each frame and draws bounding boxes around any license plates it finds.
 
     | Property | Value |
@@ -20,8 +20,8 @@ ALPR Vue relies on two ONNX models that run locally in your browser — no cloud
 
     The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It has been specifically trained on European plates under a variety of lighting conditions and camera angles.
 
-  </Tab>
-  <Tab title="Plate OCR">
+  </VTDocTab>
+  <VTDocTab title="Plate OCR">
     The plate OCR model reads the characters from each detected plate region and assigns a confidence score to each character.
 
     | Property | Value |
@@ -37,8 +37,8 @@ ALPR Vue relies on two ONNX models that run locally in your browser — no cloud
 
     Because each character has its own output head, the model reports an individual confidence score per character. You can view these scores in the plate detail view by tapping any entry in your history.
 
-  </Tab>
-</Tabs>
+  </VTDocTab>
+</VTDocTabs>
 
 ## Model format
 
@@ -48,14 +48,14 @@ ALPR Vue uses **ONNX Runtime Web** to run inference. This library compiles the m
 
 ## Limitations
 
-<Warning>
+<VTDocWarning>
   The models are optimized for European license plates. Detection and OCR accuracy may be lower for plates from other regions, especially those that use different character sets, plate dimensions, or layouts.
-</Warning>
+</VTDocWarning>
 
 - **Regional coverage:** Both models were trained primarily on European plates. Accuracy varies for plates from North America, Asia, and other regions.
 - **Device performance:** Inference speed depends on your device's CPU. Older or low-power devices may experience slower frame rates.
 - **Browser requirements:** ONNX Runtime Web requires WebAssembly support. All modern browsers support this, but very old browser versions may not.
 
-<Note>
+<VTDocNote>
   The models are downloaded once on your first visit and cached by your browser. On subsequent visits, the app loads them from the local browser cache — no network request is needed, and the app works fully offline.
-</Note>
+</VTDocNote>

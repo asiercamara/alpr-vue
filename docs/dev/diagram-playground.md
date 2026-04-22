@@ -23,4 +23,4 @@ Use this page to validate `DiagramPresenter` behavior before copying a snippet i
 4. Use the **Story mode pattern** section to verify chained presenters without adding new component API.
 5. Copy the generated snippet when the preview matches the intended docs example.
 
-<DiagramPlayground />
+<VTDocDiagramPlayground />

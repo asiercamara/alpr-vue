@@ -7,28 +7,28 @@ El modo de carga te permite ejecutar el reconocimiento de matrículas sobre arch
 
 ## Formatos compatibles
 
-<CardGroup cols="2">
-  <Card title="Imágenes" icon="image">
+<VTDocCardGroup cols="2">
+  <VTDocCard title="Imágenes" icon="image">
     JPEG, PNG, WebP y otros formatos de imagen habituales compatibles con tu navegador.
-  </Card>
-  <Card title="Vídeos" icon="video">
+  </VTDocCard>
+  <VTDocCard title="Vídeos" icon="video">
     MP4, WebM y otros formatos de vídeo compatibles con el decodificador multimedia integrado en tu navegador.
-  </Card>
-</CardGroup>
+  </VTDocCard>
+</VTDocCardGroup>
 
 ## Cargar un archivo
 
-<Steps>
-  <Step title="Haz clic en Cargar archivo">
+<VTDocSteps>
+  <VTDocStep title="Haz clic en Cargar archivo">
     En la pantalla principal, haz clic en el botón **Cargar archivo**. Se abrirá un selector de archivos.
-  </Step>
-  <Step title="Selecciona tu archivo">
+  </VTDocStep>
+  <VTDocStep title="Selecciona tu archivo">
     Navega hasta la imagen o vídeo que quieres procesar y confirma tu selección.
-  </Step>
-  <Step title="Espera el procesamiento">
+  </VTDocStep>
+  <VTDocStep title="Espera el procesamiento">
     La aplicación carga y analiza el archivo. Una superposición de progreso muestra el estado actual. Al finalizar, las matrículas detectadas aparecen en tu historial.
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
 ## Flujo de procesamiento de archivos
 
@@ -56,7 +56,7 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="uploadFlow" autoPlay="intersect" :highlight="['I']" />
+<VTDocDiagramPresenter :code="uploadFlow" autoPlay="intersect" :highlight="['I']" />
 
 ## Progreso del procesamiento
 
@@ -77,14 +77,14 @@ Hay un botón **Cancelar** disponible durante el procesamiento si quieres detene
 
 Haz clic en **O prueba una muestra** debajo del botón de carga para explorar la galería y cargar cualquier muestra con un solo clic.
 
-<Tip>
+<VTDocTip>
   Usa la galería de muestras para familiarizarte con el funcionamiento de la detección, las puntuaciones de confianza y el panel de resultados antes de cargar tus propios archivos.
-</Tip>
+</VTDocTip>
 
 ## Procesamiento de vídeo
 
 Cuando cargas un vídeo, la aplicación procesa **cada fotograma** del clip. Cualquier matrícula que aparezca — aunque sea brevemente — se detecta y se guarda en tu historial. No necesitas pausar el vídeo ni seleccionar un fotograma concreto; la aplicación gestiona el escaneo completo automáticamente.
 
-<Note>
+<VTDocNote>
   Los archivos de vídeo grandes o de alta resolución pueden tardar más en procesarse. La velocidad de procesamiento depende del rendimiento de tu dispositivo. Puedes cancelar en cualquier momento y seguir viendo los resultados de los fotogramas que ya se hayan analizado.
-</Note>
+</VTDocNote>

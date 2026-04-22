@@ -17,9 +17,9 @@ ALPR Vue ofrece tres modos de tema. Selecciona el que mejor se adapte a tu entor
 
 El predeterminado es **Sistema**.
 
-<Tip>
+<VTDocTip>
   El tema Sistema es el recomendado para la mayoría de usuarios. Cuando tu dispositivo cambia entre modo claro y oscuro — por ejemplo, al atardecer según un horario automático — ALPR Vue cambia con él, por lo que nunca tendrás que ajustarlo manualmente.
-</Tip>
+</VTDocTip>
 
 ### Prevención del destello de contenido sin estilo
 
@@ -39,6 +39,6 @@ El predeterminado es **Auto**.
 
 El cambio de idioma surte efecto inmediatamente en toda la interfaz — botones, etiquetas, notificaciones y descripciones de ajustes se actualizan todos a la vez.
 
-<Note>
+<VTDocNote>
   La opción Auto lee la preferencia de idioma de tu navegador (el ajuste `Accept-Language`). Si tu navegador está configurado en español, ALPR Vue usará español automáticamente. Si tu navegador reporta un idioma distinto del inglés o el español, la aplicación recurre al inglés.
-</Note>
+</VTDocNote>

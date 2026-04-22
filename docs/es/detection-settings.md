@@ -5,9 +5,9 @@ description: 'Cómo configurar el umbral de confianza, el tiempo de confirmació
 
 Los ajustes de detección te permiten configurar lo selectiva y lo rápida que es ALPR Vue al reconocer matrículas. Si estás escaneando un aparcamiento concurrido puede que quieras capturar todo rápidamente; si necesitas alta precisión para un control de acceso puede que prefieras un umbral más estricto y un tiempo de confirmación más largo. Abre el **panel de ajustes** (icono de engranaje en el encabezado) y cambia cualquiera de las opciones a continuación para adaptarlo a tu caso de uso.
 
-<Tip>
+<VTDocTip>
   Para aparcamientos concurridos o cámaras de tráfico, baja el umbral de confianza ligeramente (prueba con 0,6) y asegúrate de tener el modo continuo activado. Esta combinación maximiza la tasa de captura sin detener la cámara entre matrículas.
-</Tip>
+</VTDocTip>
 
 ## Logica de temporizacion de la deteccion
 
@@ -33,10 +33,10 @@ stateDiagram-v2
 `
 </script>
 
-<DiagramPresenter :code="detectionFlow" preset="neon" autoPlay="intersect" :highlight="['Confirmed', 'SaveResult']" />
+<VTDocDiagramPresenter :code="detectionFlow" preset="neon" autoPlay="intersect" :highlight="['Confirmed', 'SaveResult']" />
 
-<AccordionGroup>
-  <Accordion title="Umbral de confianza (predeterminado: 0,7)">
+<VTDocAccordionGroup>
+  <VTDocAccordion title="Umbral de confianza (predeterminado: 0,7)">
     El umbral de confianza es un control deslizante de 0 a 1. Establece la puntuación de confianza OCR media mínima que debe alcanzar una detección para que ALPR Vue la guarde en tu historial.
 
     - **Valores bajos** (p. ej. 0,5–0,65): se guardan más matrículas, pero puede haber falsos positivos o caracteres mal leídos.
@@ -44,9 +44,9 @@ stateDiagram-v2
 
     El rango recomendado para la mayoría de situaciones es **0,6–0,8**. El valor predeterminado de 0,7 equilibra bien la precisión y la tasa de captura para condiciones de luz diurna típicas.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Tiempo de confirmación (predeterminado: 3 segundos)">
+  <VTDocAccordion title="Tiempo de confirmación (predeterminado: 3 segundos)">
     El tiempo de confirmación controla cuántos segundos debe aparecer la misma matrícula de forma continua en el encuadre de la cámara antes de que ALPR Vue la considere confirmada y la guarde.
 
     - **Auméntalo** (p. ej. a 5 segundos) si quieres reducir las confirmaciones falsas de matrículas parcialmente visibles o en movimiento.
@@ -54,39 +54,39 @@ stateDiagram-v2
 
     Este ajuste se aplica en el modo de detección normal. Cuando la confianza media de una detección es 0,8 o superior, se usa el tiempo de confirmación rápida en su lugar.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Tiempo de confirmación rápida (predeterminado: 1 segundo)">
+  <VTDocAccordion title="Tiempo de confirmación rápida (predeterminado: 1 segundo)">
     Cuando la confianza OCR de ALPR Vue para una detección alcanza una media de 0,8 o superior, cambia a la ventana de confirmación rápida en lugar de la estándar. El valor predeterminado es 1 segundo.
 
     Esto permite que las matrículas claramente visibles y bien iluminadas se confirmen casi al instante, mientras que las detecciones ambiguas siguen pasando por el período de confirmación completo. Puedes aumentar este valor si encuentras que las confirmaciones rápidas son demasiado apresuradas, o reducirlo más si tu entorno produce sistemáticamente lecturas de muy alta confianza.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Modo continuo (predeterminado: activado)">
+  <VTDocAccordion title="Modo continuo (predeterminado: activado)">
     Cuando el modo continuo está **activado**, la cámara sigue escaneando tras cada matrícula confirmada. ALPR Vue continuará detectando y confirmando nuevas matrículas sin ninguna interacción por tu parte.
 
     Cuando el modo continuo está **desactivado**, la cámara se detiene automáticamente en cuanto se confirma una matrícula **nueva**. Esto es útil para flujos de trabajo de captura de una sola matrícula — por ejemplo, registrar manualmente vehículos uno a uno en un puesto de control — donde quieres revisar cada matrícula antes de continuar.
 
-    <Note>
+    <VTDocNote>
       Si **omitir duplicados** también está activado, una matrícula que ya aparezca en tu historial no detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas.
-    </Note>
+    </VTDocNote>
 
     Activa el modo continuo de nuevo en cualquier momento para reanudar el escaneo ininterrumpido.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Omitir duplicados (predeterminado: activado)">
+  <VTDocAccordion title="Omitir duplicados (predeterminado: activado)">
     Cuando omitir duplicados está **activado**, confirmar una matrícula que ya aparece en tu historial **no** activa ningún pitido ni vibración, y **no** detiene la cámara (aunque el modo continuo esté desactivado). La detección sí se guarda, y si la nueva lectura tiene una puntuación de confianza mayor que la anterior, pasa a ser el mejor representante de esa matrícula en tu historial.
 
     Desactívalo si quieres que cada matrícula confirmada — incluidas las repetidas — active una alerta y, cuando el modo continuo esté desactivado, detenga la cámara. Esto es útil al registrar entradas y salidas del mismo vehículo, donde cada paso debe tratarse como un evento distinto.
 
-  </Accordion>
+  </VTDocAccordion>
 
-  <Accordion title="Feedback de audio / haptic (predeterminado: activado)">
+  <VTDocAccordion title="Feedback de audio / haptic (predeterminado: activado)">
     Cuando el feedback está **activado**, ALPR Vue reproduce un breve pitido y activa una vibración corta (en dispositivos que lo admiten) cada vez que se confirma una matrícula. Esto te avisa de que se ha capturado una matrícula sin necesidad de mirar la pantalla.
 
     Desactiva el feedback para un funcionamiento silencioso en entornos donde el sonido o la vibración sean molestos, como bibliotecas, oficinas o zonas residenciales tranquilas.
 
-  </Accordion>
-</AccordionGroup>
+  </VTDocAccordion>
+</VTDocAccordionGroup>

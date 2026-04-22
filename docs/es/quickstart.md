@@ -36,12 +36,12 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="quickstartFlow" autoPlay="intersect" :highlight="['M', 'O']" />
+<VTDocDiagramPresenter :code="quickstartFlow" autoPlay="intersect" :highlight="['M', 'O']" />
 
 ## Detectar una matrícula con la cámara en vivo
 
-<Steps>
-  <Step title="Abre la aplicación en un navegador compatible">
+<VTDocSteps>
+  <VTDocStep title="Abre la aplicación en un navegador compatible">
     <p>
       Abre ALPR Vue en un navegador moderno como Chrome, Edge, Firefox o Safari 16+. Para que la cámara funcione, la página
       debe servirse mediante <strong>HTTPS o localhost</strong> — este es un requisito de seguridad del navegador, no algo
@@ -51,40 +51,40 @@ flowchart TD
       ¿No sabes si tu navegador es compatible? Consulta
       <a href="./browser-requirements">Navegadores compatibles y requisitos del dispositivo</a>.
     </p>
-  </Step>
-  <Step title="Concede permisos a la cámara">
+  </VTDocStep>
+  <VTDocStep title="Concede permisos a la cámara">
     <p>
       Haz clic en <strong>Iniciar cámara</strong>. Tu navegador preguntará si ALPR Vue puede acceder a tu cámara. Haz clic en
       <strong>Permitir</strong>.
     </p>
-    <Tip>
+    <VTDocTip>
       Si accidentalmente hiciste clic en <strong>Bloquear</strong>, o si el aviso de permiso nunca apareció, puedes
       restablecerlo en la configuración del navegador. En Chrome, haz clic en el icono del candado en la barra de direcciones
       y establece <strong>Cámara</strong> en <strong>Permitir</strong>. En Safari, ve a
       <strong>Ajustes → Sitios web → Cámara</strong> y permite el acceso para el sitio. A continuación, recarga la página.
-    </Tip>
-  </Step>
-  <Step title="Apunta la cámara hacia un vehículo">
+    </VTDocTip>
+  </VTDocStep>
+  <VTDocStep title="Apunta la cámara hacia un vehículo">
     <p>
       Una vez activa la cámara, sostén el teléfono o coloca la cámara web de forma que la matrícula sea claramente visible. La
       aplicación escanea automáticamente — no necesitas pulsar nada. Aparece un recuadro de detección en pantalla cuando se
       detecta una matrícula.
     </p>
-  </Step>
-  <Step title="Consulta la matrícula detectada en el historial">
+  </VTDocStep>
+  <VTDocStep title="Consulta la matrícula detectada en el historial">
     <p>
       Cuando la aplicación confirma una detección, añade la matrícula al historial de la derecha (o debajo de la cámara en
       móvil). Cada entrada muestra el texto de la matrícula, una puntuación de confianza y la hora de detección. La cámara se
       detiene automáticamente tras la confirmación.
     </p>
-    <Note>
+    <VTDocNote>
       La cámara se detiene automáticamente después de <strong>3 segundos</strong> de detección continua. Si la detección tiene
       una confianza media alta (0,8 o superior), se detiene tras solo <strong>1 segundo</strong>. Esto evita capturas
       duplicadas. Puedes cambiar este tiempo — o activar el modo continuo — en
       <a href="./detection-settings">Ajustes de detección</a>.
-    </Note>
-  </Step>
-  <Step title="Inspecciona, edita y copia el resultado">
+    </VTDocNote>
+  </VTDocStep>
+  <VTDocStep title="Inspecciona, edita y copia el resultado">
     <p>Toca o haz clic en cualquier matrícula del historial para abrir la vista detallada. Aquí puedes:</p>
     <ul>
       <li>Ver una imagen recortada de la matrícula detectada</li>
@@ -92,8 +92,8 @@ flowchart TD
       <li>Hacer clic en <strong>Editar</strong> para corregir cualquier carácter mal leído</li>
       <li>Hacer clic en <strong>Copiar</strong> para copiar el texto de la matrícula al portapapeles</li>
     </ul>
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
 ## Pruébalo sin cámara
 

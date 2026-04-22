@@ -36,12 +36,12 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="quickstartFlow" autoPlay="intersect" :highlight="['M', 'O']" />
+<VTDocDiagramPresenter :code="quickstartFlow" autoPlay="intersect" :highlight="['M', 'O']" />
 
 ## Detect a plate with the live camera
 
-<Steps>
-  <Step title="Open the app in a supported browser">
+<VTDocSteps>
+  <VTDocStep title="Open the app in a supported browser">
     <p>
       Open ALPR Vue in a modern browser such as Chrome, Edge, Firefox, or Safari 16+. For the camera to work, the page must
       be served over <strong>HTTPS or localhost</strong> — this is a browser security requirement, not something specific to
@@ -51,38 +51,38 @@ flowchart TD
       Not sure your browser is supported? See
       <a href="./browser-requirements">Supported Browsers and Device Requirements</a>.
     </p>
-  </Step>
-  <Step title="Grant camera permissions">
+  </VTDocStep>
+  <VTDocStep title="Grant camera permissions">
     <p>
       Click <strong>Start Camera</strong>. Your browser will ask whether ALPR Vue can access your camera. Click
       <strong>Allow</strong>.
     </p>
-    <Tip>
+    <VTDocTip>
       If you accidentally clicked <strong>Block</strong>, or if the permission prompt never appeared, you can reset it in
       your browser settings. In Chrome, click the lock icon in the address bar and set <strong>Camera</strong> to
       <strong>Allow</strong>. In Safari, go to <strong>Settings → Websites → Camera</strong> and allow access for the site.
       Then reload the page.
-    </Tip>
-  </Step>
-  <Step title="Point the camera at a vehicle">
+    </VTDocTip>
+  </VTDocStep>
+  <VTDocStep title="Point the camera at a vehicle">
     <p>
       Once the camera is active, hold your phone or position your webcam so the license plate is clearly visible. The app scans
       automatically — you don't need to press anything. A bounding box appears on screen when a plate is detected.
     </p>
-  </Step>
-  <Step title="View the detected plate in the history list">
+  </VTDocStep>
+  <VTDocStep title="View the detected plate in the history list">
     <p>
       When the app confirms a detection, it adds the plate to the history list on the right (or below the camera on mobile).
       Each entry shows the plate text, a confidence score, and the time it was detected. The camera stops scanning automatically
       after confirmation.
     </p>
-    <Note>
+    <VTDocNote>
       The camera auto-stops after <strong>3 seconds</strong> of continuous detection. If the detection has a high mean
       confidence (0.8 or above), it stops after just <strong>1 second</strong>. This prevents duplicate captures. You can
       change this timing — or turn on continuous mode — in <a href="./detection-settings">Detection Settings</a>.
-    </Note>
-  </Step>
-  <Step title="Inspect, edit, and copy the result">
+    </VTDocNote>
+  </VTDocStep>
+  <VTDocStep title="Inspect, edit, and copy the result">
     <p>Tap or click any plate in the history list to open the detail view. Here you can:</p>
     <ul>
       <li>See a cropped image of the detected plate</li>
@@ -90,8 +90,8 @@ flowchart TD
       <li>Click <strong>Edit</strong> to correct any misread character</li>
       <li>Click <strong>Copy</strong> to copy the plate text to your clipboard</li>
     </ul>
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
 ## Try without a camera
 

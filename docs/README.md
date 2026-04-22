@@ -18,18 +18,8 @@ docs/
 ├── .vitepress/
 │   ├── config.ts              # VitePress config, dynamic sidebar (buildSidebar + i18n)
 │   ├── theme/
-│   │   ├── index.ts           # Theme setup, global component registration
-│   │   ├── style.css          # Theme styles
-│   │   └── components/
-│   │       ├── DiagramPresenter/       # Animated Mermaid wrapper (GSAP)
-│   │       │   ├── DiagramPresenter.vue
-│   │       │   ├── diagram-adapters.ts # Flowchart/state/sequence adapters
-│   │       │   ├── usePlayback.ts      # GSAP timeline composable
-│   │       │   ├── useRenderer.ts      # Mermaid render + adapter selection
-│   │       │   └── *.ts                # Other composables (modal, minimap, …)
-│   │       ├── DiagramPlayground.vue   # Interactive prop explorer
-│   │       └── Doc*.vue                # Shared UI components
-│   └── tests/                 # Vitest test suite for theme components
+│   │   └── index.ts           # Registers vitepress-theme-app-docs as the VitePress theme
+│   └── tests/                 # Vitest test suite for theme package components
 ├── public/                    # Static assets (favicon, logo) — served at /docs/
 ├── dev/
 │   ├── diagram-presenter.md   # DiagramPresenter contributor guide (not in sidebar)
@@ -39,7 +29,7 @@ docs/
     └── *.md                   # Spanish pages (public)
 ```
 
-Pages are written in Markdown. Site configuration and navigation live in `docs/.vitepress/config.ts`, and the custom theme is implemented in `docs/.vitepress/theme/`.
+Pages are written in Markdown. Site configuration and navigation live in `docs/.vitepress/config.ts`. The custom theme (components, styles, Mermaid renderer) is provided by the [`vitepress-theme-app-docs`](https://github.com/asiercamara/vitepress-theme-app-docs) package and wired up in `docs/.vitepress/theme/index.ts`.
 
 ## Local preview
 
@@ -64,8 +54,8 @@ The production docs output is written to `dist/docs/`.
 
 - **Site generator:** VitePress
 - **Main config:** `docs/.vitepress/config.ts`
-- **Custom theme:** `docs/.vitepress/theme/index.ts`
-- **Theme styles:** `docs/.vitepress/theme/style.css`
+- **Theme package:** [`vitepress-theme-app-docs`](https://github.com/asiercamara/vitepress-theme-app-docs) — components, styles, Mermaid renderer
+- **Theme entry:** `docs/.vitepress/theme/index.ts`
 
 The docs are bilingual:
 
@@ -74,7 +64,7 @@ The docs are bilingual:
 
 ## Mermaid diagrams — DiagramPresenter
 
-All diagrams in the docs are powered by the custom `DiagramPresenter` component (`docs/.vitepress/theme/components/DiagramPresenter/DiagramPresenter.vue`), backed by GSAP timelines and a type-aware adapter system.
+All diagrams in the docs are powered by the `VTDocDiagramPresenter` component, provided by the `vitepress-theme-app-docs` package. It is backed by GSAP timelines and a type-aware adapter system.
 
 ### Quick usage
 
@@ -89,7 +79,7 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
+<VTDocDiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
 ```
 
 ### Key props

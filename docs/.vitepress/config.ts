@@ -1,12 +1,18 @@
-import { defineConfig } from 'vitepress'
+import { defineConfigWithTheme } from 'vitepress'
+import type { ThemeConfig } from 'vitepress-theme-app-docs/config'
+import { appDocsVitePlugin } from 'vitepress-theme-app-docs/config'
 import { buildSidebar } from './sidebar'
 
-export default defineConfig({
+export default defineConfigWithTheme<ThemeConfig>({
   srcDir: '.',
   outDir: '../dist/docs',
   cacheDir: '.vitepress/cache',
   base: '/docs/',
   cleanUrls: true,
+
+  vite: {
+    plugins: [appDocsVitePlugin()],
+  },
 
   srcExclude: [
     '**/README.md',

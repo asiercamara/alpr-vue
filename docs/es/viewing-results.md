@@ -26,28 +26,28 @@ Haz clic o toca cualquier matrícula de la lista para abrir su vista detallada. 
 - **Marca de tiempo de la detección** — la fecha y hora exactas de la detección.
 - **ID de detección** — un identificador único corto para el registro.
 
-<Info>
+<VTDocInfo>
   Las barras de confianza están codificadas por colores según el nivel de precisión: **verde** para confianza muy alta (≥ 90%), **verde claro** para alta (≥ 75%), **amarillo** para media (≥ 60%), **naranja** para baja (≥ 45%) y **rojo** para confianza muy baja. Los caracteres en rojo son los que más probablemente contienen una lectura errónea.
-</Info>
+</VTDocInfo>
 
 ## Editar una matrícula
 
 Si el modelo ha leído mal un carácter, puedes corregirlo directamente en la aplicación.
 
-<Steps>
-  <Step title="Abre el detalle de la matrícula">
+<VTDocSteps>
+  <VTDocStep title="Abre el detalle de la matrícula">
     Haz clic o toca la matrícula que quieres editar en el historial.
-  </Step>
-  <Step title="Haz clic en Editar">
+  </VTDocStep>
+  <VTDocStep title="Haz clic en Editar">
     Haz clic en el botón **Editar** (icono de lápiz) junto al texto de la matrícula en el modal.
-  </Step>
-  <Step title="Corrige el texto">
+  </VTDocStep>
+  <VTDocStep title="Corrige el texto">
     El texto de la matrícula se convierte en un campo editable. Escribe tus correcciones. El campo acepta hasta 12 caracteres.
-  </Step>
-  <Step title="Guarda los cambios">
+  </VTDocStep>
+  <VTDocStep title="Guarda los cambios">
     Haz clic en el botón **Guardar** (marca de verificación) o pulsa **Intro** para confirmar. Haz clic en **Cancelar** o pulsa **Escape** para descartar.
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
 ## Copiar al portapapeles
 

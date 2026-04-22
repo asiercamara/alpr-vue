@@ -7,17 +7,17 @@ La función de exportación te permite descargar tu historial completo de detecc
 
 ## Exportar los datos
 
-<Steps>
-  <Step title="Abre el panel del historial de matrículas">
+<VTDocSteps>
+  <VTDocStep title="Abre el panel del historial de matrículas">
     Asegúrate de tener al menos una detección en la lista **Matrículas detectadas**. El botón de exportación solo aparece cuando hay resultados.
-  </Step>
-  <Step title="Haz clic en Exportar CSV">
+  </VTDocStep>
+  <VTDocStep title="Haz clic en Exportar CSV">
     Haz clic en el botón **Exportar CSV** en la esquina superior derecha del panel del historial.
-  </Step>
-  <Step title="Guarda el archivo">
+  </VTDocStep>
+  <VTDocStep title="Guarda el archivo">
     Tu navegador descarga el archivo inmediatamente en tu dispositivo. Comprueba la carpeta de descargas predeterminada de tu navegador si no aparece automáticamente.
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
 ## Columnas del CSV
 
@@ -42,6 +42,6 @@ ABC1234,0.92,2024-01-15T10:23:45.000Z,a1b2c3d4
 XYZ5678,0.87,2024-01-15T10:24:12.000Z,e5f6g7h8
 ```
 
-<Tip>
+<VTDocTip>
   Abre el CSV en Excel o Google Sheets para ordenar por confianza, filtrar por rango de fechas o crear gráficos con tus datos de detección. En Google Sheets, ve a **Archivo → Importar** y selecciona el archivo descargado.
-</Tip>
+</VTDocTip>

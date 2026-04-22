@@ -28,25 +28,25 @@ stateDiagram-v2
 `
 </script>
 
-<DiagramPresenter :code="cameraStates" preset="soft" autoPlay="intersect" :highlight="['Confirmed', 'AutoStopped']" />
+<VTDocDiagramPresenter :code="cameraStates" preset="soft" autoPlay="intersect" :highlight="['Confirmed', 'AutoStopped']" />
 
 ## Starting the camera
 
-<Steps>
-  <Step title="Click Start Camera">
+<VTDocSteps>
+  <VTDocStep title="Click Start Camera">
     On the main screen, click the **Start Camera** button. If this is your first time, your browser will ask for camera permission — click **Allow**.
-  </Step>
-  <Step title="Point at a vehicle">
+  </VTDocStep>
+  <VTDocStep title="Point at a vehicle">
     Hold your device so the license plate is visible in frame. Scanning begins automatically as soon as the camera feed appears.
-  </Step>
-  <Step title="Wait for detection">
+  </VTDocStep>
+  <VTDocStep title="Wait for detection">
     The app runs continuously in the background. When it finds a plate, it draws a green box around it and saves the result to your history.
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
-<Note>
+<VTDocNote>
   Camera access requires a secure context. The app must be opened over **HTTPS** or on **localhost**. If you see a permission error, check that the URL starts with `https://`.
-</Note>
+</VTDocNote>
 
 ## Camera controls during scanning
 
@@ -67,9 +67,9 @@ By default, the camera stops automatically after it confirms a plate. This saves
 
 To keep the camera running continuously without stopping on each detection, enable **Continuous scan** in the Settings panel (gear icon in the header).
 
-<Note>
+<VTDocNote>
   When **Skip duplicates** is on, confirming a plate already in your history will **not** stop the camera — even in single-capture mode. The camera only stops for genuinely new plates. This lets you keep scanning in a busy area without being interrupted by vehicles you have already logged.
-</Note>
+</VTDocNote>
 
 ## Live scanning indicator
 
@@ -82,6 +82,6 @@ While the camera is active, a small badge appears in the top-right corner of the
 
 When a plate is detected, a **green overlay box** is drawn around it directly on the camera preview. The box updates in real time as the plate moves through the frame. Once the detection is confirmed and saved, the overlay clears and the result appears in your plate history list.
 
-<Tip>
+<VTDocTip>
   For the best detection results, make sure the plate is well-lit and hold the camera as steady as possible. Avoid shooting at extreme angles — a straight-on view gives the AI model the clearest read.
-</Tip>
+</VTDocTip>

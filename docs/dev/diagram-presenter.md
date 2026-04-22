@@ -11,7 +11,7 @@ description: 'How to embed animated Mermaid diagrams in the ALPR Vue docs using 
 
 ## Quick start
 
-Every diagram needs two things in the Markdown file: a `<script setup>` block with the Mermaid source, and a `<DiagramPresenter>` tag that receives it.
+Every diagram needs two things in the Markdown file: a `<script setup>` block with the Mermaid source, and a `<VTDocDiagramPresenter>` tag that receives it.
 
 ```md
 <script setup>
@@ -24,7 +24,7 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="myDiagram" />
+<VTDocDiagramPresenter :code="myDiagram" />
 ```
 
 The component is globally registered, so no import is needed in Markdown.
@@ -66,7 +66,7 @@ The component is globally registered, so no import is needed in Markdown.
 Adapts automatically to the current VitePress theme.
 
 ```md
-<DiagramPresenter :code="myDiagram" />
+<VTDocDiagramPresenter :code="myDiagram" />
 ```
 
 ### `soft`
@@ -74,7 +74,7 @@ Adapts automatically to the current VitePress theme.
 Best choice for light-mode documentation. The refined light-mode tokens give nodes, edges, and the stage frame more contrast than the original version.
 
 ```md
-<DiagramPresenter :code="myDiagram" preset="soft" />
+<VTDocDiagramPresenter :code="myDiagram" preset="soft" />
 ```
 
 ### `neon`
@@ -82,7 +82,7 @@ Best choice for light-mode documentation. The refined light-mode tokens give nod
 High-contrast dark presentation mode with stronger highlights and edge glow after playback.
 
 ```md
-<DiagramPresenter
+<VTDocDiagramPresenter
   :code="myDiagram"
   preset="neon"
   autoPlay="intersect"
@@ -110,7 +110,7 @@ For production docs pages, `intersect` is usually the best default.
 Use `phaseNav` when a diagram should behave like a guided walkthrough rather than a continuous animation timeline.
 
 ```md
-<DiagramPresenter
+<VTDocDiagramPresenter
   :code="myDiagram"
   phaseNav
   caption="Step through the flow one phase at a time"
@@ -129,7 +129,7 @@ When `phaseNav` is enabled:
 The `highlight` prop accepts **node keys** from the Mermaid source, not DOM IDs.
 
 ```md
-<DiagramPresenter
+<VTDocDiagramPresenter
   :code="detectionFlow"
   preset="neon"
   autoPlay="intersect"
@@ -150,7 +150,7 @@ Enable `showBadge` and inspect the console if you need to confirm what the adapt
 `spotlight` dims nodes and edges that are not directly connected to the hovered node.
 
 ```md
-<DiagramPresenter
+<VTDocDiagramPresenter
   :code="flowDiagram"
   spotlight
   caption="Hover any node to inspect the surrounding branch"
@@ -222,13 +222,13 @@ function playSecondStep() {
 }
 </script>
 
-<DiagramPresenter
+<VTDocDiagramPresenter
 ref="first"
 :code="firstDiagram"
 @play-complete="playSecondStep"
 />
 
-<DiagramPresenter
+<VTDocDiagramPresenter
   ref="second"
   :code="secondDiagram"
   :controls="false"
@@ -291,7 +291,7 @@ Use the [DiagramPresenter Playground](/dev/diagram-playground) to:
 
 1. Create or edit a `.md` file in `docs/` (English) or `docs/es/` (Spanish).
 2. Add a `<script setup>` block with your Mermaid source as a template literal.
-3. Render it with `<DiagramPresenter :code="myDiagram" />`.
+3. Render it with `<VTDocDiagramPresenter :code="myDiagram" />`.
 4. Use `autoPlay="intersect"` for diagrams that appear mid-page.
 5. Validate the behavior in `pnpm dev:docs`.
 6. Run `pnpm build:docs` before opening a pull request.
