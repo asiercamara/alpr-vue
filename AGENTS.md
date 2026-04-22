@@ -189,12 +189,14 @@ The script runs `pnpm build` first, then calls `surge ./dist <domain>`. It auto-
 
 ### Docs
 
-Docs built with VitePress, served at `/docs/` within the same app. Output goes to `dist/docs/`.
+Docs built with VitePress, served at `/docs/` within the same app. Output goes to `dist/docs/`. The custom theme (components, styles, Mermaid renderer) is provided by the [`vitepress-theme-app-docs`](https://github.com/asiercamara/vitepress-theme-app-docs) package.
 
 ```bash
-pnpm dev:docs      # VitePress dev server (docs only)
+pnpm dev:docs      # VitePress dev server (docs only, full HMR)
 pnpm build:docs    # builds docs into dist/docs/
 pnpm build:all     # builds app first, then docs into dist/docs/
 ```
 
 Run `pnpm build:all` for production — app build runs first (clears `dist/`), docs build follows and writes into `dist/docs/`.
+
+In `pnpm dev` (main app), `/docs/*` is served from the pre-built `dist/docs/` via a Vite middleware plugin (`serveDocsPlugin` in `vite.config.ts`). Requires a prior `pnpm build:docs`. For active docs editing use `pnpm dev:docs`.

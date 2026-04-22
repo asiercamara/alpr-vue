@@ -5,9 +5,9 @@ description: 'Cómo ALPR Vue procesa los datos completamente en el dispositivo, 
 
 ALPR Vue fue construido con un compromiso claro de privacidad: todo se ejecuta en tu navegador y nada se envía a un servidor. No hay backend, no hay análisis de datos y no hay sistema de cuentas. Cuando usas la aplicación, tus imágenes, vídeos y matrículas detectadas nunca salen de tu dispositivo.
 
-<Check>Ninguna imagen ni vídeo sale de tu dispositivo — nunca.</Check>
-<Check>No se necesita cuenta ni inicio de sesión.</Check>
-<Check>Funciona completamente sin conexión tras la primera carga.</Check>
+<VTDocCheck>Ninguna imagen ni vídeo sale de tu dispositivo — nunca.</VTDocCheck>
+<VTDocCheck>No se necesita cuenta ni inicio de sesión.</VTDocCheck>
+<VTDocCheck>Funciona completamente sin conexión tras la primera carga.</VTDocCheck>
 
 ## Qué ocurre con tus imágenes
 
@@ -55,6 +55,6 @@ ALPR Vue solicita el **permiso de cámara** únicamente cuando haces clic en **I
 - Puedes revocar el permiso de cámara en cualquier momento desde la configuración del sitio de tu navegador
 - La aplicación nunca accede a la cámara en segundo plano ni sin tu acción explícita
 
-<Note>
+<VTDocNote>
   ALPR Vue no tiene servidor backend. Toda la inferencia de IA se ejecuta con ONNX Runtime Web dentro de tu pestaña del navegador. Los desarrolladores no tienen capacidad técnica para acceder a tus imágenes, detecciones ni a ningún dato de tu dispositivo.
-</Note>
+</VTDocNote>

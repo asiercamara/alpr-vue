@@ -31,34 +31,34 @@ sequenceDiagram
 `
 </script>
 
-<DiagramPresenter :code="architectureFlow" preset="neon" autoPlay="intersect" />
+<VTDocDiagramPresenter :code="architectureFlow" preset="neon" autoPlay="intersect" />
 
 ## The processing pipeline
 
-<Steps>
-  <Step title="Capture">
+<VTDocSteps>
+  <VTDocStep title="Capture">
     You start the camera or upload a photo or video file. When using the live camera, the app captures frames continuously at up to approximately 50 frames per second and feeds them into the detection pipeline.
-  </Step>
-  <Step title="Plate detection">
+  </VTDocStep>
+  <VTDocStep title="Plate detection">
     A YOLOv9 AI model scans each frame for license plate regions. It analyzes the entire frame in a single pass and draws a bounding box around any plate it finds.
-  </Step>
-  <Step title="Text recognition (OCR)">
+  </VTDocStep>
+  <VTDocStep title="Text recognition (OCR)">
     Each detected plate region is cropped out of the frame and passed to a MobileViT v2 OCR model. This model reads the characters on the plate and assigns a confidence score to each one.
-  </Step>
-  <Step title="Quality check">
+  </VTDocStep>
+  <VTDocStep title="Quality check">
     Each result is scored against four criteria: character length, mean confidence, minimum per-character confidence, and plate format. Only results with a combined quality score of 0.7 or higher are kept. Results that fall below this threshold are discarded silently.
-  </Step>
-  <Step title="Confirmation window">
+  </VTDocStep>
+  <VTDocStep title="Confirmation window">
     A plate must be detected consistently before it is added to your history. In standard mode, the same plate must appear for 3 continuous seconds. If the detection confidence is very high (mean confidence ≥ 0.8), this window shortens to 1 second.
-  </Step>
-  <Step title="Grouping">
+  </VTDocStep>
+  <VTDocStep title="Grouping">
     Once confirmed, new detections are compared against plates already in your history. If two plate readings are at least 80% similar (measured by Levenshtein string distance), they are grouped together as the same plate. This prevents minor OCR variations — such as a single misread character — from creating duplicate entries.
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
-<Note>
+<VTDocNote>
   All processing runs in a dedicated Web Worker thread, separate from the browser's main UI thread. This keeps the interface smooth and responsive even while the models are actively running.
-</Note>
+</VTDocNote>
 
 ## Plate quality validation rules
 

@@ -7,28 +7,28 @@ Upload mode lets you run license plate recognition on files you already have —
 
 ## Supported formats
 
-<CardGroup cols="2">
-  <Card title="Images" icon="image">
+<VTDocCardGroup cols="2">
+  <VTDocCard title="Images" icon="image">
     JPEG, PNG, WebP, and other common image formats supported by your browser.
-  </Card>
-  <Card title="Videos" icon="video">
+  </VTDocCard>
+  <VTDocCard title="Videos" icon="video">
     MP4, WebM, and other video formats supported by your browser's built-in media decoder.
-  </Card>
-</CardGroup>
+  </VTDocCard>
+</VTDocCardGroup>
 
 ## Uploading a file
 
-<Steps>
-  <Step title="Click Upload File">
+<VTDocSteps>
+  <VTDocStep title="Click Upload File">
     On the main screen, click the **Upload File** button. A file picker will open.
-  </Step>
-  <Step title="Select your file">
+  </VTDocStep>
+  <VTDocStep title="Select your file">
     Browse to the image or video you want to process and confirm your selection.
-  </Step>
-  <Step title="Wait for processing">
+  </VTDocStep>
+  <VTDocStep title="Wait for processing">
     The app loads and analyzes the file. A progress overlay shows the current state. When finished, any detected plates appear in your history list.
-  </Step>
-</Steps>
+  </VTDocStep>
+</VTDocSteps>
 
 ## Upload processing flow
 
@@ -56,7 +56,7 @@ flowchart TD
 `
 </script>
 
-<DiagramPresenter :code="uploadFlow" autoPlay="intersect" :highlight="['I']" />
+<VTDocDiagramPresenter :code="uploadFlow" autoPlay="intersect" :highlight="['I']" />
 
 ## Processing progress
 
@@ -77,14 +77,14 @@ Not near a vehicle? The app includes built-in sample media so you can explore al
 
 Click **Or try a sample** below the upload button to browse the gallery and load any sample with a single click.
 
-<Tip>
+<VTDocTip>
   Use the sample gallery to get familiar with how detection, confidence scores, and the results panel work before uploading your own files.
-</Tip>
+</VTDocTip>
 
 ## Video processing
 
 When you upload a video, the app processes **every frame** of the clip. Any license plate that appears — even briefly — is detected and saved to your history. You don't need to pause the video or select a specific frame; the app handles the full scan automatically.
 
-<Note>
+<VTDocNote>
   Large or high-resolution video files may take longer to process. Processing speed depends on your device's performance. You can cancel at any time and still see results from frames that were already analyzed.
-</Note>
+</VTDocNote>

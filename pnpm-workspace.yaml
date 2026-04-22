@@ -8,6 +8,10 @@ allowBuilds:
 # Mitiga ataques de supply chain que aprovechan ventanas de publicación recientes.
 minimumReleaseAge: 4320
 
+# Exención para paquetes propios — no tienen riesgo de supply chain externo.
+minimumReleaseAgeExclude:
+  - vitepress-theme-app-docs
+
 # Falla si el nivel de confianza de un paquete baja respecto a versiones anteriores.
 trustPolicy: no-downgrade
 

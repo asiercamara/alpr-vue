@@ -5,9 +5,9 @@ description: 'How ALPR Vue processes data entirely on-device, what is stored loc
 
 ALPR Vue was built with a straightforward privacy commitment: everything runs in your browser, and nothing is sent to a server. There is no backend, no analytics, and no account system. When you use the app, your images, videos, and detected plates never leave your device.
 
-<Check>No images or videos leave your device — ever.</Check>
-<Check>No account or login required.</Check>
-<Check>Works completely offline after first load.</Check>
+<VTDocCheck>No images or videos leave your device — ever.</VTDocCheck>
+<VTDocCheck>No account or login required.</VTDocCheck>
+<VTDocCheck>Works completely offline after first load.</VTDocCheck>
 
 ## What happens to your images
 
@@ -55,6 +55,6 @@ ALPR Vue asks for **camera permission** only when you click **Start Camera**. Th
 - You can revoke camera permission at any time from your browser's site settings
 - The app never accesses the camera in the background or without your explicit action
 
-<Note>
+<VTDocNote>
   ALPR Vue has no backend server. All AI inference runs using ONNX Runtime Web inside your browser tab. The developers have no technical ability to access your images, detections, or any data on your device.
-</Note>
+</VTDocNote>

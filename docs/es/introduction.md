@@ -7,28 +7,28 @@ Bienvenido a ALPR Vue, una herramienta gratuita basada en el navegador para el r
 
 ## Qué puedes hacer
 
-<CardGroup cols="2">
-  <Card title="Cámara en vivo" icon="camera" href="./camera-mode">
+<VTDocCardGroup cols="2">
+  <VTDocCard title="Cámara en vivo" icon="camera" href="./camera-mode">
     Apunta la cámara web o la del móvil hacia un vehículo y la aplicación detecta la matrícula automáticamente en tiempo real.
-  </Card>
-  <Card title="Cargar una foto" icon="image" href="./upload-files">
+  </VTDocCard>
+  <VTDocCard title="Cargar una foto" icon="image" href="./upload-files">
     Selecciona un archivo de imagen y la aplicación encuentra y lee todas las matrículas de la foto.
-  </Card>
-  <Card title="Cargar un vídeo" icon="video" href="./upload-files">
+  </VTDocCard>
+  <VTDocCard title="Cargar un vídeo" icon="video" href="./upload-files">
     Sube un clip de vídeo y la aplicación analiza cada fotograma extrayendo todas las matrículas que aparecen.
-  </Card>
-  <Card title="Resultados y exportación" icon="list-check" href="./viewing-results">
+  </VTDocCard>
+  <VTDocCard title="Resultados y exportación" icon="list-check" href="./viewing-results">
     Consulta las matrículas detectadas con marcas de tiempo y puntuaciones de confianza, inspecciona cada carácter, edita lecturas erróneas y exporta todo a CSV.
-  </Card>
-</CardGroup>
+  </VTDocCard>
+</VTDocCardGroup>
 
 ## Sin cuenta, sin servidor, funciona sin conexión
 
 ALPR Vue ejecuta los modelos de IA directamente en tu navegador usando WebAssembly. Tras la primera carga de la página, que descarga los modelos, la aplicación funciona completamente sin conexión. Tus imágenes y fotogramas de vídeo nunca se suben — todo el procesamiento ocurre en tu propio dispositivo.
 
-<Note>
+<VTDocNote>
   ALPR Vue está optimizado para **matrículas europeas**. La precisión de detección puede ser menor para matrículas de otras regiones.
-</Note>
+</VTDocNote>
 
 ## Pruébalo sin tener un coche cerca
 
@@ -36,11 +36,11 @@ La aplicación incluye **10 imágenes de muestra** y **3 vídeos de muestra** in
 
 ## Próximos pasos
 
-<CardGroup cols="2">
-  <Card title="Inicio rápido" icon="rocket" href="./quickstart">
+<VTDocCardGroup cols="2">
+  <VTDocCard title="Inicio rápido" icon="rocket" href="./quickstart">
     Detecta tu primera matrícula en unos pocos pasos.
-  </Card>
-  <Card title="Requisitos del navegador" icon="browser" href="./browser-requirements">
+  </VTDocCard>
+  <VTDocCard title="Requisitos del navegador" icon="browser" href="./browser-requirements">
     Comprueba que tu navegador y dispositivo son compatibles.
-  </Card>
-</CardGroup>
+  </VTDocCard>
+</VTDocCardGroup>

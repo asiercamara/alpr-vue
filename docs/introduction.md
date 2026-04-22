@@ -7,28 +7,28 @@ Welcome to ALPR Vue, a free browser-based tool for automatic license plate recog
 
 ## What you can do
 
-<CardGroup cols="2">
-  <Card title="Live camera" icon="camera" href="./camera-mode">
+<VTDocCardGroup cols="2">
+  <VTDocCard title="Live camera" icon="camera" href="./camera-mode">
     Point your webcam or phone camera at a vehicle and the app detects the plate automatically in real time.
-  </Card>
-  <Card title="Upload a photo" icon="image" href="./upload-files">
+  </VTDocCard>
+  <VTDocCard title="Upload a photo" icon="image" href="./upload-files">
     Select an image file and the app finds and reads every plate in the photo.
-  </Card>
-  <Card title="Upload a video" icon="video" href="./upload-files">
+  </VTDocCard>
+  <VTDocCard title="Upload a video" icon="video" href="./upload-files">
     Upload a video clip and the app scans every frame, extracting all plates that appear.
-  </Card>
-  <Card title="Results and export" icon="list-check" href="./viewing-results">
+  </VTDocCard>
+  <VTDocCard title="Results and export" icon="list-check" href="./viewing-results">
     View detected plates with timestamps and confidence scores, inspect each character, edit misreads, and export everything to CSV.
-  </Card>
-</CardGroup>
+  </VTDocCard>
+</VTDocCardGroup>
 
 ## No account, no server, works offline
 
 ALPR Vue runs the AI models directly in your browser using WebAssembly. After the first time the page loads and downloads the models, the app works completely offline. Your images and video frames are never uploaded — all processing happens on your own device.
 
-<Note>
+<VTDocNote>
   ALPR Vue is optimized for **European license plates**. Detection accuracy may be lower for plates from other regions.
-</Note>
+</VTDocNote>
 
 ## Try it without a car nearby
 
@@ -36,11 +36,11 @@ The app includes **10 sample images** and **3 sample videos** built into the gal
 
 ## What's next
 
-<CardGroup cols="2">
-  <Card title="Quick start" icon="rocket" href="./quickstart">
+<VTDocCardGroup cols="2">
+  <VTDocCard title="Quick start" icon="rocket" href="./quickstart">
     Detect your first plate in a few steps.
-  </Card>
-  <Card title="Browser requirements" icon="browser" href="./browser-requirements">
+  </VTDocCard>
+  <VTDocCard title="Browser requirements" icon="browser" href="./browser-requirements">
     Check that your browser and device are supported.
-  </Card>
-</CardGroup>
+  </VTDocCard>
+</VTDocCardGroup>

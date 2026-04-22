@@ -5,8 +5,8 @@ description: 'Conoce el detector de matrículas YOLOv9 y el modelo OCR MobileViT
 
 ALPR Vue utiliza dos modelos ONNX que se ejecutan localmente en tu navegador — sin API en la nube, sin inferencia remota. El primer modelo detecta dónde están las matrículas en la imagen; el segundo lee los caracteres de cada matrícula. Ambos modelos se cargan directamente en tu pestaña del navegador usando ONNX Runtime Web.
 
-<Tabs>
-  <Tab title="Detector de matrículas">
+<VTDocTabs>
+  <VTDocTab title="Detector de matrículas">
     El detector de matrículas analiza cada fotograma y dibuja recuadros delimitadores alrededor de las matrículas que encuentra.
 
     | Propiedad | Valor |
@@ -20,8 +20,8 @@ ALPR Vue utiliza dos modelos ONNX que se ejecutan localmente en tu navegador —
 
     El modelo es una variante compacta YOLOv9-t, diseñada para funcionar eficientemente en dispositivos con recursos limitados como teléfonos y portátiles. Ha sido entrenada específicamente en matrículas europeas bajo diversas condiciones de iluminación y ángulos de cámara.
 
-  </Tab>
-  <Tab title="OCR de matrículas">
+  </VTDocTab>
+  <VTDocTab title="OCR de matrículas">
     El modelo OCR de matrículas lee los caracteres de cada región de matrícula detectada y asigna una puntuación de confianza a cada carácter.
 
     | Propiedad | Valor |
@@ -37,8 +37,8 @@ ALPR Vue utiliza dos modelos ONNX que se ejecutan localmente en tu navegador —
 
     Como cada carácter tiene su propia cabeza de salida, el modelo reporta una puntuación de confianza individual por carácter. Puedes ver estas puntuaciones en la vista detallada de la matrícula tocando cualquier entrada de tu historial.
 
-  </Tab>
-</Tabs>
+  </VTDocTab>
+</VTDocTabs>
 
 ## Formato de los modelos
 
@@ -48,14 +48,14 @@ ALPR Vue usa **ONNX Runtime Web** para ejecutar la inferencia. Esta biblioteca c
 
 ## Limitaciones
 
-<Warning>
+<VTDocWarning>
   Los modelos están optimizados para matrículas europeas. La precisión de detección y OCR puede ser menor para matrículas de otras regiones, especialmente las que usan diferentes juegos de caracteres, dimensiones o formatos de matrícula.
-</Warning>
+</VTDocWarning>
 
 - **Cobertura regional:** Ambos modelos fueron entrenados principalmente con matrículas europeas. La precisión varía para matrículas de Norteamérica, Asia y otras regiones.
 - **Rendimiento del dispositivo:** La velocidad de inferencia depende de la CPU de tu dispositivo. Los dispositivos más antiguos o de bajo consumo pueden experimentar tasas de fotogramas más lentas.
 - **Requisitos del navegador:** ONNX Runtime Web requiere compatibilidad con WebAssembly. Todos los navegadores modernos lo admiten, pero versiones muy antiguas pueden no hacerlo.
 
-<Note>
+<VTDocNote>
   Los modelos se descargan una vez en tu primera visita y tu navegador los almacena en caché. En visitas posteriores, la aplicación los carga desde la caché local del navegador — no se necesita ninguna solicitud de red y la aplicación funciona completamente sin conexión.
-</Note>
+</VTDocNote>
