@@ -29,9 +29,38 @@ sequenceDiagram
   Plates-->>UI: Actualiza matriculas y mejor resultado
   UI-->>User: Muestra historial y vista detallada
 `
+
+const pipelineMindmap = `
+# Canal ALPR
+## 1. Captura
+### Origen: Cámara / Archivos
+### Tasa: ~50 fps
+## 2. Detección (YOLOv9)
+### Encontrar cajas
+### Procesamiento local
+## 3. OCR (MobileViT v2)
+### Leer caracteres
+### Asignar confianza
+## 4. Validación
+### Calidad >= 0,7
+### Longitud: 4-10 cars
+### Formato check
+## 5. Confirmación
+### 3s (Estándar)
+### 1s (Alta confianza)
+## 6. Agrupación
+### 80% similitud
+### Distancia Levenshtein
+`
 </script>
 
 <VTDocDiagramPresenter :code="architectureFlow" preset="neon" autoPlay="intersect" />
+
+## Resumen del canal
+
+Este mapa mental ofrece una visión general de alto nivel de las etapas secuenciales y los requisitos del canal de ALPR.
+
+<VTDocMindmap :code="pipelineMindmap" />
 
 ## El canal de procesamiento
 

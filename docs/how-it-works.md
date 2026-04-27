@@ -29,9 +29,38 @@ sequenceDiagram
   Plates-->>UI: Update saved plates and best result
   UI-->>User: Show history item and detail view
 `
+
+const pipelineMindmap = `
+# ALPR Pipeline
+## 1. Capture
+### Source: Camera / Files
+### Rate: ~50 fps
+## 2. Detection (YOLOv9)
+### Find bounding boxes
+### Local processing
+## 3. OCR (MobileViT v2)
+### Read characters
+### Assign confidence
+## 4. Validation
+### Quality >= 0.7
+### Length: 4-10 chars
+### Format check
+## 5. Confirmation
+### 3s (Standard)
+### 1s (High confidence)
+## 6. Grouping
+### 80% similarity
+### Levenshtein distance
+`
 </script>
 
 <VTDocDiagramPresenter :code="architectureFlow" preset="neon" autoPlay="intersect" />
+
+## Pipeline summary
+
+This mindmap provides a high-level overview of the sequential stages and requirements of the ALPR pipeline.
+
+<VTDocMindmap :code="pipelineMindmap" />
 
 ## The processing pipeline
 
