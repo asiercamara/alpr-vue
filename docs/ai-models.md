@@ -5,7 +5,7 @@ description: 'Learn about the YOLOv9 plate detector and MobileViT v2 OCR model t
 
 ALPR Vue relies on two ONNX models that run locally in your browser — no cloud API, no remote inference. The first model detects where license plates are in the image; the second reads the characters on each plate. Both models load directly in your browser tab using ONNX Runtime Web.
 
-<VTDocTabs>
+<VTDocTabs variant="pills">
   <VTDocTab title="Plate detector">
     The plate detector scans each frame and draws bounding boxes around any license plates it finds.
 

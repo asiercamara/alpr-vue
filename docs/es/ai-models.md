@@ -5,7 +5,7 @@ description: 'Conoce el detector de matrículas YOLOv9 y el modelo OCR MobileViT
 
 ALPR Vue utiliza dos modelos ONNX que se ejecutan localmente en tu navegador — sin API en la nube, sin inferencia remota. El primer modelo detecta dónde están las matrículas en la imagen; el segundo lee los caracteres de cada matrícula. Ambos modelos se cargan directamente en tu pestaña del navegador usando ONNX Runtime Web.
 
-<VTDocTabs>
+<VTDocTabs variant="pills">
   <VTDocTab title="Detector de matrículas">
     El detector de matrículas analiza cada fotograma y dibuja recuadros delimitadores alrededor de las matrículas que encuentra.
 
