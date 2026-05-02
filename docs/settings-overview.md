@@ -14,15 +14,21 @@ Tap the **gear icon (⚙️)** in the app header to open the settings panel. The
 The settings panel covers three areas:
 
 <VTDocCardGroup cols="3">
-  <VTDocCard title="Detection" icon="sliders" href="./detection-settings">
-    Confidence threshold, confirmation timing, continuous mode, duplicate filtering, and audio/haptic feedback.
-  </VTDocCard>
-  <VTDocCard title="Appearance" icon="sun" href="./appearance-language">
-    Switch between light, dark, and system theme modes.
-  </VTDocCard>
-  <VTDocCard title="Language" icon="language" href="./appearance-language">
-    Choose English, Spanish, or automatic detection from your browser.
-  </VTDocCard>
+<VTDocCard title="Detection" icon="sliders" href="./detection-settings">
+
+Confidence threshold, confirmation timing, continuous mode, duplicate filtering, and audio/haptic feedback.
+
+</VTDocCard>
+<VTDocCard title="Appearance" icon="sun" href="./appearance-language">
+
+Switch between light, dark, and system theme modes.
+
+</VTDocCard>
+<VTDocCard title="Language" icon="language" href="./appearance-language">
+
+Choose English, Spanish, or automatic detection from your browser.
+
+</VTDocCard>
 </VTDocCardGroup>
 
 ## Settings persistence
@@ -30,7 +36,9 @@ The settings panel covers three areas:
 Every time you change a setting, ALPR Vue saves it automatically to your browser's `localStorage` under the key `alpr-settings`. Your preferences survive page reloads and browser restarts without any extra steps on your part.
 
 <VTDocNote>
-  Settings are stored locally in your browser. If you clear your browser's site data or use private/incognito mode with strict storage settings, all settings will reset to their defaults.
+
+Settings are stored locally in your browser. If you clear your browser's site data or use private/incognito mode with strict storage settings, all settings will reset to their defaults.
+
 </VTDocNote>
 
 ## Resetting settings

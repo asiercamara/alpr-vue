@@ -18,7 +18,9 @@ ALPR Vue offers three theme modes. Select the one that best fits your working en
 The default is **System**.
 
 <VTDocTip>
-  The System theme is recommended for most users. When your device switches between light and dark mode — for example, at sunset via an automatic schedule — ALPR Vue switches with it, so you never have to adjust it manually.
+
+The System theme is recommended for most users. When your device switches between light and dark mode — for example, at sunset via an automatic schedule — ALPR Vue switches with it, so you never have to adjust it manually.
+
 </VTDocTip>
 
 ### Flash-of-unstyled-content prevention
@@ -40,5 +42,7 @@ The default is **Auto**.
 Switching languages takes effect immediately across the entire interface — buttons, labels, notifications, and settings descriptions all update at once.
 
 <VTDocNote>
-  The Auto option reads your browser's language preference (the `Accept-Language` setting). If your browser is configured for Spanish, ALPR Vue will use Spanish automatically. If your browser reports a language other than English or Spanish, the app falls back to English.
+
+The Auto option reads your browser's language preference (the `Accept-Language` setting). If your browser is configured for Spanish, ALPR Vue will use Spanish automatically. If your browser reports a language other than English or Spanish, the app falls back to English.
+
 </VTDocNote>

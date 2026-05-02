@@ -14,15 +14,21 @@ Toca el **icono de engranaje (⚙️)** en el encabezado de la aplicación para 
 El panel de ajustes cubre tres áreas:
 
 <VTDocCardGroup cols="3">
-  <VTDocCard title="Detección" icon="sliders" href="./detection-settings">
-    Umbral de confianza, tiempo de confirmación, modo continuo, filtrado de duplicados y feedback de audio/haptic.
-  </VTDocCard>
-  <VTDocCard title="Apariencia" icon="sun" href="./appearance-language">
-    Alterna entre los modos de tema claro, oscuro y del sistema.
-  </VTDocCard>
-  <VTDocCard title="Idioma" icon="language" href="./appearance-language">
-    Elige inglés, español o detección automática según tu navegador.
-  </VTDocCard>
+<VTDocCard title="Detección" icon="sliders" href="./detection-settings">
+
+Umbral de confianza, tiempo de confirmación, modo continuo, filtrado de duplicados y feedback de audio/haptic.
+
+</VTDocCard>
+<VTDocCard title="Apariencia" icon="sun" href="./appearance-language">
+
+Alterna entre los modos de tema claro, oscuro y del sistema.
+
+</VTDocCard>
+<VTDocCard title="Idioma" icon="language" href="./appearance-language">
+
+Elige inglés, español o detección automática según tu navegador.
+
+</VTDocCard>
 </VTDocCardGroup>
 
 ## Persistencia de los ajustes
@@ -30,7 +36,9 @@ El panel de ajustes cubre tres áreas:
 Cada vez que cambias un ajuste, ALPR Vue lo guarda automáticamente en el `localStorage` de tu navegador bajo la clave `alpr-settings`. Tus preferencias sobreviven a recargas de página y reinicios del navegador sin que tengas que hacer nada más.
 
 <VTDocNote>
-  Los ajustes se almacenan localmente en tu navegador. Si borras los datos del sitio en tu navegador o usas el modo privado/incógnito con ajustes de almacenamiento estrictos, todos los ajustes volverán a sus valores predeterminados.
+
+Los ajustes se almacenan localmente en tu navegador. Si borras los datos del sitio en tu navegador o usas el modo privado/incógnito con ajustes de almacenamiento estrictos, todos los ajustes volverán a sus valores predeterminados.
+
 </VTDocNote>
 
 ## Restablecer los ajustes

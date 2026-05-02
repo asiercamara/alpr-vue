@@ -6,38 +6,43 @@ description: 'Learn about the YOLOv9 plate detector and MobileViT v2 OCR model t
 ALPR Vue relies on two ONNX models that run locally in your browser — no cloud API, no remote inference. The first model detects where license plates are in the image; the second reads the characters on each plate. Both models load directly in your browser tab using ONNX Runtime Web.
 
 <VTDocTabs variant="pills">
-  <VTDocTab title="Plate detector">
-    The plate detector scans each frame and draws bounding boxes around any license plates it finds.
 
-    | Property | Value |
-    |---|---|
-    | Model file | `yolo-v9-t-384-license-plates-end2end.onnx` |
-    | Architecture | YOLOv9 (single-pass object detection) |
-    | Input resolution | 384 × 384 pixels |
-    | Source | [open-image-models](https://github.com/ankandrew/open-image-models) |
+<VTDocTab title="Plate detector">
 
-    **How it works:** The model resizes each frame to 384 × 384 pixels, then analyzes the entire image in a single forward pass through the neural network. It divides the image into a grid and predicts bounding boxes and confidence scores for each cell. The result is a set of bounding boxes — one for each plate region the model found.
+The plate detector scans each frame and draws bounding boxes around any license plates it finds.
 
-    The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It has been specifically trained on European plates under a variety of lighting conditions and camera angles.
+| Property         | Value                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Model file       | `yolo-v9-t-384-license-plates-end2end.onnx`                         |
+| Architecture     | YOLOv9 (single-pass object detection)                               |
+| Input resolution | 384 × 384 pixels                                                    |
+| Source           | [open-image-models](https://github.com/ankandrew/open-image-models) |
 
-  </VTDocTab>
-  <VTDocTab title="Plate OCR">
-    The plate OCR model reads the characters from each detected plate region and assigns a confidence score to each character.
+**How it works:** The model resizes each frame to 384 × 384 pixels, then analyzes the entire image in a single forward pass through the neural network. It divides the image into a grid and predicts bounding boxes and confidence scores for each cell. The result is a set of bounding boxes — one for each plate region the model found.
 
-    | Property | Value |
-    |---|---|
-    | Model file | `european_mobile_vit_v2_ocr.onnx` |
-    | Architecture | MobileViT v2 (CNN with multiple output heads) |
-    | Input resolution | 140 × 70 pixels |
-    | Alphabet | A–Z, 0–9, hyphen, underscore (used as padding) |
-    | Maximum plate length | 9 characters |
-    | Source | [open-image-models](https://github.com/ankandrew/open-image-models) |
+The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It has been specifically trained on European plates under a variety of lighting conditions and camera angles.
 
-    **How it works:** The cropped plate region is resized to 140 × 70 pixels and converted to grayscale. The model then processes this image through a series of convolutional layers. It has 9 output heads — one for each possible character position on the plate. Each head produces a probability distribution across the full alphabet, and the character with the highest probability is selected for that position. Padding characters are stripped from the final result, leaving only the actual plate text.
+</VTDocTab>
 
-    Because each character has its own output head, the model reports an individual confidence score per character. You can view these scores in the plate detail view by tapping any entry in your history.
+<VTDocTab title="Plate OCR">
 
-  </VTDocTab>
+The plate OCR model reads the characters from each detected plate region and assigns a confidence score to each character.
+
+| Property             | Value                                                               |
+| -------------------- | ------------------------------------------------------------------- |
+| Model file           | `european_mobile_vit_v2_ocr.onnx`                                   |
+| Architecture         | MobileViT v2 (CNN with multiple output heads)                       |
+| Input resolution     | 140 × 70 pixels                                                     |
+| Alphabet             | A–Z, 0–9, hyphen, underscore (used as padding)                      |
+| Maximum plate length | 9 characters                                                        |
+| Source               | [open-image-models](https://github.com/ankandrew/open-image-models) |
+
+**How it works:** The cropped plate region is resized to 140 × 70 pixels and converted to grayscale. The model then processes this image through a series of convolutional layers. It has 9 output heads — one for each possible character position on the plate. Each head produces a probability distribution across the full alphabet, and the character with the highest probability is selected for that position. Padding characters are stripped from the final result, leaving only the actual plate text.
+
+Because each character has its own output head, the model reports an individual confidence score per character. You can view these scores in the plate detail view by tapping any entry in your history.
+
+</VTDocTab>
+
 </VTDocTabs>
 
 ## Model format
@@ -49,7 +54,9 @@ ALPR Vue uses **ONNX Runtime Web** to run inference. This library compiles the m
 ## Limitations
 
 <VTDocWarning>
-  The models are optimized for European license plates. Detection and OCR accuracy may be lower for plates from other regions, especially those that use different character sets, plate dimensions, or layouts.
+
+The models are optimized for European license plates. Detection and OCR accuracy may be lower for plates from other regions, especially those that use different character sets, plate dimensions, or layouts.
+
 </VTDocWarning>
 
 - **Regional coverage:** Both models were trained primarily on European plates. Accuracy varies for plates from North America, Asia, and other regions.
@@ -57,5 +64,7 @@ ALPR Vue uses **ONNX Runtime Web** to run inference. This library compiles the m
 - **Browser requirements:** ONNX Runtime Web requires WebAssembly support. All modern browsers support this, but very old browser versions may not.
 
 <VTDocNote>
-  The models are downloaded once on your first visit and cached by your browser. On subsequent visits, the app loads them from the local browser cache — no network request is needed, and the app works fully offline.
+
+The models are downloaded once on your first visit and cached by your browser. On subsequent visits, the app loads them from the local browser cache — no network request is needed, and the app works fully offline.
+
 </VTDocNote>
