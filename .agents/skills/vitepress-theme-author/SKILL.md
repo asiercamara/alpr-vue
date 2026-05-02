@@ -101,41 +101,49 @@ When improving an existing article, first read [`references/improvement-checklis
   - Good (block): a fenced ` ```html ` or ` ```md ` block containing the tags.
   - Bad: `Use <VTDocNote> for asides.` written as prose — `<VTDocNote>` will be treated as a real component, swallow following content until a matching close, and produce wrong output or a parse error.
   - Self-closing or unknown tags (`<custom-element>`, `<my-tag />`) are equally dangerous. Same rule: backtick them.
-- **Component tag indentation is cosmetic.** You may indent inner components (e.g. `  <VTDocAccordion>` inside `<VTDocAccordionGroup>`) for readability. The parser ignores the indentation as long as the **blank-line rule above is followed**. The real cause of _"Element is missing end tag"_ errors is missing blank lines around slot content — not the indentation of the tags themselves.
-- **Markdown lists inside component slots: items at column 1 OR consistently indented under the surrounding tag is fine, as long as sub-items are 2 spaces beyond their parent and you don't accidentally land at 4+ spaces in a context where it becomes an indented code block.** This is the rule that bites people most. markdown-it (the parser VitePress uses) treats any line indented by **4 or more spaces as an indented code block**, so a list visually indented to "match" a nested component (e.g. inside a `<VTDocAccordion>` that lives inside a `<VTDocAccordionGroup>`) silently turns into a code block instead of a list.
-  - **Component tags** can be indented for readability — that's purely cosmetic and the parser ignores it.
-  - **List items inside the slot** must start at column 1. Do not align them with the opening tag.
-  - Leave a **blank line between the opening tag and the first list item**, and another blank line before the closing tag.
-  - Nested list items indent by exactly **two spaces** from their parent item (still relative to column 1, not to the surrounding component).
-  - When in doubt: blank line, flush-left bullets, blank line.
+- **Component tag indentation: cosmetic at shallow nesting, dangerous at deep nesting.** The parser handles `VTDoc*` tags independently of block rules, so a tag at any indentation level is valid. However, every level of tag indentation pushes the slot content further right — and content at 4+ spaces is parsed as an indented code block. With one level of nesting (`<VTDocAccordion>` at col 2, content at col 0) this is fine. With two or more levels (accordion inside group, note inside accordion) the safe default is **column 0 for all tags and all content**.
+- **Slot content indentation: three categories with different limits.** markdown-it measures indentation from **column 0 of the physical line**, not from the parent tag. A line that starts with 4+ spaces after a blank line is always parsed as an indented code block — regardless of how deeply the surrounding tags are nested.
 
-  Correct (note: list flush-left even though `VTDocAccordion` is nested two levels deep):
+  | Content type                      | Compatible indentation   | Why                                        |
+  | --------------------------------- | ------------------------ | ------------------------------------------ |
+  | `VTDoc*` tags (shallow, 1 level)  | Up to 2 spaces           | Any deeper risks pushing content to col 4+ |
+  | `VTDoc*` tags (nested, 2+ levels) | Column 0 — safest        | Eliminates the drift risk entirely         |
+  | Prose paragraphs                  | ≤ 3 spaces from column 0 | 4+ spaces → indented code block            |
+  | Lists (`-`, `*`, `1.`)            | Column 0 only            | Even 4 spaces collapses to code block      |
+  | Code fences (` ``` `)             | Column 0 only            | Indented fence = code block                |
+  | Tables (`\| … \|`)                | Column 0 only            | Same 4-space rule                          |
+
+  The trap: indent tags to "look nice" under their parent and content silently becomes a code block. `<VTDocAccordion>` at col 2 → content looks natural at col 4, but col 4 = code block:
 
   ```md
   <VTDocAccordionGroup>
-    <VTDocAccordion title="Setup">
+    <VTDocAccordion title="Q">
 
-  - First item
-  - Second item
-    - Nested item (2-space indent from parent)
-  - Third item
+      Answer here              ← col 4 → <pre><code>, not a paragraph ❌
 
     </VTDocAccordion>
   </VTDocAccordionGroup>
   ```
 
-  Wrong (list indented to match the nesting → parsed as a code block):
+  **Nesting `VTDoc*` components inside other slots is fully supported** — `<VTDocNote>` inside `<VTDocAccordion>`, `<VTDocTip>` inside `<VTDocStep>`, etc. Keep every tag and every content line at column 0:
 
   ```md
   <VTDocAccordionGroup>
-    <VTDocAccordion title="Setup">
-      - First item
-      - Second item
-    </VTDocAccordion>
+  <VTDocAccordion title="Q">
+
+  Answer here. ✓
+
+  <VTDocNote>
+
+  A note inside the accordion. ✓
+
+  </VTDocNote>
+
+  </VTDocAccordion>
   </VTDocAccordionGroup>
   ```
 
-  The same rule applies to other block-level Markdown inside slots (paragraphs, fenced code blocks, tables): keep them flush-left. Short prose lines tolerate small indentation, but lists, fences, and tables do not.
+  Leave a **blank line between the opening tag and the first content line**, and another blank line before the closing tag. Nested list items indent by exactly **two spaces** from their parent item (relative to column 0).
 
 - **No HTML escaping of slot content unless the content is itself HTML/XML markup** (see the rule above) or the user asked for raw HTML output.
 - **Slot content must be written inline in the `.md` file — never passed as a string prop.** VitePress compiles `.md` to Vue SFCs at build time; Markdown syntax (`[link](url)`, `**bold**`) and `VTDoc*` components inside slots are only processed during that compile step. If a consumer passes content from a JS variable, JSON data file, or `:content="someString"` prop, it renders as raw text — markdown syntax and component tags appear literally. The fix is always to move the content inline as slot markup in the `.md` file.

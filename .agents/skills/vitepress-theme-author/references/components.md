@@ -62,17 +62,17 @@ Pick at most one callout per logical idea. Stacking callouts dilutes them.
 <VTDocCardGroup :cols="3">
   <VTDocCard title="Quickstart" icon="rocket" href="/guide/getting-started">
 
-    Add the package, peer dependencies, and the theme wrapper.
+Add the package, peer dependencies, and the theme wrapper.
 
   </VTDocCard>
   <VTDocCard title="i18n" icon="language" href="/guide/i18n">
 
-    Set up locale routing and translated frontmatter.
+Set up locale routing and translated frontmatter.
 
   </VTDocCard>
   <VTDocCard title="Custom Adapters" icon="gear" href="/guide/custom-adapters">
 
-    Register adapters for the diagram presenter.
+Register adapters for the diagram presenter.
 
   </VTDocCard>
 </VTDocCardGroup>
@@ -104,17 +104,17 @@ Use cards for navigation/entry points. They are not a replacement for bullet lis
 <VTDocSteps>
   <VTDocStep title="Install the package">
 
-    Add `vitepress-theme-app-docs` to your VitePress site.
+Add `vitepress-theme-app-docs` to your VitePress site.
 
   </VTDocStep>
   <VTDocStep title="Wire up the theme entry">
 
-    Re-export the theme from `.vitepress/theme/index.ts`.
+Re-export the theme from `.vitepress/theme/index.ts`.
 
   </VTDocStep>
   <VTDocStep title="Author with components">
 
-    Drop callouts, cards, tabs, and steps directly in Markdown.
+Drop callouts, cards, tabs, and steps directly in Markdown.
 
   </VTDocStep>
 </VTDocSteps>
@@ -186,12 +186,12 @@ Accordions start collapsed. Use them for FAQs and secondary detail you want to k
 <VTDocAccordionGroup>
   <VTDocAccordion title="Are the components auto-registered?">
 
-    Yes — they are registered in the theme's `enhanceApp` hook.
+Yes — they are registered in the theme's `enhanceApp` hook.
 
   </VTDocAccordion>
   <VTDocAccordion title="Can I extend the theme?">
 
-    Yes. Use `extends` and re-call the original `enhanceApp`.
+Yes. Use `extends` and re-call the original `enhanceApp`.
 
   </VTDocAccordion>
 </VTDocAccordionGroup>

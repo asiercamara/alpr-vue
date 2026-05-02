@@ -19,12 +19,12 @@ A short paragraph stating what the reader will have working after this guide and
 <VTDocSteps type="bullet">
   <VTDocStep title="Node.js ≥ 18">
 
-    Required by VitePress and the theme.
+Required by VitePress and the theme.
 
   </VTDocStep>
   <VTDocStep title="An existing VitePress site">
 
-    The theme wraps a site — it does not scaffold one.
+The theme wraps a site — it does not scaffold one.
 
   </VTDocStep>
 </VTDocSteps>
@@ -61,12 +61,12 @@ yarn add vitepress-theme-app-docs
 <VTDocSteps>
   <VTDocStep title="Re-export the theme">
 
-    In `.vitepress/theme/index.ts`, re-export the package theme.
+In `.vitepress/theme/index.ts`, re-export the package theme.
 
   </VTDocStep>
   <VTDocStep title="Author your first page">
 
-    Drop a `VTDocTip` or a `VTDocSteps` directly in any Markdown file.
+Drop a `VTDocTip` or a `VTDocSteps` directly in any Markdown file.
 
   </VTDocStep>
 </VTDocSteps>
@@ -82,12 +82,12 @@ Run `pnpm dev` and open the page — components should render with the theme's s
 <VTDocCardGroup :cols="2">
   <VTDocCard title="Components" icon="sliders" href="/guide/components">
 
-    Browse the full component reference.
+Browse the full component reference.
 
   </VTDocCard>
   <VTDocCard title="i18n" icon="language" href="/guide/i18n">
 
-    Configure locale routing.
+Configure locale routing.
 
   </VTDocCard>
 </VTDocCardGroup>
@@ -161,17 +161,17 @@ description: Common questions about installing, extending, and shipping the them
 <VTDocAccordionGroup>
   <VTDocAccordion title="Are the components auto-registered?">
 
-    Yes. The theme registers them in `enhanceApp`, so any `.md` file can use them without imports.
+Yes. The theme registers them in `enhanceApp`, so any `.md` file can use them without imports.
 
   </VTDocAccordion>
   <VTDocAccordion title="Can I extend the theme with my own enhancements?">
 
-    Yes — use `extends` in your local theme entry and re-call the original `enhanceApp`.
+Yes — use `extends` in your local theme entry and re-call the original `enhanceApp`.
 
   </VTDocAccordion>
   <VTDocAccordion title="Does the theme also style raw Mermaid fences?">
 
-    Yes. Plain ` ```mermaid ` fences pick up the toolbar and fullscreen handling automatically.
+Yes. Plain ` ```mermaid ` fences pick up the toolbar and fullscreen handling automatically.
 
   </VTDocAccordion>
 </VTDocAccordionGroup>
@@ -202,12 +202,12 @@ A one-paragraph framing of the decision.
 <VTDocSteps>
   <VTDocStep title="Install the package">
 
-    …
+…
 
   </VTDocStep>
   <VTDocStep title="Wire up the theme entry">
 
-    …
+…
 
   </VTDocStep>
 </VTDocSteps>
@@ -217,12 +217,12 @@ A one-paragraph framing of the decision.
 <VTDocSteps type="alpha">
   <VTDocStep title="Option A — pnpm">
 
-    Faster installs and strict hoisting.
+Faster installs and strict hoisting.
 
   </VTDocStep>
   <VTDocStep title="Option B — npm">
 
-    Default toolchain.
+Default toolchain.
 
   </VTDocStep>
 </VTDocSteps>
@@ -232,12 +232,12 @@ A one-paragraph framing of the decision.
 <VTDocSteps type="bullet">
   <VTDocStep title="Node.js ≥ 18">
 
-    Required by VitePress.
+Required by VitePress.
 
   </VTDocStep>
   <VTDocStep title="An existing VitePress site">
 
-    The theme does not scaffold one.
+The theme does not scaffold one.
 
   </VTDocStep>
 </VTDocSteps>
@@ -282,12 +282,12 @@ The theme re-renders diagrams on the `vtdoc:before-print` event for a high-resol
 <VTDocAccordionGroup>
   <VTDocAccordion title="Where do I file an issue?">
 
-    Open one in the `vitepress-theme-app-docs` GitHub repository with a minimal reproduction.
+Open one in the `vitepress-theme-app-docs` GitHub repository with a minimal reproduction.
 
   </VTDocAccordion>
   <VTDocAccordion title="How do I get debug output?">
 
-    Pass `showBadge` to `VTDocDiagramPresenter` to print the detected adapter while authoring.
+Pass `showBadge` to `VTDocDiagramPresenter` to print the detected adapter while authoring.
 
   </VTDocAccordion>
 </VTDocAccordionGroup>
