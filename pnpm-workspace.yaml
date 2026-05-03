@@ -18,3 +18,7 @@ trustPolicy: no-downgrade
 # Solo las dependencias directas pueden usar fuentes exóticas (git URLs, tarballs directos).
 # Las transitivas quedan bloqueadas.
 blockExoticSubdeps: true
+
+# VitePress 1.x no compatible con Vite 8 (rolldown). Override fuerza Vite 5/6.
+# @vitejs/plugin-vue 5.2.4 declara peer vite>=8 pero funciona con Vite 6.
+strictPeerDependencies: false

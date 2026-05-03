@@ -1,85 +1,36 @@
 ---
-title: 'ALPR Vue: Reconocimiento de Matrículas en el Navegador'
-description: 'ALPR Vue detecta y lee matrículas de vehículos en tu navegador — con cámara en vivo, fotos o vídeos. Sin servidor, sin cuenta y con total privacidad.'
+layout: home
+
+hero:
+  name: ALPR Vue
+  text: Reconocimiento de Matrículas en el Navegador
+  tagline: Alto rendimiento, 100% privado y funciona sin conexión.
+  image:
+    src: /logo.png
+    alt: Logo de ALPR Vue
+  actions:
+    - theme: brand
+      text: Empezar
+      link: /es/quickstart
+    - theme: alt
+      text: Ver en GitHub
+      link: https://github.com/asiercamara/alpr-vue
+
+features:
+  - icon: 🛡️
+    title: 100% Privado
+    details: Todo el procesamiento ocurre localmente. Tus datos nunca salen del navegador.
+  - icon: ⚡️
+    title: Rendimiento en Tiempo Real
+    details: Basado en Vue 3 y ONNX Runtime para un reconocimiento instantáneo.
+  - icon: 📷
+    title: Multi-formato
+    details: Soporte para cámara en vivo, subida de fotos y procesamiento de vídeo.
+  - icon: 📊
+    title: Listo para Exportar
+    details: Exporta tu historial de detección directamente a CSV para análisis externos.
 ---
 
-ALPR Vue es una herramienta gratuita basada en el navegador para el reconocimiento automático de matrículas (ALPR). Apunta la cámara hacia un vehículo o sube una foto o un vídeo, y la aplicación detecta y lee la matrícula al instante, directamente en tu dispositivo. Sin cuenta, sin conexión a internet tras la primera carga, y tus imágenes nunca salen de tu teléfono u ordenador.
+## ¿Por qué elegir ALPR Vue?
 
-<VTDocCardGroup cols="2">
-<VTDocCard title="Inicio rápido" icon="rocket" href="./quickstart">
-
-Comienza en minutos. Abre la aplicación, permite el acceso a la cámara y empieza a leer matrículas.
-
-</VTDocCard>
-<VTDocCard title="Modo cámara" icon="camera" href="./camera-mode">
-
-Usa tu cámara web o la cámara del móvil para detectar matrículas en tiempo real con recuadros de detección en vivo.
-
-</VTDocCard>
-<VTDocCard title="Cargar archivos" icon="upload" href="./upload-files">
-
-Carga una foto o un vídeo para extraer matrículas sin necesidad de una cámara en directo.
-
-</VTDocCard>
-<VTDocCard title="Exportar datos" icon="file-csv" href="./exporting-data">
-
-Descarga las matrículas detectadas como un archivo CSV para usar en Excel u otras herramientas.
-
-</VTDocCard>
-</VTDocCardGroup>
-
-## Cómo empezar
-
-<VTDocSteps>
-<VTDocStep title="Abre la aplicación en tu navegador">
-
-ALPR Vue se ejecuta completamente en tu navegador. Sin instalación, sin cuenta y sin registro.
-
-</VTDocStep>
-<VTDocStep title="Elige el modo de entrada">
-
-Haz clic en **Iniciar cámara** para usar la cámara web o la del móvil, o en **Cargar archivo** para procesar una imagen o vídeo guardado.
-
-</VTDocStep>
-<VTDocStep title="Lee las matrículas">
-
-La aplicación detecta automáticamente las matrículas y las muestra en el historial con puntuaciones de confianza y marcas de tiempo.
-
-</VTDocStep>
-<VTDocStep title="Exporta los resultados">
-
-Haz clic en **Exportar CSV** para descargar todas las matrículas detectadas como un archivo listo para hojas de cálculo.
-
-</VTDocStep>
-</VTDocSteps>
-
-## Funcionalidades principales
-
-<VTDocCardGroup cols="2">
-<VTDocCard title="100% Privado" icon="shield-halved" href="./privacy">
-
-Todo el procesamiento de IA ocurre localmente en tu dispositivo. Tus imágenes y vídeos nunca se suben a ningún servidor.
-
-</VTDocCard>
-<VTDocCard title="Tres modos de entrada" icon="sliders" href="./camera-mode">
-
-Cámara en vivo, carga de fotos y carga de vídeos — todos procesados a través del mismo canal de IA.
-
-</VTDocCard>
-<VTDocCard title="Resultados editables" icon="pen" href="./viewing-results">
-
-Toca cualquier matrícula detectada para ver la confianza carácter por carácter y corregir lecturas erróneas manualmente.
-
-</VTDocCard>
-<VTDocCard title="Ajustes configurables" icon="gear" href="./settings-overview">
-
-Ajusta la sensibilidad de detección, el tiempo de confirmación, el tema y el idioma según tu flujo de trabajo.
-
-</VTDocCard>
-</VTDocCardGroup>
-
-<VTDocNote>
-
-ALPR Vue está optimizado para **matrículas europeas**. La precisión de detección puede variar para matrículas de otras regiones.
-
-</VTDocNote>
+ALPR Vue está diseñado para usuarios y desarrolladores que necesitan un reconocimiento de matrículas rápido y fiable sin la complejidad de un backend ni los problemas de privacidad de las APIs en la nube. Funciona completamente en tu navegador utilizando modelos de IA de última generación.

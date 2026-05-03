@@ -1,18 +1,13 @@
-import { defineConfigWithTheme } from 'vitepress'
-import type { ThemeConfig } from 'vitepress-theme-app-docs/config'
-import { appDocsVitePlugin } from 'vitepress-theme-app-docs/config'
+import { withAppDocs } from 'vitepress-theme-app-docs/config'
 import { buildSidebar } from './sidebar'
 
-export default defineConfigWithTheme<ThemeConfig>({
+export default withAppDocs({
   srcDir: '.',
   outDir: '../dist/docs',
   cacheDir: '.vitepress/cache',
   base: '/docs/',
   cleanUrls: true,
-
-  vite: {
-    plugins: [appDocsVitePlugin()],
-  },
+  ignoreDeadLinks: true,
 
   srcExclude: [
     '**/README.md',
@@ -64,6 +59,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     logo: '/logo.png',
     socialLinks: [{ icon: 'github', link: 'https://github.com/asiercamara/alpr-vue' }],
     search: { provider: 'local' },
+    mergeDocs: { enabled: true },
   },
 
   head: [
