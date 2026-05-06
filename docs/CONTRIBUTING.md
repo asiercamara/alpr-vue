@@ -16,7 +16,7 @@ Thank you for your interest in contributing to the ALPR Vue documentation! This 
 2. Install dependencies from the repository root: `pnpm install`
 3. Create a branch for your changes
 4. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish)
-5. From the repository root, run `pnpm dev:docs`
+5. From the repository root, run `pnpm docs:dev`
 6. Preview your changes at the URL shown in the terminal (typically `http://localhost:5173/docs/`)
 7. Commit your changes and submit a pull request
 
@@ -33,8 +33,8 @@ Thank you for your interest in contributing to the ALPR Vue documentation! This 
 
 1. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish).
 2. If you add a new page, register it in `docs/.vitepress/config.ts` under the correct locale sidebar.
-3. Run `pnpm dev:docs` to preview your changes.
-4. Run `pnpm build:docs` before opening a pull request.
+3. Run `pnpm docs:dev` to preview your changes.
+4. Run `pnpm docs:build` before opening a pull request.
 
 ## Adding a Spanish translation
 
@@ -60,4 +60,4 @@ flowchart TD
 <VTDocDiagramPresenter :code="myDiagram" preset="neon" autoPlay="intersect" />
 ```
 
-To experiment with all diagram props interactively, run `pnpm dev:docs` and open `/docs/dev/diagram-playground`.
+To experiment with all diagram props interactively, run `pnpm docs:dev` and open `/docs/dev/diagram-playground`.

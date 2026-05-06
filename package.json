@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
+  "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && tsc -p tsconfig.workers.json --noEmit && vite build",
@@ -15,10 +15,10 @@
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src",
     "prepare": "husky",
-    "dev:docs": "vitepress dev docs",
-    "build:docs": "vitepress build docs",
-    "build:all": "pnpm build && pnpm build:docs",
-    "preview:docs": "vitepress preview docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "build:all": "pnpm build && pnpm docs:build",
     "deploy:surge": "bash ./scripts/deploy-surge.sh",
     "security:audit": "pnpm audit --audit-level high",
     "security:audit:ci": "pnpm audit --audit-level high --prod"
@@ -54,7 +54,7 @@
     "vite-plugin-vue-devtools": "^8.1.1",
     "vitepress": "^1.6.4",
     "vitepress-mermaid-renderer": "^1.1.20",
-    "vitepress-theme-app-docs": "^0.8.0",
+    "vitepress-theme-app-docs": "^0.8.3",
     "vitest": "^4.1.3",
     "vue-tsc": "^3.2.6"
   },
