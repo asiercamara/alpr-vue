@@ -1,16 +1,11 @@
 name: CI
 
 # Light on purpose, to spare the free tier's minutes: production audit, lint,
-# types, knip, format and unit tests with coverage. The builds and the
-# Playwright e2e suite run locally with `pnpm check:all` before a release; the
-# build can also be switched on by hand from the Actions tab (`build`).
+# types, knip, format, unit tests with coverage and the build of the app and
+# the docs (about 30 s). The Playwright e2e suite runs locally with
+# `pnpm check:all` before a release.
 on:
   workflow_dispatch:
-    inputs:
-      build:
-        description: 'Also build the app and the docs (pnpm build:all)'
-        type: boolean
-        default: false
   push:
     branches: [main, develop]
   pull_request:
@@ -64,5 +59,4 @@ jobs:
         run: pnpm test:coverage
 
       - name: Build app and docs
-        if: inputs.build
         run: pnpm build:all
