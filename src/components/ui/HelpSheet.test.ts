@@ -32,6 +32,24 @@ describe('HelpSheet', () => {
     expect(wrapper.text()).toContain('3')
   })
 
+  it('explains upload, history and settings after the camera steps', () => {
+    const wrapper = mount(HelpSheet, {
+      props: { modelValue: true },
+      global: {
+        stubs: {
+          Teleport: { template: '<div><slot/></div>' },
+          Transition: { template: '<div><slot/></div>' },
+        },
+      },
+    })
+    const steps = wrapper.findAll('p').map((p) => p.text())
+    expect(steps[3]).toContain('sube una imagen o un vídeo')
+    expect(steps[4]).toContain('exporta todo a CSV')
+    expect(steps[5]).toContain('Pulsa')
+    expect(steps[5]).toContain('sensibilidad de detección')
+    expect(wrapper.text()).toContain('6')
+  })
+
   it('emits update:modelValue false when backdrop is clicked', async () => {
     const wrapper = mount(HelpSheet, {
       props: { modelValue: true },
