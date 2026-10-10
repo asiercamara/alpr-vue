@@ -20,6 +20,16 @@ Icons
   Heroicons (https://github.com/tailwindlabs/heroicons), MIT License,
     Copyright (c) Tailwind Labs, Inc.
 
+Fonts
+  Served by the app itself through Fontsource, under the SIL Open Font
+  License 1.1 (https://openfontlicense.org):
+  Inter, Copyright 2016 The Inter Project Authors
+    (https://github.com/rsms/inter).
+  Space Grotesk, Copyright 2020 The Space Grotesk Project Authors
+    (https://github.com/floriankarsten/space-grotesk).
+  JetBrains Mono, Copyright 2020 The JetBrains Mono Project Authors
+    (https://github.com/JetBrains/JetBrainsMono).
+
 Sample media
   The photos and videos in public/test/ are only demo content for the sample
   gallery. They are not covered by the MIT License and remain the property of

@@ -3,12 +3,20 @@ import { expect, test as base, type Page } from '@playwright/test'
 /**
  * `test` with a guard on every page a spec opens: any console error or
  * warning, uncaught exception or failed request fails the test. Hydration
- * mismatches are Vue warnings, so they are caught here too.
+ * mismatches are Vue warnings, so they are caught here too. So does any request
+ * to another origin: the privacy page promises that nothing leaves the app.
  */
 export const test = base.extend<{ consoleGuard: void }>({
   consoleGuard: [
-    async ({ page }, use) => {
+    async ({ page, baseURL }, use) => {
       const problems: string[] = []
+      const ownOrigin = new URL(baseURL ?? 'http://localhost').origin
+      page.on('request', (request) => {
+        const { protocol, origin } = new URL(request.url())
+        if (/^https?:$/.test(protocol) && origin !== ownOrigin) {
+          problems.push(`external request: ${request.url()}`)
+        }
+      })
       page.on('console', (message) => {
         if (message.type() === 'error' || message.type() === 'warning') {
           problems.push(`console.${message.type()}: ${message.text()}`)
