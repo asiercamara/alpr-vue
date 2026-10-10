@@ -8,18 +8,26 @@ Welcome to ALPR Vue, a free browser-based tool for automatic license plate recog
 ## What you can do
 
 <VTDocCardGroup cols="2">
-  <VTDocCard title="Live camera" icon="camera" href="./camera-mode">
-    Point your webcam or phone camera at a vehicle and the app detects the plate automatically in real time.
-  </VTDocCard>
-  <VTDocCard title="Upload a photo" icon="image" href="./upload-files">
-    Select an image file and the app finds and reads every plate in the photo.
-  </VTDocCard>
-  <VTDocCard title="Upload a video" icon="video" href="./upload-files">
-    Upload a video clip and the app scans every frame, extracting all plates that appear.
-  </VTDocCard>
-  <VTDocCard title="Results and export" icon="list-check" href="./viewing-results">
-    View detected plates with timestamps and confidence scores, inspect each character, edit misreads, and export everything to CSV.
-  </VTDocCard>
+<VTDocCard title="Live camera" icon="camera" href="./camera-mode">
+
+Point your webcam or phone camera at a vehicle and the app detects the plate automatically in real time.
+
+</VTDocCard>
+<VTDocCard title="Upload a photo" icon="image" href="./upload-files">
+
+Select an image file and the app finds and reads every plate in the photo.
+
+</VTDocCard>
+<VTDocCard title="Upload a video" icon="video" href="./upload-files">
+
+Upload a video clip and the app scans every frame, extracting all plates that appear.
+
+</VTDocCard>
+<VTDocCard title="Results and export" icon="list-check" href="./viewing-results">
+
+View detected plates with timestamps and confidence scores, inspect each character, edit misreads, and export everything to CSV.
+
+</VTDocCard>
 </VTDocCardGroup>
 
 ## No account, no server, works offline
@@ -27,7 +35,9 @@ Welcome to ALPR Vue, a free browser-based tool for automatic license plate recog
 ALPR Vue runs the AI models directly in your browser using WebAssembly. After the first time the page loads and downloads the models, the app works completely offline. Your images and video frames are never uploaded — all processing happens on your own device.
 
 <VTDocNote>
-  ALPR Vue is optimized for **European license plates**. Detection accuracy may be lower for plates from other regions.
+
+ALPR Vue is optimized for **European license plates**. Detection accuracy may be lower for plates from other regions.
+
 </VTDocNote>
 
 ## Try it without a car nearby
@@ -37,10 +47,14 @@ The app includes **10 sample images** and **3 sample videos** built into the gal
 ## What's next
 
 <VTDocCardGroup cols="2">
-  <VTDocCard title="Quick start" icon="rocket" href="./quickstart">
-    Detect your first plate in a few steps.
-  </VTDocCard>
-  <VTDocCard title="Browser requirements" icon="browser" href="./browser-requirements">
-    Check that your browser and device are supported.
-  </VTDocCard>
+<VTDocCard title="Quick start" icon="rocket" href="./quickstart">
+
+Detect your first plate in a few steps.
+
+</VTDocCard>
+<VTDocCard title="Browser requirements" icon="browser" href="./browser-requirements">
+
+Check that your browser and device are supported.
+
+</VTDocCard>
 </VTDocCardGroup>

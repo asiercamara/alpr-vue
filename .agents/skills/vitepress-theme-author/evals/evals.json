@@ -1,0 +1,29 @@
+{
+  "skill_name": "vitepress-theme-author",
+  "evals": [
+    {
+      "id": 1,
+      "name": "recommend-component-package-managers",
+      "prompt": "I'm writing a docs page for a project that uses vitepress-theme-app-docs. I want to show the same install command for pnpm, npm, and yarn so the reader can pick. What's the best way to present that with the theme components, and can you give me a copy-pasteable snippet?",
+      "expected_output": "Recommends VTDocTabs (default underline variant) with one VTDocTab per package manager. Mentions blank lines around fenced code blocks. Provides a short snippet. Does not edit any file.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "scaffold-new-article",
+      "prompt": "Create a new VitePress article at docs/guide/custom-adapters.md explaining how to register a custom diagram adapter. It should have proper frontmatter, an intro, an ordered walkthrough, a tip about the recommended default, and an FAQ section. Use the project's theme components where they earn their place.",
+      "expected_output": "Produces a complete .md file with title/description frontmatter, intro paragraph, VTDocSteps (decimal) walkthrough, a VTDocTip, and a VTDocAccordionGroup with VTDocAccordion items. Avoids over-componentizing.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 3,
+      "name": "improve-plain-markdown-article",
+      "prompt": "Here's an article from our docs. Improve it by using the theme's components where they actually help. Don't over-componentize.\n\n---\n# Troubleshooting\n\nThis page collects common issues.\n\n## Components don't render\n\n> Important: check that your local .vitepress/theme/index.ts re-exports the package theme.\n\n## Mermaid prints blurry\n\nThe theme re-renders diagrams on a custom event before printing. If you bypass the print button, this won't fire.\n\n## FAQ\n\n### Where do I file an issue?\n\nOn GitHub.\n\n### How do I get debug output?\n\nPass showBadge to VTDocDiagramPresenter while authoring.",
+      "expected_output": "Adds title/description frontmatter. Converts the 'Important' blockquote to a VTDocWarning. Converts the FAQ section to VTDocAccordionGroup with two VTDocAccordion items. Leaves the Mermaid paragraph as plain prose or wraps it in a single VTDocInfo. Does not introduce VTDocCard, VTDocSteps, or VTDocTabs.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

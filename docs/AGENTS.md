@@ -5,8 +5,8 @@
 - This is a documentation site for **ALPR Vue**, a browser-based automatic license plate recognition app
 - Pages are Markdown files with YAML frontmatter, built on [VitePress](https://vitepress.dev)
 - Configuration lives in `docs/.vitepress/config.ts`
-- Run `pnpm dev:docs` to preview locally
-- Run `pnpm build:docs` to build
+- Run `pnpm docs:dev` to preview locally
+- Run `pnpm docs:build` to build
 - The app itself is at https://alpr-vue.surge.sh
 
 ## Terminology

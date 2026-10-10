@@ -65,28 +65,47 @@ Este mapa mental ofrece una visión general de alto nivel de las etapas secuenci
 ## El canal de procesamiento
 
 <VTDocSteps>
-  <VTDocStep title="Captura">
-    Inicias la cámara o cargas una foto o un archivo de vídeo. Al usar la cámara en vivo, la aplicación captura fotogramas de forma continua a aproximadamente 50 fotogramas por segundo y los introduce en el canal de detección.
-  </VTDocStep>
-  <VTDocStep title="Detección de matrícula">
-    Un modelo de IA YOLOv9 analiza cada fotograma en busca de regiones de matrículas. Analiza el fotograma completo en una sola pasada y dibuja un recuadro delimitador alrededor de cualquier matrícula que encuentre.
-  </VTDocStep>
-  <VTDocStep title="Reconocimiento de texto (OCR)">
-    Cada región de matrícula detectada se recorta del fotograma y se pasa a un modelo OCR MobileViT v2. Este modelo lee los caracteres de la matrícula y asigna una puntuación de confianza a cada uno.
-  </VTDocStep>
-  <VTDocStep title="Control de calidad">
-    Cada resultado se puntúa según cuatro criterios: longitud de caracteres, confianza media, confianza mínima por carácter y formato de matrícula. Solo se conservan los resultados con una puntuación de calidad combinada de 0,7 o superior. Los resultados que no alcanzan este umbral se descartan silenciosamente.
-  </VTDocStep>
-  <VTDocStep title="Ventana de confirmación">
-    Una matrícula debe detectarse de forma consistente antes de añadirse a tu historial. En modo estándar, la misma matrícula debe aparecer durante 3 segundos continuos. Si la confianza de detección es muy alta (confianza media ≥ 0,8), esta ventana se reduce a 1 segundo.
-  </VTDocStep>
-  <VTDocStep title="Agrupación">
-    Una vez confirmada, las nuevas detecciones se comparan con las matrículas ya presentes en tu historial. Si dos lecturas de matrícula son al menos un 80% similares (medido por la distancia de cadenas de Levenshtein), se agrupan como la misma matrícula. Esto evita que variaciones menores del OCR — como un único carácter mal leído — creen entradas duplicadas.
-  </VTDocStep>
+<VTDocStep title="Captura">
+
+Inicias la cámara o cargas una foto o un archivo de vídeo. Al usar la cámara en vivo, la aplicación captura fotogramas de forma continua a aproximadamente 50 fotogramas por segundo y los introduce en el canal de detección.
+
+</VTDocStep>
+
+<VTDocStep title="Detección de matrícula">
+
+Un modelo de IA YOLOv9 analiza cada fotograma en busca de regiones de matrículas. Analiza el fotograma completo en una sola pasada y dibuja un recuadro delimitador alrededor de cualquier matrícula que encuentre.
+
+</VTDocStep>
+
+<VTDocStep title="Reconocimiento de texto (OCR)">
+
+Cada región de matrícula detectada se recorta del fotograma y se pasa a un modelo OCR MobileViT v2. Este modelo lee los caracteres de la matrícula y asigna una puntuación de confianza a cada uno.
+
+</VTDocStep>
+
+<VTDocStep title="Control de calidad">
+
+Cada resultado se puntúa según cuatro criterios: longitud de caracteres, confianza media, confianza mínima por carácter y formato de matrícula. Solo se conservan los resultados con una puntuación de calidad combinada de 0,7 o superior. Los resultados que no alcanzan este umbral se descartan silenciosamente.
+
+</VTDocStep>
+
+<VTDocStep title="Ventana de confirmación">
+
+Una matrícula debe detectarse de forma consistente antes de añadirse a tu historial. En modo estándar, la misma matrícula debe aparecer durante 3 segundos continuos. Si la confianza de detección es muy alta (confianza media ≥ 0,8), esta ventana se reduce a 1 segundo.
+
+</VTDocStep>
+
+<VTDocStep title="Agrupación">
+
+Una vez confirmada, las nuevas detecciones se comparan con las matrículas ya presentes en tu historial. Si dos lecturas de matrícula son al menos un 80% similares (medido por la distancia de cadenas de Levenshtein), se agrupan como la misma matrícula. Esto evita que variaciones menores del OCR — como un único carácter mal leído — creen entradas duplicadas.
+
+</VTDocStep>
 </VTDocSteps>
 
 <VTDocNote>
-  Todo el procesamiento se ejecuta en un hilo Web Worker dedicado, separado del hilo principal de la interfaz del navegador. Esto mantiene la interfaz fluida y receptiva incluso mientras los modelos están ejecutándose activamente.
+
+Todo el procesamiento se ejecuta en un hilo Web Worker dedicado, separado del hilo principal de la interfaz del navegador. Esto mantiene la interfaz fluida y receptiva incluso mientras los modelos están ejecutándose activamente.
+
 </VTDocNote>
 
 ## Reglas de validación de calidad de matrículas

@@ -35,7 +35,7 @@ Las páginas están escritas en Markdown. La configuración del sitio y la naveg
 Desde la raíz del repositorio, ejecuta:
 
 ```bash
-pnpm dev:docs
+pnpm docs:dev
 ```
 
 VitePress sirve la documentación localmente y la recompila cuando detecta cambios.
@@ -43,8 +43,8 @@ VitePress sirve la documentación localmente y la recompila cuando detecta cambi
 ## Compilar la documentación
 
 ```bash
-pnpm build:docs
-pnpm preview:docs
+pnpm docs:build
+pnpm docs:preview
 ```
 
 La salida de producción de la documentación se escribe en `dist/docs/`.
@@ -81,7 +81,7 @@ El comportamiento personalizado actual incluye:
 
 1. Edita el archivo `.md` correspondiente en `docs/` (inglés) o `docs/es/` (español).
 2. Si añades una página nueva, regístrala en `docs/.vitepress/config.ts`: añade una entrada en `sections[]` y una clave de traducción en cada locale del objeto `i18n`.
-3. Ejecuta `pnpm dev:docs` para previsualizar los cambios.
-4. Ejecuta `pnpm build:docs` antes de abrir una pull request.
+3. Ejecuta `pnpm docs:dev` para previsualizar los cambios.
+4. Ejecuta `pnpm docs:build` antes de abrir una pull request.
 
 Consulta [CONTRIBUTING.md](./CONTRIBUTING.md) para las guías de escritura.

@@ -56,3 +56,6 @@ Thumbs.db
 
 # Analysis artifacts
 .atlas-analysis.json
+
+# vitepress-theme-app-docs: merged-docs cache
+docs/vtdoc-merged/

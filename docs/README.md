@@ -36,7 +36,7 @@ Pages are written in Markdown. Site configuration and navigation live in `docs/.
 From the repository root, run:
 
 ```bash
-pnpm dev:docs
+pnpm docs:dev
 ```
 
 VitePress serves the docs locally and rebuilds them on changes.
@@ -44,8 +44,8 @@ VitePress serves the docs locally and rebuilds them on changes.
 ## Build documentation
 
 ```bash
-pnpm build:docs
-pnpm preview:docs
+pnpm docs:build
+pnpm docs:preview
 ```
 
 The production docs output is written to `dist/docs/`.
@@ -101,7 +101,7 @@ See **[`docs/dev/diagram-presenter.md`](./dev/diagram-presenter.md)** for the co
 Open `docs/dev/diagram-playground.md` (not in the sidebar) to experiment with all props live in the browser:
 
 ```bash
-pnpm dev:docs
+pnpm docs:dev
 # then open http://localhost:5173/docs/dev/diagram-playground
 ```
 
@@ -109,7 +109,7 @@ pnpm dev:docs
 
 1. Edit the relevant `.md` file in `docs/` (English) or `docs/es/` (Spanish).
 2. If you add a new page, register it in `docs/.vitepress/config.ts`: add an entry to `sections[]` and a translation key to every locale in `i18n`.
-3. Run `pnpm dev:docs` to preview your changes.
-4. Run `pnpm build:docs` before opening a pull request.
+3. Run `pnpm docs:dev` to preview your changes.
+4. Run `pnpm docs:build` before opening a pull request.
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for writing guidelines.

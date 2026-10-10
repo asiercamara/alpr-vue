@@ -8,15 +8,21 @@ The export feature lets you download your complete detection history as a CSV fi
 ## Exporting your data
 
 <VTDocSteps>
-  <VTDocStep title="Open the plate history panel">
-    Make sure you have at least one detection in the **Detected Plates** list. The export button only appears when results are present.
-  </VTDocStep>
-  <VTDocStep title="Click Export CSV">
-    Click the **Export CSV** button in the top-right corner of the plate history panel.
-  </VTDocStep>
-  <VTDocStep title="Save the file">
-    Your browser immediately downloads the file to your device. Check your browser's default downloads folder if it doesn't appear automatically.
-  </VTDocStep>
+<VTDocStep title="Open the plate history panel">
+
+Make sure you have at least one detection in the **Detected Plates** list. The export button only appears when results are present.
+
+</VTDocStep>
+<VTDocStep title="Click Export CSV">
+
+Click the **Export CSV** button in the top-right corner of the plate history panel.
+
+</VTDocStep>
+<VTDocStep title="Save the file">
+
+Your browser immediately downloads the file to your device. Check your browser's default downloads folder if it doesn't appear automatically.
+
+</VTDocStep>
 </VTDocSteps>
 
 ## CSV columns
@@ -43,5 +49,7 @@ XYZ5678,0.87,2024-01-15T10:24:12.000Z,e5f6g7h8
 ```
 
 <VTDocTip>
-  Open the CSV in Excel or Google Sheets to sort by confidence, filter by date range, or build charts from your detection data. In Google Sheets, go to **File → Import** and select the downloaded file.
+
+Open the CSV in Excel or Google Sheets to sort by confidence, filter by date range, or build charts from your detection data. In Google Sheets, go to **File → Import** and select the downloaded file.
+
 </VTDocTip>

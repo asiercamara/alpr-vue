@@ -27,7 +27,9 @@ Click or tap any plate in the list to open its detail view. The modal shows:
 - **Detection ID** — a short unique identifier for the record.
 
 <VTDocInfo>
-  Confidence bars are color-coded by accuracy level: **green** for very high confidence (≥ 90%), **light green** for high (≥ 75%), **yellow** for medium (≥ 60%), **orange** for low (≥ 45%), and **red** for very low confidence. Characters shown in red are the most likely to contain a misread.
+
+Confidence bars are color-coded by accuracy level: **green** for very high confidence (≥ 90%), **light green** for high (≥ 75%), **yellow** for medium (≥ 60%), **orange** for low (≥ 45%), and **red** for very low confidence. Characters shown in red are the most likely to contain a misread.
+
 </VTDocInfo>
 
 ## Editing a plate
@@ -35,18 +37,26 @@ Click or tap any plate in the list to open its detail view. The modal shows:
 If the AI misread a character, you can correct it directly in the app.
 
 <VTDocSteps>
-  <VTDocStep title="Open the plate detail">
-    Click or tap the plate you want to edit in the history list.
-  </VTDocStep>
-  <VTDocStep title="Click Edit">
-    Click the **Edit** button (pencil icon) next to the plate text in the modal.
-  </VTDocStep>
-  <VTDocStep title="Correct the text">
-    The plate text becomes an editable field. Type your corrections. The field accepts up to 12 characters.
-  </VTDocStep>
-  <VTDocStep title="Save your changes">
-    Click the **Save** button (checkmark) or press **Enter** to confirm. Click the **Cancel** button or press **Escape** to discard.
-  </VTDocStep>
+<VTDocStep title="Open the plate detail">
+
+Click or tap the plate you want to edit in the history list.
+
+</VTDocStep>
+<VTDocStep title="Click Edit">
+
+Click the **Edit** button (pencil icon) next to the plate text in the modal.
+
+</VTDocStep>
+<VTDocStep title="Correct the text">
+
+The plate text becomes an editable field. Type your corrections. The field accepts up to 12 characters.
+
+</VTDocStep>
+<VTDocStep title="Save your changes">
+
+Click the **Save** button (checkmark) or press **Enter** to confirm. Click the **Cancel** button or press **Escape** to discard.
+
+</VTDocStep>
 </VTDocSteps>
 
 ## Copying to clipboard

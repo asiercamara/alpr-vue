@@ -6,89 +6,105 @@ description: 'Quick answers to common questions about ALPR Vue: offline use, pri
 Here are quick answers to the questions users ask most often. If you don't find what you're looking for, check the [troubleshooting guide](./troubleshooting) for step-by-step help with specific problems.
 
 <VTDocAccordionGroup>
-  <VTDocAccordion title="Does ALPR Vue work offline?">
-    Yes. After the first time you open the app — which downloads the AI model files from the server — everything runs fully offline. You can close the browser, disconnect from the internet, and reopen the app later; detection still works without any network connection. The model files are cached by your browser automatically.
-  </VTDocAccordion>
+<VTDocAccordion title="Does ALPR Vue work offline?">
 
-  <VTDocAccordion title="Do my images or camera feed get uploaded anywhere?">
-    No. All processing happens entirely within your browser using WebAssembly. Your camera feed, uploaded photos, and uploaded videos never leave your device — they are not sent to any server. See [how it works](./how-it-works) for a technical explanation of the local processing pipeline.
-  </VTDocAccordion>
+Yes. After the first time you open the app — which downloads the AI model files from the server — everything runs fully offline. You can close the browser, disconnect from the internet, and reopen the app later; detection still works without any network connection. The model files are cached by your browser automatically.
 
-  <VTDocAccordion title="Which license plate formats are supported?">
-    ALPR Vue is optimized for **European license plates**. The OCR model reads alphanumeric plates with 4 to 10 characters and handles common European formats best. Plates from other regions may be detected and read, but accuracy tends to be lower. The model specifically validates plates matching the pattern of 2–4 alphanumeric characters, an optional separator, and another 2–4 alphanumeric characters.
+</VTDocAccordion>
 
-    <VTDocNote>
-      If you regularly work with plates from a specific region outside Europe and accuracy is poor, try lowering the **Confidence Threshold** in Settings to allow more detections through, and manually correct any misread characters.
-    </VTDocNote>
+<VTDocAccordion title="Do my images or camera feed get uploaded anywhere?">
 
-  </VTDocAccordion>
+No. All processing happens entirely within your browser using WebAssembly. Your camera feed, uploaded photos, and uploaded videos never leave your device — they are not sent to any server. See [how it works](./how-it-works) for a technical explanation of the local processing pipeline.
 
-  <VTDocAccordion title="Can I use it on my phone?">
-    Yes. ALPR Vue is designed with mobile devices in mind and works on modern iOS and Android browsers. On mobile you can:
+</VTDocAccordion>
 
-    - Tap **Flip camera** to switch between the front and rear cameras.
-    - Use the **Zoom in / Zoom out** buttons to adjust the view (hardware zoom when supported by your device, digital zoom otherwise).
-    - Add the app to your home screen from your browser menu for an app-like, full-screen experience.
+<VTDocAccordion title="Which license plate formats are supported?">
 
-    See [camera mode](./camera-mode) for details on all camera controls.
+ALPR Vue is optimized for **European license plates**. The OCR model reads alphanumeric plates with 4 to 10 characters and handles common European formats best. Plates from other regions may be detected and read, but accuracy tends to be lower. The model specifically validates plates matching the pattern of 2–4 alphanumeric characters, an optional separator, and another 2–4 alphanumeric characters.
 
-  </VTDocAccordion>
+<VTDocNote>
 
-  <VTDocAccordion title="Why does the app stop the camera automatically?">
-    By default, the camera stops as soon as it confirms a plate. This prevents the app from scanning the same vehicle repeatedly and saves battery life.
+If you regularly work with plates from a specific region outside Europe and accuracy is poor, try lowering the **Confidence Threshold** in Settings to allow more detections through, and manually correct any misread characters.
 
-    The confirmation timing depends on how confident the model is:
-    - **Standard mode:** the same plate must appear continuously for **3 seconds** before being confirmed.
-    - **High-confidence mode:** if the detection's mean OCR confidence is 0.8 or higher, the camera stops after just **1 second**.
+</VTDocNote>
 
-    If you need the camera to keep running after each detection — for example, when logging multiple vehicles at an entrance — enable **Continuous scan** in the Settings panel (gear icon in the header).
+</VTDocAccordion>
 
-  </VTDocAccordion>
+<VTDocAccordion title="Can I use it on my phone?">
 
-  <VTDocAccordion title="Can I read plates from photos or videos I already have?">
-    Yes. Tap the **Upload File** button on the main screen and select any image or video file saved on your device. The app processes images immediately and scans videos frame by frame, extracting every plate that appears throughout the clip.
+Yes. ALPR Vue is designed with mobile devices in mind and works on modern iOS and Android browsers. On mobile you can:
 
-    You can also browse the built-in sample gallery, which includes 10 real car photos and 3 traffic video clips — useful for trying the app without needing a vehicle nearby.
+- Tap **Flip camera** to switch between the front and rear cameras.
+- Use the **Zoom in / Zoom out** buttons to adjust the view (hardware zoom when supported by your device, digital zoom otherwise).
+- Add the app to your home screen from your browser menu for an app-like, full-screen experience.
 
-    See [uploading files](./upload-files) for full instructions.
+See [camera mode](./camera-mode) for details on all camera controls.
 
-  </VTDocAccordion>
+</VTDocAccordion>
 
-  <VTDocAccordion title="Why is the confidence score low for some characters?">
-    The OCR model assigns an individual confidence score to each character it reads. Several factors can cause low confidence on specific characters:
+<VTDocAccordion title="Why does the app stop the camera automatically?">
 
-    - **Glare or reflection** on the plate surface
-    - **Dirt, damage, or fading** on individual characters
-    - **Motion blur** from a moving vehicle or an unsteady camera
-    - **Steep angle** — plates read best when the camera faces them directly
-    - **Partial occlusion** — a character covered by a tow hitch, sticker, or shadow
+By default, the camera stops as soon as it confirms a plate. This prevents the app from scanning the same vehicle repeatedly and saves battery life.
 
-    Characters with low confidence are shown in the plate detail view with a red confidence bar. You can tap any plate in your history list, then tap **Edit** to correct any misread character manually.
+The confirmation timing depends on how confident the model is:
 
-  </VTDocAccordion>
+- **Standard mode:** the same plate must appear continuously for **3 seconds** before being confirmed.
+- **High-confidence mode:** if the detection's mean OCR confidence is 0.8 or higher, the camera stops after just **1 second**.
 
-  <VTDocAccordion title="What does 'Skip Duplicates' do?">
-    When **Skip Duplicates** is enabled (the default), the app silently ignores any detection whose plate text already exists in your history. This prevents the same vehicle from appearing multiple times when you scan it more than once.
+If you need the camera to keep running after each detection — for example, when logging multiple vehicles at an entrance — enable **Continuous scan** in the Settings panel (gear icon in the header).
 
-    Disable **Skip Duplicates** in Settings if you need to record every detection event individually — for example, if you are logging the same plate appearing at different times throughout a shift.
+</VTDocAccordion>
 
-    You can find this toggle in **Settings > Skip duplicate alerts**. See [detection settings](./detection-settings) for all detection-related options.
+<VTDocAccordion title="Can I read plates from photos or videos I already have?">
 
-  </VTDocAccordion>
+Yes. Tap the **Upload File** button on the main screen and select any image or video file saved on your device. The app processes images immediately and scans videos frame by frame, extracting every plate that appears throughout the clip.
 
-  <VTDocAccordion title="Is there a native mobile app?">
-    There is no native iOS or Android app. ALPR Vue is a **progressive web app (PWA)**, which means you can add it to your home screen directly from your mobile browser for an app-like experience with a full-screen view and no browser chrome.
+You can also browse the built-in sample gallery, which includes 10 real car photos and 3 traffic video clips — useful for trying the app without needing a vehicle nearby.
 
-    To add it to your home screen:
-    - **iOS (Safari):** Tap the share icon, then tap **Add to Home Screen**.
-    - **Android (Chrome):** Tap the three-dot menu, then tap **Add to Home Screen** or **Install app**.
+See [uploading files](./upload-files) for full instructions.
 
-  </VTDocAccordion>
+</VTDocAccordion>
 
-  <VTDocAccordion title="Can I self-host ALPR Vue?">
-    Yes. ALPR Vue is open source and you can host it yourself on any static web host. Build the project and serve the output folder from any static hosting service. The only hard requirement is that you serve it over **HTTPS** — camera access is blocked by browsers on plain HTTP.
+<VTDocAccordion title="Why is the confidence score low for some characters?">
 
-    Visit the [GitHub repository](https://github.com/asiercamara/alpr-vue) for the full source code and deployment instructions.
+The OCR model assigns an individual confidence score to each character it reads. Several factors can cause low confidence on specific characters:
 
-  </VTDocAccordion>
+- **Glare or reflection** on the plate surface
+- **Dirt, damage, or fading** on individual characters
+- **Motion blur** from a moving vehicle or an unsteady camera
+- **Steep angle** — plates read best when the camera faces them directly
+- **Partial occlusion** — a character covered by a tow hitch, sticker, or shadow
+
+Characters with low confidence are shown in the plate detail view with a red confidence bar. You can tap any plate in your history list, then tap **Edit** to correct any misread character manually.
+
+</VTDocAccordion>
+
+<VTDocAccordion title="What does 'Skip Duplicates' do?">
+
+When **Skip Duplicates** is enabled (the default), the app silently ignores any detection whose plate text already exists in your history. This prevents the same vehicle from appearing multiple times when you scan it more than once.
+
+Disable **Skip Duplicates** in Settings if you need to record every detection event individually — for example, if you are logging the same plate appearing at different times throughout a shift.
+
+You can find this toggle in **Settings > Skip duplicate alerts**. See [detection settings](./detection-settings) for all detection-related options.
+
+</VTDocAccordion>
+
+<VTDocAccordion title="Is there a native mobile app?">
+
+There is no native iOS or Android app. ALPR Vue is a **progressive web app (PWA)**, which means you can add it to your home screen directly from your mobile browser for an app-like experience with a full-screen view and no browser chrome.
+
+To add it to your home screen:
+
+- **iOS (Safari):** Tap the share icon, then tap **Add to Home Screen**.
+- **Android (Chrome):** Tap the three-dot menu, then tap **Add to Home Screen** or **Install app**.
+
+</VTDocAccordion>
+
+<VTDocAccordion title="Can I self-host ALPR Vue?">
+
+Yes. ALPR Vue is open source and you can host it yourself on any static web host. Build the project and serve the output folder from any static hosting service. The only hard requirement is that you serve it over **HTTPS** — camera access is blocked by browsers on plain HTTP.
+
+Visit the [GitHub repository](https://github.com/asiercamara/alpr-vue) for the full source code and deployment instructions.
+
+</VTDocAccordion>
 </VTDocAccordionGroup>

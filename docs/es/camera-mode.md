@@ -33,19 +33,29 @@ stateDiagram-v2
 ## Iniciar la cámara
 
 <VTDocSteps>
-  <VTDocStep title="Haz clic en Iniciar cámara">
-    En la pantalla principal, haz clic en el botón **Iniciar cámara**. Si es la primera vez, tu navegador pedirá permiso para la cámara — haz clic en **Permitir**.
-  </VTDocStep>
-  <VTDocStep title="Apunta hacia un vehículo">
-    Sostén el dispositivo de forma que la matrícula sea visible en el encuadre. El escaneo comienza automáticamente en cuanto aparece la imagen de la cámara.
-  </VTDocStep>
-  <VTDocStep title="Espera la detección">
-    La aplicación se ejecuta de forma continua en segundo plano. Cuando encuentra una matrícula, dibuja un recuadro verde a su alrededor y guarda el resultado en tu historial.
-  </VTDocStep>
+<VTDocStep title="Haz clic en Iniciar cámara">
+
+En la pantalla principal, haz clic en el botón **Iniciar cámara**. Si es la primera vez, tu navegador pedirá permiso para la cámara — haz clic en **Permitir**.
+
+</VTDocStep>
+
+<VTDocStep title="Apunta hacia un vehículo">
+
+Sostén el dispositivo de forma que la matrícula sea visible en el encuadre. El escaneo comienza automáticamente en cuanto aparece la imagen de la cámara.
+
+</VTDocStep>
+
+<VTDocStep title="Espera la detección">
+
+La aplicación se ejecuta de forma continua en segundo plano. Cuando encuentra una matrícula, dibuja un recuadro verde a su alrededor y guarda el resultado en tu historial.
+
+</VTDocStep>
 </VTDocSteps>
 
 <VTDocNote>
-  El acceso a la cámara requiere un contexto seguro. La aplicación debe abrirse mediante **HTTPS** o en **localhost**. Si ves un error de permiso, comprueba que la URL comience por `https://`.
+
+El acceso a la cámara requiere un contexto seguro. La aplicación debe abrirse mediante **HTTPS** o en **localhost**. Si ves un error de permiso, comprueba que la URL comience por `https://`.
+
 </VTDocNote>
 
 ## Controles de la cámara durante el escaneo
@@ -68,7 +78,9 @@ Por defecto, la cámara se detiene automáticamente tras confirmar una matrícul
 Para mantener la cámara en funcionamiento de forma continua sin detenerse en cada detección, activa **Modo continuo** en el panel de ajustes (icono de engranaje en el encabezado).
 
 <VTDocNote>
-  Cuando **Omitir duplicados** está activado, confirmar una matrícula que ya está en tu historial **no** detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas. Esto te permite seguir escaneando en una zona concurrida sin interrupciones por vehículos ya registrados.
+
+Cuando **Omitir duplicados** está activado, confirmar una matrícula que ya está en tu historial **no** detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas. Esto te permite seguir escaneando en una zona concurrida sin interrupciones por vehículos ya registrados.
+
 </VTDocNote>
 
 ## Indicador de escaneo en vivo
@@ -83,5 +95,7 @@ Mientras la cámara está activa, aparece un pequeño indicador en la esquina su
 Cuando se detecta una matrícula, aparece un **recuadro verde** dibujado a su alrededor directamente en la previsualización de la cámara. El recuadro se actualiza en tiempo real a medida que la matrícula se mueve por el encuadre. Una vez confirmada y guardada la detección, el recuadro desaparece y el resultado aparece en tu historial de matrículas.
 
 <VTDocTip>
-  Para obtener los mejores resultados de detección, asegúrate de que la matrícula esté bien iluminada y mantén la cámara lo más estable posible. Evita ángulos extremos — una vista frontal directa le ofrece al modelo de IA la lectura más clara.
+
+Para obtener los mejores resultados de detección, asegúrate de que la matrícula esté bien iluminada y mantén la cámara lo más estable posible. Evita ángulos extremos — una vista frontal directa le ofrece al modelo de IA la lectura más clara.
+
 </VTDocTip>
