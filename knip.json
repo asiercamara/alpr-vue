@@ -9,7 +9,7 @@
     "e2e/**/*.ts",
     "src/**/*.{ts,vue}",
     "docs/.vitepress/**/*.{ts,vue}",
-    "scripts/**/*.mjs"
+    "scripts/**/*.{mjs,ts}"
   ],
   "ignore": ["src/components/icons/IconVolumeOff.vue", "src/components/icons/IconVolumeOn.vue"],
   "ignoreDependencies": ["gsap", "@heroicons/vue", "tailwindcss"],

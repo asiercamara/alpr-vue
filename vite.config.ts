@@ -6,6 +6,7 @@ import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
+import { resolveDocsPath } from './scripts/resolve-docs-path'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -41,7 +42,11 @@ function serveDocsPlugin(): Plugin {
         const url = req.url ?? '/'
         if (!url.startsWith('/docs')) return next()
 
-        let filePath = resolve(__dirname, 'dist', url.slice(1))
+        let filePath = resolveDocsPath(resolve(__dirname, 'dist'), url)
+        if (!filePath) {
+          res.statusCode = 403
+          return res.end()
+        }
         if (existsSync(filePath) && statSync(filePath).isDirectory()) {
           filePath = resolve(filePath, 'index.html')
         }
