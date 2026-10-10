@@ -70,7 +70,7 @@
             :href="docsUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-5 flex items-center gap-2 text-xs font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
+            class="mt-5 flex items-center gap-2 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
           >
             <span
               class="flex-none inline-flex items-center justify-center w-5 h-5 rounded-full border border-brand-400 dark:border-brand-500"

@@ -54,7 +54,7 @@
         ></div>
       </div>
       <p class="text-sm font-medium text-surface-600 dark:text-white/70">{{ t('plates.empty') }}</p>
-      <p class="text-xs text-surface-400 dark:text-white/50 mt-1 text-center">
+      <p class="text-xs text-surface-500 dark:text-white/50 mt-1 text-center">
         {{ t('plates.emptyHint') }}
       </p>
     </div>
