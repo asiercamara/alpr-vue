@@ -53,8 +53,7 @@ La salida de producción de la documentación se escribe en `dist/docs/`.
 
 - **Generador del sitio:** VitePress
 - **Configuración principal:** `docs/.vitepress/config.ts`
-- **Tema personalizado:** `docs/.vitepress/theme/index.ts`
-- **Estilos del tema:** `docs/.vitepress/theme/style.css`
+- **Tema personalizado:** `docs/.vitepress/theme/index.ts` (los estilos vienen incluidos en el paquete del tema)
 
 La documentación es bilingüe:
 
@@ -65,10 +64,10 @@ La documentación es bilingüe:
 
 La documentación incluye diagramas Mermaid con:
 
-- `vitepress-mermaid-renderer`
+- `vitepress-theme-app-docs` (incluye el renderizador de Mermaid)
 - `mermaid`
 
-La integración se inicializa en `docs/.vitepress/theme/index.ts` y se estiliza en `docs/.vitepress/theme/style.css`.
+La integración se inicializa en `docs/.vitepress/theme/index.ts`; los estilos llegan con el paquete del tema.
 
 El comportamiento personalizado actual incluye:
 
