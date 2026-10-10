@@ -1,6 +1,7 @@
 {
   "name": "alpr-vue",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800",
@@ -31,6 +32,9 @@
     "check:all": "node scripts/check.mjs --all"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
     "onnxruntime-web": "^1.24.3",
     "pinia": "^3.0.4",
     "vue": "^3.5.43",

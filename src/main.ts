@@ -1,3 +1,6 @@
+import '@fontsource-variable/inter'
+import '@fontsource-variable/space-grotesk'
+import '@fontsource-variable/jetbrains-mono'
 import './assets/main.css'
 
 import { createApp } from 'vue'

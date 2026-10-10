@@ -132,6 +132,10 @@ To run the docs locally: `pnpm docs:dev`
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## License
+
+[MIT](./LICENSE). Third-party work and the sample media in `public/test/` are described in [NOTICE](./NOTICE).
+
 ## Acknowledgements
 
 - [fast-alpr](https://github.com/ankandrew/fast-alpr) — original project
