@@ -11,7 +11,6 @@
     "docs/.vitepress/**/*.{ts,vue}",
     "scripts/**/*.mjs"
   ],
-  "ignore": ["src/components/icons/IconVolumeOff.vue", "src/components/icons/IconVolumeOn.vue"],
-  "ignoreDependencies": ["gsap", "@heroicons/vue", "tailwindcss"],
+  "ignoreDependencies": ["tailwindcss"],
   "ignoreUnresolved": ["^/models/.+\\.onnx\\?url$"]
 }
