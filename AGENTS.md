@@ -75,11 +75,16 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Development server: `pnpm dev`
 - Build project: `pnpm build`
 - Preview build: `pnpm preview`
-- Run tests: `pnpm test:run`
-- Run tests with coverage: `pnpm test:coverage`
-- Lint: `pnpm lint`
-- Format: `pnpm format`
-- Type check: `npx vue-tsc --noEmit`
+- Run tests: `pnpm test` (or `pnpm test:run`; `pnpm test:watch` for watch mode)
+- Run tests with coverage: `pnpm test:coverage` (enforces thresholds: lines/statements/functions 90 %, branches 85 %)
+- Lint: `pnpm lint` (`eslint . --max-warnings 0`, includes `eslint-plugin-security`)
+- Format: `pnpm format` (write) / `pnpm format:check` (verify)
+- Type check: `pnpm typecheck` (app, workers and e2e)
+- Unused code and dependencies: `pnpm knip`
+- End-to-end tests (Playwright, app + docs): `pnpm test:e2e` (needs `pnpm build:all` first)
+- Quality gates: `pnpm check` (typecheck, lint, format, tests, knip, build) and `pnpm check:all` (adds coverage thresholds, e2e and the audit of every dependency)
+
+**CI is light on purpose**: it runs audit (prod), lint, typecheck, knip, format check and coverage. Builds and e2e run locally with `pnpm check:all` before a release.
 
 ## Project Conventions
 

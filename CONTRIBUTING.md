@@ -20,17 +20,20 @@ Husky hooks install automatically on `pnpm install`.
 
 ```bash
 pnpm dev          # Start dev server → http://localhost:5173/
-pnpm test         # Vitest watch mode
+pnpm test         # Vitest, single run
+pnpm test:watch   # Vitest watch mode
 pnpm lint         # ESLint
 pnpm lint:fix     # ESLint --fix
 pnpm format       # Prettier
 ```
 
-Before opening a PR, make sure the full check suite passes:
+Before opening a PR, run the quality gates (typecheck, lint, format, tests, knip and build):
 
 ```bash
-pnpm lint && pnpm build && pnpm test:run
+pnpm check
 ```
+
+`pnpm check:all` also runs coverage thresholds, the Playwright e2e suite and the dependency audit.
 
 ## Code style
 
