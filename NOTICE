@@ -10,6 +10,16 @@ fast-alpr, fast-plate-ocr and open-image-models
   (a YOLOv9 plate detector and a MobileViT v2 OCR) come from fast-plate-ocr
   and open-image-models.
 
+Icons
+  Several icons in src/components/icons/ are identical to, or adapted from:
+  Feather (https://github.com/feathericons/feather), MIT License,
+    Copyright (c) 2013-2023 Cole Bemis.
+  Lucide (https://github.com/lucide-icons/lucide), ISC License,
+    Copyright (c) Lucide Icons and Contributors; the parts derived from
+    Feather are under the MIT License above.
+  Heroicons (https://github.com/tailwindlabs/heroicons), MIT License,
+    Copyright (c) Tailwind Labs, Inc.
+
 Sample media
   The photos and videos in public/test/ are only demo content for the sample
   gallery. They are not covered by the MIT License and remain the property of
