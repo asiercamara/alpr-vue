@@ -32,20 +32,21 @@ Use these terms consistently across all pages:
 | ONNX                              | Open Neural Network Exchange (spell out on first use in a page)        |
 
 In Spanish pages, use:
-| English | Spanish preferred |
-|---------|-------------------|
-| license plate | matrícula |
-| confidence score | puntuación de confianza |
-| confidence threshold | umbral de confianza |
-| confirmation time | tiempo de confirmación |
-| continuous mode | modo continuo |
-| skip duplicates | omitir duplicados |
-| plate history | historial de matrículas |
-| plate detail view | vista detallada de la matrícula |
-| bounding box | recuadro de detección |
-| settings | ajustes (not "configuración" for the panel name) |
-| upload | subir / cargar (prefer "cargar" for files) |
-| sample gallery | galería de muestras |
+
+| English              | Spanish preferred                                |
+| -------------------- | ------------------------------------------------ |
+| license plate        | matrícula                                        |
+| confidence score     | puntuación de confianza                          |
+| confidence threshold | umbral de confianza                              |
+| confirmation time    | tiempo de confirmación                           |
+| continuous mode      | modo continuo                                    |
+| skip duplicates      | omitir duplicados                                |
+| plate history        | historial de matrículas                          |
+| plate detail view    | vista detallada de la matrícula                  |
+| bounding box         | recuadro de detección                            |
+| settings             | ajustes (not "configuración" for the panel name) |
+| upload               | subir / cargar (prefer "cargar" for files)       |
+| sample gallery       | galería de muestras                              |
 
 ## Style preferences
 

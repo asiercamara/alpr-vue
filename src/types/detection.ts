@@ -52,7 +52,4 @@ export interface PlateRecord {
 
 /** Union of all message shapes the detection Worker can send to the main thread. */
 export type WorkerResponse =
-  | { status: 'model_ready' }
-  | { status: 'model_failed' }
-  | { error: string }
-  | DetectionBox[]
+  { status: 'model_ready' } | { status: 'model_failed' } | { error: string } | DetectionBox[]
