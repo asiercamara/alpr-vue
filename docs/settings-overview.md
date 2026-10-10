@@ -9,6 +9,8 @@ ALPR Vue gives you full control over how plates are detected, how the interface 
 
 Tap the **gear icon (⚙️)** in the app header to open the settings panel. The panel slides up from the bottom of the screen and stays open until you dismiss it.
 
+<VTDocFrame src="/screenshots/en/settings.png" alt="The Settings panel: sound, confidence threshold, confirmation times, continuous scan, duplicate alerts, appearance and language." caption="The settings panel, opened from the gear icon." />
+
 ## Settings categories
 
 The settings panel covers three areas:

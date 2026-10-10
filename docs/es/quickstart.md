@@ -77,6 +77,8 @@ Cuando la aplicación confirma una detección, añade la matrícula al historial
 móvil). Cada entrada muestra el texto de la matrícula, una puntuación de confianza y la hora de detección. La cámara se
 detiene automáticamente tras la confirmación.
 
+<VTDocFrame src="/screenshots/es/detection.jpg" alt="ALPR Vue tras analizar una foto: dos matrículas enmarcadas en verde sobre la imagen, y ambas aparecen en la lista de matrículas detectadas con su anillo de confianza." caption="Una imagen analizada con sus detecciones en el historial." />
+
 <VTDocNote>
 
 La cámara se detiene automáticamente después de **3 segundos** de detección continua. Si la detección tiene

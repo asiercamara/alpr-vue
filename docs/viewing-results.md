@@ -15,9 +15,14 @@ The history list shows all confirmed detections sorted with the most recent at t
 
 A count badge next to the "Detected Plates" heading shows how many plates are currently in the list.
 
+<VTDocFrame src="/screenshots/en/detection.jpg" alt="ALPR Vue after analyzing a photo: two plates are outlined in green on the image, and both appear in the Detected Plates list with their confidence rings." caption="An analyzed image with its detections in the history list." />
+
 ## Plate detail modal
 
 Click or tap any plate in the list to open its detail view. The modal shows:
+
+<VTDocColumns cols="2">
+<div>
 
 - **Cropped plate image** — a close-up of the detected plate region extracted from your image or video frame.
 - **Plate text** — large, clearly readable characters at the top of the modal.
@@ -25,6 +30,14 @@ Click or tap any plate in the list to open its detail view. The modal shows:
 - **Character-by-character confidence bars** — a bar for each character showing exactly how confident the model was about that letter or digit (see the note below for color meanings).
 - **Detection timestamp** — the exact date and time of the detection.
 - **Detection ID** — a short unique identifier for the record.
+
+</div>
+<div>
+
+<VTDocFrame src="/screenshots/en/modal.png" alt="Plate detail: a close-up of the plate BIG 918, its text, 84.7% overall confidence and a confidence bar for each character." caption="The detail view of a plate." />
+
+</div>
+</VTDocColumns>
 
 <VTDocInfo>
 

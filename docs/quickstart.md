@@ -80,6 +80,8 @@ When the app confirms a detection, it adds the plate to the history list on the 
 Each entry shows the plate text, a confidence score, and the time it was detected. The camera stops scanning automatically
 after confirmation.
 
+<VTDocFrame src="/screenshots/en/detection.jpg" alt="ALPR Vue after analyzing a photo: two plates are outlined in green on the image, and both appear in the Detected Plates list with their confidence rings." caption="An analyzed image with its detections in the history list." />
+
 <VTDocNote>
 
 The camera auto-stops after **3 seconds** of continuous detection. If the detection has a high mean

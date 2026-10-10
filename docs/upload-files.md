@@ -94,6 +94,8 @@ Not near a vehicle? The app includes built-in sample media so you can explore al
 
 Click **Or try a sample** below the upload button to browse the gallery and load any sample with a single click.
 
+<VTDocFrame src="/screenshots/en/gallery.png" alt="The sample gallery open above the Upload file button, listing sample photos such as Porsche 918 and Kia Stinger." caption="The sample gallery." />
+
 <VTDocTip>
 
 Use the sample gallery to get familiar with how detection, confidence scores, and the results panel work before uploading your own files.

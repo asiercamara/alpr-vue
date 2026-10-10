@@ -87,6 +87,8 @@ Hay un botón **Cancelar** disponible durante el procesamiento si quieres detene
 
 Haz clic en **O prueba una muestra** debajo del botón de carga para explorar la galería y cargar cualquier muestra con un solo clic.
 
+<VTDocFrame src="/screenshots/es/gallery.png" alt="La galería de muestras abierta sobre el botón Subir archivo, con fotos de muestra como Porsche 918 y Kia Stinger." caption="La galería de muestras." />
+
 <VTDocTip>
 
 Usa la galería de muestras para familiarizarte con el funcionamiento de la detección, las puntuaciones de confianza y el panel de resultados antes de cargar tus propios archivos.

@@ -15,9 +15,14 @@ El historial muestra todas las detecciones confirmadas ordenadas con la más rec
 
 Un contador junto al encabezado "Matrículas detectadas" indica cuántas matrículas hay en la lista.
 
+<VTDocFrame src="/screenshots/es/detection.jpg" alt="ALPR Vue tras analizar una foto: dos matrículas enmarcadas en verde sobre la imagen, y ambas aparecen en la lista de matrículas detectadas con su anillo de confianza." caption="Una imagen analizada con sus detecciones en el historial." />
+
 ## Vista detallada de la matrícula
 
 Haz clic o toca cualquier matrícula de la lista para abrir su vista detallada. El modal muestra:
+
+<VTDocColumns cols="2">
+<div>
 
 - **Imagen recortada de la matrícula** — un primer plano de la región de la matrícula detectada, extraída de tu imagen o fotograma de vídeo.
 - **Texto de la matrícula** — caracteres grandes y claramente legibles en la parte superior del modal.
@@ -25,6 +30,14 @@ Haz clic o toca cualquier matrícula de la lista para abrir su vista detallada. 
 - **Barras de confianza carácter por carácter** — una barra por carácter que muestra exactamente la confianza del modelo para esa letra o dígito (consulta la nota a continuación para el significado de los colores).
 - **Marca de tiempo de la detección** — la fecha y hora exactas de la detección.
 - **ID de detección** — un identificador único corto para el registro.
+
+</div>
+<div>
+
+<VTDocFrame src="/screenshots/es/modal.png" alt="Detalle de la matrícula: primer plano de la matrícula BIG 918, su texto, una confianza global del 84,7 % y una barra de confianza por cada carácter." caption="La vista detallada de una matrícula." />
+
+</div>
+</VTDocColumns>
 
 <VTDocInfo>
 

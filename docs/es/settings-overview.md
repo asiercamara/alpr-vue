@@ -9,6 +9,8 @@ ALPR Vue te da control total sobre cómo se detectan las matrículas, cómo se v
 
 Toca el **icono de engranaje (⚙️)** en el encabezado de la aplicación para abrir el panel de ajustes. El panel se desliza desde la parte inferior de la pantalla y permanece abierto hasta que lo cierras.
 
+<VTDocFrame src="/screenshots/es/settings.png" alt="El panel de configuración: sonido, umbral de confianza, tiempos de confirmación, escaneo continuo, alertas de duplicados, apariencia e idioma." caption="El panel de ajustes, que se abre con el icono de engranaje." />
+
 ## Categorías de ajustes
 
 El panel de ajustes cubre tres áreas:
