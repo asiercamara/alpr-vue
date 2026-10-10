@@ -73,7 +73,7 @@ Subject line ≤ 72 characters. Body only when the _why_ isn't obvious from the 
 4. Link the related issue if one exists.
 5. Fill in the PR description: what changed and why.
 
-The CI pipeline runs lint, type-check, tests with coverage, and a security audit on every PR. All checks must pass before merge.
+The CI pipeline runs a security audit, lint, type-check, knip, format check and tests with coverage and the build of the app and docs on every PR. All checks must pass before merge. The e2e suite is not part of CI: run `pnpm check:all` locally before a release.
 
 ## Reporting issues
 

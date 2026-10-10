@@ -1,25 +1,38 @@
 name: CI
 
+# Light on purpose, to spare the free tier's minutes: production audit, lint,
+# types, knip, format, unit tests with coverage and the build of the app and
+# the docs (about 30 s). The Playwright e2e suite runs locally with
+# `pnpm check:all` before a release.
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   ci:
     name: Lint · Types · Knip · Format · Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -27,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Security audit
+      - name: Security audit (production dependencies)
         run: pnpm security:audit:ci
 
       - name: Lint
@@ -44,3 +57,6 @@ jobs:
 
       - name: Tests with coverage thresholds
         run: pnpm test:coverage
+
+      - name: Build app and docs
+        run: pnpm build:all
