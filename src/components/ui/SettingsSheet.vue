@@ -35,6 +35,7 @@
                   settingsStore.feedbackEnabled ? 'toggle-track-on' : 'toggle-track-off',
                 ]"
                 role="switch"
+                :aria-label="t('settings.sound.title')"
                 :aria-checked="settingsStore.feedbackEnabled"
                 @click="settingsStore.toggleFeedback()"
               >
@@ -60,6 +61,7 @@
               <template #below>
                 <input
                   type="range"
+                  :aria-label="t('settings.confidence.title')"
                   :min="0.5"
                   :max="0.95"
                   :step="0.05"
@@ -85,6 +87,7 @@
               <template #below>
                 <input
                   type="range"
+                  :aria-label="t('settings.confirmTime.title')"
                   :min="1"
                   :max="10"
                   :step="0.5"
@@ -110,6 +113,7 @@
               <template #below>
                 <input
                   type="range"
+                  :aria-label="t('settings.fastConfirm.title')"
                   :min="0.5"
                   :max="5"
                   :step="0.5"
@@ -139,6 +143,7 @@
                   settingsStore.continuousMode ? 'toggle-track-on' : 'toggle-track-off',
                 ]"
                 role="switch"
+                :aria-label="t('settings.continuousScan.title')"
                 :aria-checked="settingsStore.continuousMode"
                 @click="settingsStore.setContinuousMode(!settingsStore.continuousMode)"
               >
@@ -164,6 +169,7 @@
                   settingsStore.skipDuplicates ? 'toggle-track-on' : 'toggle-track-off',
                 ]"
                 role="switch"
+                :aria-label="t('settings.skipDuplicates.title')"
                 :aria-checked="settingsStore.skipDuplicates"
                 @click="settingsStore.setSkipDuplicates(!settingsStore.skipDuplicates)"
               >

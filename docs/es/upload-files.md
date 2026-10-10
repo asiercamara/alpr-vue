@@ -23,9 +23,9 @@ MP4, WebM y otros formatos de vídeo compatibles con el decodificador multimedia
 ## Cargar un archivo
 
 <VTDocSteps>
-<VTDocStep title="Haz clic en Cargar archivo">
+<VTDocStep title="Haz clic en Subir archivo">
 
-En la pantalla principal, haz clic en el botón **Cargar archivo**. Se abrirá un selector de archivos.
+En la pantalla principal, haz clic en el botón **Subir archivo**. Se abrirá un selector de archivos.
 
 </VTDocStep>
 <VTDocStep title="Selecciona tu archivo">
@@ -85,7 +85,9 @@ Hay un botón **Cancelar** disponible durante el procesamiento si quieres detene
 - **10 fotos de coches de muestra** — imágenes reales de vehículos sobre las que puedes ejecutar el reconocimiento de matrículas ahora mismo.
 - **3 clips de vídeo de tráfico** — clips cortos que muestran vehículos en movimiento.
 
-Haz clic en **O prueba una muestra** debajo del botón de carga para explorar la galería y cargar cualquier muestra con un solo clic.
+Haz clic en **O prueba con una muestra** debajo del botón de carga para explorar la galería y cargar cualquier muestra con un solo clic.
+
+<VTDocFrame src="/screenshots/es/gallery.png" alt="La galería de muestras abierta sobre el botón Subir archivo, con fotos de muestra como Porsche 918 y Kia Stinger." caption="La galería de muestras." />
 
 <VTDocTip>
 

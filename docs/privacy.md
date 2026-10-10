@@ -58,12 +58,15 @@ The only network activity occurs on your **first visit**, when your browser down
 
 - HTML, JavaScript, and CSS (the app itself)
 - The two ONNX model files (`yolo-v9-t-384-license-plates-end2end.onnx` and `european_mobile_vit_v2_ocr.onnx`)
+- The fonts (Inter, Space Grotesk and JetBrains Mono), served by the app itself
+
+All of these come from the same address as the app. ALPR Vue never contacts a CDN or any other server, not even for fonts, and the project's test suite fails if any page makes a request to another origin.
 
 After that initial load, your browser caches everything locally. The app runs fully offline on every subsequent visit — no network connection is required.
 
 ## Browser permissions
 
-ALPR Vue asks for **camera permission** only when you click **Start Camera**. This is a standard browser permission prompt — you decide whether to allow it.
+ALPR Vue asks for **camera permission** only when you click **Start camera**. This is a standard browser permission prompt — you decide whether to allow it.
 
 - If you deny camera access, you can still use the app by uploading photos or videos instead
 - You can revoke camera permission at any time from your browser's site settings

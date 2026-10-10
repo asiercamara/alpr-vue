@@ -60,7 +60,7 @@ Este ajuste se aplica en el modo de detección normal. Cuando la confianza media
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Tiempo de confirmación rápida (predeterminado: 1 segundo)">
+<VTDocAccordion title="Confirmación rápida (predeterminado: 1 segundo)">
 
 Cuando la confianza OCR de ALPR Vue para una detección alcanza una media de 0,8 o superior, cambia a la ventana de confirmación rápida en lugar de la estándar. El valor predeterminado es 1 segundo.
 
@@ -68,7 +68,7 @@ Esto permite que las matrículas claramente visibles y bien iluminadas se confir
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Modo continuo (predeterminado: activado)">
+<VTDocAccordion title="Escaneo continuo (predeterminado: activado)">
 
 Cuando el modo continuo está **activado**, la cámara sigue escaneando tras cada matrícula confirmada. ALPR Vue continuará detectando y confirmando nuevas matrículas sin ninguna interacción por tu parte.
 
@@ -76,7 +76,7 @@ Cuando el modo continuo está **desactivado**, la cámara se detiene automática
 
 <VTDocNote>
 
-Si **omitir duplicados** también está activado, una matrícula que ya aparezca en tu historial no detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas.
+Si **No alertar duplicados** también está activado, una matrícula que ya aparezca en tu historial no detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas.
 
 </VTDocNote>
 
@@ -84,15 +84,15 @@ Activa el modo continuo de nuevo en cualquier momento para reanudar el escaneo i
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Omitir duplicados (predeterminado: activado)">
+<VTDocAccordion title="No alertar duplicados (predeterminado: activado)">
 
-Cuando omitir duplicados está **activado**, confirmar una matrícula que ya aparece en tu historial **no** activa ningún pitido ni vibración, y **no** detiene la cámara (aunque el modo continuo esté desactivado). La detección sí se guarda, y si la nueva lectura tiene una puntuación de confianza mayor que la anterior, pasa a ser el mejor representante de esa matrícula en tu historial.
+Cuando **No alertar duplicados** está **activado**, confirmar una matrícula que ya aparece en tu historial **no** activa ningún pitido ni vibración, y **no** detiene la cámara (aunque el modo continuo esté desactivado). La detección sí se guarda, y si la nueva lectura tiene una puntuación de confianza mayor que la anterior, pasa a ser el mejor representante de esa matrícula en tu historial.
 
 Desactívalo si quieres que cada matrícula confirmada — incluidas las repetidas — active una alerta y, cuando el modo continuo esté desactivado, detenga la cámara. Esto es útil al registrar entradas y salidas del mismo vehículo, donde cada paso debe tratarse como un evento distinto.
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Feedback de audio / haptic (predeterminado: activado)">
+<VTDocAccordion title="Sonido y vibración (predeterminado: activado)">
 
 Cuando el feedback está **activado**, ALPR Vue reproduce un breve pitido y activa una vibración corta (en dispositivos que lo admiten) cada vez que se confirma una matrícula. Esto te avisa de que se ha capturado una matrícula sin necesidad de mirar la pantalla.
 

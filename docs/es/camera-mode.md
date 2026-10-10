@@ -62,11 +62,11 @@ El acceso a la cámara requiere un contexto seguro. La aplicación debe abrirse 
 
 Una vez activa la cámara, aparece una fila de controles en la parte inferior del área de previsualización.
 
-| Control             | Qué hace                                                                                                                                  |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **Detener**         | Detiene la cámara inmediatamente y vuelve a la pantalla de espera.                                                                        |
-| **Cambiar cámara**  | Alterna entre la cámara frontal y la trasera en dispositivos móviles.                                                                     |
-| **Zoom + / Zoom −** | Ajusta el nivel de zoom. La aplicación usa el zoom de hardware nativo cuando está disponible y recurre al zoom digital en caso contrario. |
+| Control              | Qué hace                                                                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Detener**          | Detiene la cámara inmediatamente y vuelve a la pantalla de espera.                                                                        |
+| **Cambiar cámara**   | Alterna entre la cámara frontal y la trasera en dispositivos móviles.                                                                     |
+| **Acercar / Alejar** | Ajusta el nivel de zoom. La aplicación usa el zoom de hardware nativo cuando está disponible y recurre al zoom digital en caso contrario. |
 
 ## Comportamiento de detención automática
 
@@ -75,11 +75,11 @@ Por defecto, la cámara se detiene automáticamente tras confirmar una matrícul
 - La cámara se detiene tras **3 segundos** de detección continua de una matrícula.
 - Si la detección tiene una confianza OCR media de **0,8 o superior**, la cámara se detiene tras solo **1 segundo**.
 
-Para mantener la cámara en funcionamiento de forma continua sin detenerse en cada detección, activa **Modo continuo** en el panel de ajustes (icono de engranaje en el encabezado).
+Para mantener la cámara en funcionamiento de forma continua sin detenerse en cada detección, activa **Escaneo continuo** en el panel de ajustes (icono de engranaje en el encabezado).
 
 <VTDocNote>
 
-Cuando **Omitir duplicados** está activado, confirmar una matrícula que ya está en tu historial **no** detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas. Esto te permite seguir escaneando en una zona concurrida sin interrupciones por vehículos ya registrados.
+Cuando **No alertar duplicados** está activado, confirmar una matrícula que ya está en tu historial **no** detendrá la cámara, aunque el modo continuo esté desactivado. La cámara solo se detiene ante matrículas genuinamente nuevas. Esto te permite seguir escaneando en una zona concurrida sin interrupciones por vehículos ya registrados.
 
 </VTDocNote>
 

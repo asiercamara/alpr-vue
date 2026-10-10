@@ -121,8 +121,11 @@ export default {
     step1: 'Activa la cámara para comenzar el escaneo en tiempo real.',
     step2: 'Apunta la cámara directamente a la matrícula del vehículo.',
     step3: 'El sistema detectará automáticamente el texto y lo guardará en el historial.',
-    step4prefix: 'Pulsa',
-    step4suffix: 'para ajustar la sensibilidad de detección, apariencia e idioma.',
+    step4: 'O sube una imagen o un vídeo desde tu dispositivo.',
+    step5:
+      'Pulsa una matrícula del historial para verla, editarla o copiarla, y exporta todo a CSV.',
+    step6prefix: 'Pulsa',
+    step6suffix: 'para ajustar la sensibilidad de detección, apariencia e idioma.',
     moreInfo: 'Abrir documentación completa',
     close: 'Entendido',
   },

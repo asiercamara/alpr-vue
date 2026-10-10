@@ -58,14 +58,14 @@ Make sure the plate is clearly visible in the frame, well-lit, and not blurry. T
 **Hold the camera steady:**
 The app requires the same plate to be detected continuously for at least 3 seconds before saving it to history. If the camera moves around too much, the plate may not stay in frame long enough to be confirmed.
 
-**Lower the Confidence Threshold:**
-Open **Settings** (gear icon in the header) and lower the **Confidence Threshold** from its default of 0.7. Trying a value of 0.6 or 0.5 may allow more marginal detections through.
+**Lower the confidence threshold:**
+Open **Settings** (gear icon in the header) and lower the **Confidence threshold** from its default of 0.7. Trying a value of 0.6 or 0.5 may allow more marginal detections through.
 
 **Consider regional limitations:**
 The AI models are optimized for European license plates. Plates from other regions may be detected with lower accuracy or not at all. See [how the AI models work](./how-it-works) for more detail.
 
 **Try uploading a photo instead:**
-If live camera detection isn't working, try using the **Upload File** button to process a still image of the plate. This rules out camera-related issues and gives the model more processing time per frame. See [uploading files](./upload-files) for instructions.
+If live camera detection isn't working, try using the **Upload file** button to process a still image of the plate. This rules out camera-related issues and gives the model more processing time per frame. See [uploading files](./upload-files) for instructions.
 
 <VTDocTip>
 
@@ -110,7 +110,7 @@ The app runs AI inference in a background Web Worker thread so the UI stays resp
 Chrome and Edge generally offer the best WebAssembly performance. If you are using a different browser and experiencing lag, try switching. See [browser requirements](./browser-requirements) for the full compatibility list.
 
 **Understand device limits:**
-On older or lower-powered devices — particularly budget smartphones — the models may run slowly regardless of optimizations. In this case, consider using the **Upload File** mode instead of live camera, which processes each frame at its own pace without a real-time constraint.
+On older or lower-powered devices — particularly budget smartphones — the models may run slowly regardless of optimizations. In this case, consider using the **Upload file** mode instead of live camera, which processes each frame at its own pace without a real-time constraint.
 
 </VTDocAccordion>
 

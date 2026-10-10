@@ -20,17 +20,20 @@ Husky hooks install automatically on `pnpm install`.
 
 ```bash
 pnpm dev          # Start dev server → http://localhost:5173/
-pnpm test         # Vitest watch mode
+pnpm test         # Vitest, single run
+pnpm test:watch   # Vitest watch mode
 pnpm lint         # ESLint
 pnpm lint:fix     # ESLint --fix
 pnpm format       # Prettier
 ```
 
-Before opening a PR, make sure the full check suite passes:
+Before opening a PR, run the quality gates (typecheck, lint, format, tests, knip and build):
 
 ```bash
-pnpm lint && pnpm build && pnpm test:run
+pnpm check
 ```
+
+`pnpm check:all` also runs coverage thresholds, the Playwright e2e suite and the dependency audit.
 
 ## Code style
 
@@ -57,7 +60,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat: add zoom controls to CameraPreview
 fix: correct confidence threshold in detectionProcessor
-chore: update vitepress-theme-app-docs to 0.8.2
+chore: update vitepress-theme-app-docs to 1.1.0
 ```
 
 Subject line ≤ 72 characters. Body only when the _why_ isn't obvious from the subject.
@@ -70,7 +73,7 @@ Subject line ≤ 72 characters. Body only when the _why_ isn't obvious from the 
 4. Link the related issue if one exists.
 5. Fill in the PR description: what changed and why.
 
-The CI pipeline runs lint, type-check, tests with coverage, and a security audit on every PR. All checks must pass before merge.
+The CI pipeline runs a security audit, lint, type-check, knip, format check and tests with coverage and the build of the app and docs on every PR. All checks must pass before merge. The e2e suite is not part of CI: run `pnpm check:all` locally before a release.
 
 ## Reporting issues
 

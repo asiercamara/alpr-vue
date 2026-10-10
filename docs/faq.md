@@ -24,7 +24,7 @@ ALPR Vue is optimized for **European license plates**. The OCR model reads alpha
 
 <VTDocNote>
 
-If you regularly work with plates from a specific region outside Europe and accuracy is poor, try lowering the **Confidence Threshold** in Settings to allow more detections through, and manually correct any misread characters.
+If you regularly work with plates from a specific region outside Europe and accuracy is poor, try lowering the **Confidence threshold** in Settings to allow more detections through, and manually correct any misread characters.
 
 </VTDocNote>
 
@@ -34,7 +34,7 @@ If you regularly work with plates from a specific region outside Europe and accu
 
 Yes. ALPR Vue is designed with mobile devices in mind and works on modern iOS and Android browsers. On mobile you can:
 
-- Tap **Flip camera** to switch between the front and rear cameras.
+- Tap **Switch camera** to switch between the front and rear cameras.
 - Use the **Zoom in / Zoom out** buttons to adjust the view (hardware zoom when supported by your device, digital zoom otherwise).
 - Add the app to your home screen from your browser menu for an app-like, full-screen experience.
 
@@ -57,7 +57,7 @@ If you need the camera to keep running after each detection — for example, whe
 
 <VTDocAccordion title="Can I read plates from photos or videos I already have?">
 
-Yes. Tap the **Upload File** button on the main screen and select any image or video file saved on your device. The app processes images immediately and scans videos frame by frame, extracting every plate that appears throughout the clip.
+Yes. Tap the **Upload file** button on the main screen and select any image or video file saved on your device. The app processes images immediately and scans videos frame by frame, extracting every plate that appears throughout the clip.
 
 You can also browse the built-in sample gallery, which includes 10 real car photos and 3 traffic video clips — useful for trying the app without needing a vehicle nearby.
 
@@ -79,11 +79,11 @@ Characters with low confidence are shown in the plate detail view with a red con
 
 </VTDocAccordion>
 
-<VTDocAccordion title="What does 'Skip Duplicates' do?">
+<VTDocAccordion title="What does 'Skip duplicate alerts' do?">
 
-When **Skip Duplicates** is enabled (the default), the app silently ignores any detection whose plate text already exists in your history. This prevents the same vehicle from appearing multiple times when you scan it more than once.
+When **Skip duplicate alerts** is enabled (the default), the app silently ignores any detection whose plate text already exists in your history. This prevents the same vehicle from appearing multiple times when you scan it more than once.
 
-Disable **Skip Duplicates** in Settings if you need to record every detection event individually — for example, if you are logging the same plate appearing at different times throughout a shift.
+Disable **Skip duplicate alerts** in Settings if you need to record every detection event individually — for example, if you are logging the same plate appearing at different times throughout a shift.
 
 You can find this toggle in **Settings > Skip duplicate alerts**. See [detection settings](./detection-settings) for all detection-related options.
 

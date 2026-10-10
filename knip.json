@@ -1,0 +1,16 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/workers/mainWorker.ts",
+    "docs/.vitepress/config.ts",
+    "docs/.vitepress/theme/index.ts"
+  ],
+  "project": [
+    "e2e/**/*.ts",
+    "src/**/*.{ts,vue}",
+    "docs/.vitepress/**/*.{ts,vue}",
+    "scripts/**/*.{mjs,ts}"
+  ],
+  "ignoreDependencies": ["tailwindcss"],
+  "ignoreUnresolved": ["^/models/.+\\.onnx\\?url$"]
+}

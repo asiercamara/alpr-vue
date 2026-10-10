@@ -1,0 +1,14 @@
+dist
+coverage
+node_modules
+public
+pnpm-lock.yaml
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/vtdoc-merged
+.agents
+.claude
+.playwright-mcp
+playwright-report
+test-results
+skills-lock.json

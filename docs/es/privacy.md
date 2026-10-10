@@ -58,6 +58,9 @@ La única actividad de red ocurre en tu **primera visita**, cuando tu navegador 
 
 - HTML, JavaScript y CSS (la propia aplicación)
 - Los dos archivos de modelo ONNX (`yolo-v9-t-384-license-plates-end2end.onnx` y `european_mobile_vit_v2_ocr.onnx`)
+- Las fuentes (Inter, Space Grotesk y JetBrains Mono), servidas por la propia aplicación
+
+Todo esto viene de la misma dirección que la aplicación. ALPR Vue nunca contacta con una CDN ni con ningún otro servidor, ni siquiera para las fuentes, y las pruebas automáticas del proyecto fallan si alguna página hace una petición a otro origen.
 
 Tras esa carga inicial, tu navegador almacena todo en caché localmente. La aplicación funciona completamente sin conexión en cada visita posterior — no se necesita conexión de red.
 

@@ -11,16 +11,16 @@ import {
 describe('PLATE_FORMAT_REGEX', () => {
   describe('formatos válidos', () => {
     it.each([
-      ['AB1234',  '2 letras + 4 números, sin separador'],
-      ['1234AB',  '4 números + 2 letras, sin separador'],
-      ['ABC123',  '3+3, sin separador'],
-      ['ABCD1234','4+4, sin separador (máximo)'],
-      ['AB12',    '2+2, mínimo válido'],
+      ['AB1234', '2 letras + 4 números, sin separador'],
+      ['1234AB', '4 números + 2 letras, sin separador'],
+      ['ABC123', '3+3, sin separador'],
+      ['ABCD1234', '4+4, sin separador (máximo)'],
+      ['AB12', '2+2, mínimo válido'],
       ['AB-1234', '2+guión+4'],
       ['AB 1234', '2+espacio+4'],
-      ['1234 BCD','4+espacio+3 (matrícula española típica)'],
-      ['ab1234',  'minúsculas — case insensitive'],
-      ['Ab12Cd',  'mix mayúsculas/minúsculas'],
+      ['1234 BCD', '4+espacio+3 (matrícula española típica)'],
+      ['ab1234', 'minúsculas — case insensitive'],
+      ['Ab12Cd', 'mix mayúsculas/minúsculas'],
       ['AB12345', 'el motor lo interpreta como AB1+2345 (3+4), válido sin separador'],
     ])('acepta "%s" (%s)', (plate) => {
       expect(PLATE_FORMAT_REGEX.test(plate)).toBe(true)
@@ -29,13 +29,13 @@ describe('PLATE_FORMAT_REGEX', () => {
 
   describe('formatos inválidos', () => {
     it.each([
-      ['A1',          'demasiado corto (1+1)'],
-      ['ABCDE1234',   'primer grupo demasiado largo (5 chars)'],
-      ['AB-12345',    'con separador explícito, segundo grupo de 5 es demasiado largo'],
-      ['AB!1234',     'carácter especial no permitido'],
-      ['AB-1234-CD',  'dos separadores'],
-      ['AB 1234 CD',  'dos separadores con espacios'],
-      ['',            'cadena vacía'],
+      ['A1', 'demasiado corto (1+1)'],
+      ['ABCDE1234', 'primer grupo demasiado largo (5 chars)'],
+      ['AB-12345', 'con separador explícito, segundo grupo de 5 es demasiado largo'],
+      ['AB!1234', 'carácter especial no permitido'],
+      ['AB-1234-CD', 'dos separadores'],
+      ['AB 1234 CD', 'dos separadores con espacios'],
+      ['', 'cadena vacía'],
     ])('rechaza "%s" (%s)', (plate) => {
       expect(PLATE_FORMAT_REGEX.test(plate)).toBe(false)
     })

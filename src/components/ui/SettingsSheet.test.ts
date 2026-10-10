@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import SettingsSheet from '@/components/ui/SettingsSheet.vue'
 import { useSettingsStore } from '@/stores/settingsStore'
+import { i18n } from '@/i18n'
 
 describe('SettingsSheet', () => {
   beforeEach(() => {
@@ -350,5 +351,31 @@ describe('SettingsSheet', () => {
     await resetBtns[0].trigger('click')
 
     expect(settingsStore.skipDuplicates).toBe(true)
+  })
+
+  describe('accessible names', () => {
+    const t = (key: string) => i18n.global.t(key)
+
+    it('names every toggle switch after the setting it controls', () => {
+      const wrapper = mountSheet()
+      const names = wrapper.findAll('[role="switch"]').map((el) => el.attributes('aria-label'))
+
+      expect(names).toEqual([
+        t('settings.sound.title'),
+        t('settings.continuousScan.title'),
+        t('settings.skipDuplicates.title'),
+      ])
+    })
+
+    it('labels every range slider after the setting it controls', () => {
+      const wrapper = mountSheet()
+      const names = wrapper.findAll('input[type="range"]').map((el) => el.attributes('aria-label'))
+
+      expect(names).toEqual([
+        t('settings.confidence.title'),
+        t('settings.confirmTime.title'),
+        t('settings.fastConfirm.title'),
+      ])
+    })
   })
 })

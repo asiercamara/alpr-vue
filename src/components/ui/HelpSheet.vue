@@ -55,13 +55,31 @@
                 >4</span
               >
               <p class="text-sm text-surface-700 dark:text-white/70 leading-relaxed">
-                {{ t('help.step4prefix') }}
+                {{ t('help.step4') }}
+              </p>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span
+                class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-xs font-bold flex items-center justify-center flex-none"
+                >5</span
+              >
+              <p class="text-sm text-surface-700 dark:text-white/70 leading-relaxed">
+                {{ t('help.step5') }}
+              </p>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span
+                class="flex-shrink-0 w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 text-xs font-bold flex items-center justify-center flex-none"
+                >6</span
+              >
+              <p class="text-sm text-surface-700 dark:text-white/70 leading-relaxed">
+                {{ t('help.step6prefix') }}
                 <span
                   class="inline-flex align-middle items-center justify-center w-5 h-5 rounded-full border border-surface-300 dark:border-white/30 text-surface-500 dark:text-white/50 mx-0.5"
                 >
                   <IconSettings class="w-3 h-3" />
                 </span>
-                {{ t('help.step4suffix') }}
+                {{ t('help.step6suffix') }}
               </p>
             </div>
           </div>
@@ -70,7 +88,7 @@
             :href="docsUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-5 flex items-center gap-2 text-xs font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
+            class="mt-5 flex items-center gap-2 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
           >
             <span
               class="flex-none inline-flex items-center justify-center w-5 h-5 rounded-full border border-brand-400 dark:border-brand-500"
