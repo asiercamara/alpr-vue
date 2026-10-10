@@ -83,7 +83,7 @@ El texto se copia al portapapeles y está listo para pegar en cualquier lugar.
 
 ## Borrar el historial
 
-Para eliminar todas las detecciones de una vez, haz clic en el botón **Borrar** en el encabezado del panel de historial. Esto elimina inmediatamente todas las matrículas de la lista. Esta acción no se puede deshacer, así que exporta tus datos primero si necesitas conservarlos.
+Para eliminar todas las detecciones de una vez, haz clic en el botón **Limpiar** en el encabezado del panel de historial. Esto elimina inmediatamente todas las matrículas de la lista. Esta acción no se puede deshacer, así que exporta tus datos primero si necesitas conservarlos.
 
 ## Notificaciones emergentes
 

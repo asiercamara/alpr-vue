@@ -63,7 +63,7 @@ After that initial load, your browser caches everything locally. The app runs fu
 
 ## Browser permissions
 
-ALPR Vue asks for **camera permission** only when you click **Start Camera**. This is a standard browser permission prompt — you decide whether to allow it.
+ALPR Vue asks for **camera permission** only when you click **Start camera**. This is a standard browser permission prompt — you decide whether to allow it.
 
 - If you deny camera access, you can still use the app by uploading photos or videos instead
 - You can revoke camera permission at any time from your browser's site settings

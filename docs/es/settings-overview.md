@@ -45,17 +45,17 @@ Los ajustes se almacenan localmente en tu navegador. Si borras los datos del sit
 
 ## Restablecer los ajustes
 
-Puedes restablecer cualquier ajuste individual a su valor predeterminado usando el botón de reinicio que aparece junto a ese ajuste en el panel. Para restaurar todos los ajustes a la vez, toca **Restablecer todo** en la parte inferior del panel de ajustes.
+Puedes restablecer cualquier ajuste individual a su valor predeterminado usando el botón de reinicio que aparece junto a ese ajuste en el panel. Para restaurar todos los ajustes a la vez, toca **Restaurar todo** en la parte inferior del panel de ajustes.
 
 ## Todos los ajustes de un vistazo
 
-| Ajuste                        | Predeterminado | Qué controla                                                                                   |
-| ----------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
-| Feedback de audio / haptic    | Activado       | Reproduce un pitido y vibra cuando se confirma una matrícula                                   |
-| Umbral de confianza           | 0,7            | Confianza OCR media mínima (0–1) requerida para guardar una detección                          |
-| Tiempo de confirmación        | 3 segundos     | Cuánto tiempo debe detectarse la misma matrícula de forma continua antes de confirmarse        |
-| Tiempo de confirmación rápida | 1 segundo      | Ventana de confirmación más corta para detecciones de alta confianza (media ≥ 0,8)             |
-| Modo continuo                 | Activado       | Mantiene la cámara escaneando tras cada matrícula confirmada                                   |
-| Omitir duplicados             | Activado       | Ignora silenciosamente las matrículas que ya están en tu historial de detecciones              |
-| Tema                          | Sistema        | Controla si la interfaz usa modo claro, oscuro o la preferencia del sistema operativo          |
-| Idioma                        | Auto           | Establece el idioma de la interfaz (inglés, español o detección automática desde el navegador) |
+| Ajuste                 | Predeterminado | Qué controla                                                                                   |
+| ---------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| Sonido y vibración     | Activado       | Reproduce un pitido y vibra cuando se confirma una matrícula                                   |
+| Umbral de confianza    | 0,7            | Confianza OCR media mínima (0–1) requerida para guardar una detección                          |
+| Tiempo de confirmación | 3 segundos     | Cuánto tiempo debe detectarse la misma matrícula de forma continua antes de confirmarse        |
+| Confirmación rápida    | 1 segundo      | Ventana de confirmación más corta para detecciones de alta confianza (media ≥ 0,8)             |
+| Escaneo continuo       | Activado       | Mantiene la cámara escaneando tras cada matrícula confirmada                                   |
+| No alertar duplicados  | Activado       | Ignora silenciosamente las matrículas que ya están en tu historial de detecciones              |
+| Apariencia             | Sistema        | Controla si la interfaz usa modo claro, oscuro o la preferencia del sistema operativo          |
+| Idioma                 | Auto           | Establece el idioma de la interfaz (inglés, español o detección automática desde el navegador) |

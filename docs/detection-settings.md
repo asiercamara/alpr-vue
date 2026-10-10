@@ -61,7 +61,7 @@ This setting applies in normal detection mode. When a detection's mean confidenc
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Fast confirmation time (default: 1 second)">
+<VTDocAccordion title="Fast confirmation (default: 1 second)">
 
 When ALPR Vue's OCR confidence for a detection reaches a mean of 0.8 or above, it switches to the fast confirmation window instead of the standard one. The default is 1 second.
 
@@ -69,7 +69,7 @@ This lets clearly visible, well-lit plates be confirmed almost instantly, while 
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Continuous mode (default: on)">
+<VTDocAccordion title="Continuous scan (default: on)">
 
 When continuous mode is **on**, the camera keeps scanning after each confirmed plate. ALPR Vue will continue detecting and confirming new plates without any interaction from you.
 
@@ -77,7 +77,7 @@ When continuous mode is **off**, the camera stops automatically as soon as a **n
 
 <VTDocNote>
 
-If **skip duplicates** is also on, a plate that already appears in your history will not stop the camera even in single-capture mode. The camera only stops for genuinely new plates.
+If **Skip duplicate alerts** is also on, a plate that already appears in your history will not stop the camera even in single-capture mode. The camera only stops for genuinely new plates.
 
 </VTDocNote>
 
@@ -85,15 +85,15 @@ Toggle continuous mode back on at any time to resume uninterrupted scanning.
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Skip duplicates (default: on)">
+<VTDocAccordion title="Skip duplicate alerts (default: on)">
 
-When skip duplicates is **on**, confirming a plate that already appears in your history will **not** trigger a beep or vibration, and will **not** stop the camera (even when continuous mode is off). The detection is still saved, and if the new reading has a higher confidence score than the previous one, it becomes the best representative for that plate in your history.
+When **Skip duplicate alerts** is **on**, confirming a plate that already appears in your history will **not** trigger a beep or vibration, and will **not** stop the camera (even when continuous mode is off). The detection is still saved, and if the new reading has a higher confidence score than the previous one, it becomes the best representative for that plate in your history.
 
 Turn this **off** if you want every confirmed plate — including repeated ones — to trigger an alert and, when continuous mode is off, stop the camera. This is useful when logging entry and exit events for the same vehicle, where each pass should be treated as a distinct event.
 
 </VTDocAccordion>
 
-<VTDocAccordion title="Audio / haptic feedback (default: on)">
+<VTDocAccordion title="Sound & vibration (default: on)">
 
 When feedback is **on**, ALPR Vue plays a brief beep and triggers a short vibration (on devices that support it) each time a plate is confirmed. This lets you know a plate has been captured without looking at the screen.
 

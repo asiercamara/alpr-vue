@@ -59,13 +59,13 @@ Asegúrate de que la matrícula sea claramente visible en el encuadre, esté bie
 La aplicación requiere que la misma matrícula se detecte de forma continua durante al menos 3 segundos antes de guardarla en el historial. Si la cámara se mueve demasiado, la matrícula puede no permanecer en el encuadre el tiempo suficiente para confirmarse.
 
 **Baja el Umbral de confianza:**
-Abre **Ajustes** (icono de engranaje en el encabezado) y baja el **Umbral de confianza** desde su valor predeterminado de 0,7. Probar con un valor de 0,6 o 0,5 puede permitir que pasen detecciones más marginales.
+Abre **Configuración** (icono de engranaje en el encabezado) y baja el **Umbral de confianza** desde su valor predeterminado de 0,7. Probar con un valor de 0,6 o 0,5 puede permitir que pasen detecciones más marginales.
 
 **Ten en cuenta las limitaciones regionales:**
 Los modelos de IA están optimizados para matrículas europeas. Las matrículas de otras regiones pueden detectarse con menor precisión o no detectarse en absoluto. Consulta [cómo funcionan los modelos de IA](./how-it-works) para más detalles.
 
 **Intenta cargar una foto:**
-Si la detección con cámara en vivo no funciona, intenta usar el botón **Cargar archivo** para procesar una imagen fija de la matrícula. Esto descarta problemas relacionados con la cámara y da al modelo más tiempo de procesamiento por fotograma. Consulta [cargar archivos](./upload-files) para obtener instrucciones.
+Si la detección con cámara en vivo no funciona, intenta usar el botón **Subir archivo** para procesar una imagen fija de la matrícula. Esto descarta problemas relacionados con la cámara y da al modelo más tiempo de procesamiento por fotograma. Consulta [cargar archivos](./upload-files) para obtener instrucciones.
 
 <VTDocTip>
 
@@ -110,7 +110,7 @@ La aplicación ejecuta la inferencia de IA en un hilo Web Worker en segundo plan
 Chrome y Edge generalmente ofrecen el mejor rendimiento de WebAssembly. Si usas un navegador diferente y experimentas lentitud, intenta cambiar. Consulta [requisitos del navegador](./browser-requirements) para la lista completa de compatibilidad.
 
 **Comprende las limitaciones del dispositivo:**
-En dispositivos más antiguos o de menor potencia — especialmente smartphones de gama baja — los modelos pueden ejecutarse lentamente independientemente de las optimizaciones. En este caso, considera usar el modo **Cargar archivo** en lugar de la cámara en vivo, que procesa cada fotograma a su propio ritmo sin una restricción de tiempo real.
+En dispositivos más antiguos o de menor potencia — especialmente smartphones de gama baja — los modelos pueden ejecutarse lentamente independientemente de las optimizaciones. En este caso, considera usar el modo **Subir archivo** en lugar de la cámara en vivo, que procesa cada fotograma a su propio ritmo sin una restricción de tiempo real.
 
 </VTDocAccordion>
 
@@ -125,7 +125,7 @@ Una matrícula debe detectarse de forma continua durante toda la ventana de conf
 Desplázate por el panel **Matrículas detectadas** para confirmar que las matrículas que esperas están en la lista. Si la lista está vacía, no se ha confirmado ninguna matrícula en la sesión actual.
 
 **Vuelve a ejecutar la detección si es necesario:**
-Si borraste el historial antes de exportar, toca **Borrar** en el panel del historial y ejecuta otra sesión de detección. Una vez que las matrículas aparezcan en la lista, usa **Exportar CSV** para descargarlas.
+Si borraste el historial antes de exportar, toca **Limpiar** en el panel del historial y ejecuta otra sesión de detección. Una vez que las matrículas aparezcan en la lista, usa **Exportar CSV** para descargarlas.
 
 Consulta [exportar datos](./exporting-data) para obtener detalles completos sobre el formato CSV y el contenido de cada columna.
 

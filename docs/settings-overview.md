@@ -49,13 +49,13 @@ You can reset any individual setting back to its default using the reset button 
 
 ## All settings at a glance
 
-| Setting                 | Default   | What it controls                                                                 |
-| ----------------------- | --------- | -------------------------------------------------------------------------------- |
-| Audio / Haptic Feedback | On        | Plays a beep and vibrates when a plate is confirmed                              |
-| Confidence Threshold    | 0.7       | Minimum mean OCR confidence (0–1) required to save a detection                   |
-| Confirmation Time       | 3 seconds | How long the same plate must be detected continuously before being confirmed     |
-| Fast Confirmation Time  | 1 second  | Shorter confirmation window for high-confidence detections (mean ≥ 0.8)          |
-| Continuous Mode         | On        | Keeps the camera scanning after each confirmed plate                             |
-| Skip Duplicates         | On        | Silently skips plates already present in your detection history                  |
-| Theme                   | System    | Controls whether the interface uses light, dark, or your OS preference           |
-| Language                | Auto      | Sets the display language (English, Spanish, or auto-detected from your browser) |
+| Setting               | Default   | What it controls                                                                 |
+| --------------------- | --------- | -------------------------------------------------------------------------------- |
+| Sound & vibration     | On        | Plays a beep and vibrates when a plate is confirmed                              |
+| Confidence threshold  | 0.7       | Minimum mean OCR confidence (0–1) required to save a detection                   |
+| Confirmation time     | 3 seconds | How long the same plate must be detected continuously before being confirmed     |
+| Fast confirmation     | 1 second  | Shorter confirmation window for high-confidence detections (mean ≥ 0.8)          |
+| Continuous scan       | On        | Keeps the camera scanning after each confirmed plate                             |
+| Skip duplicate alerts | On        | Silently skips plates already present in your detection history                  |
+| Appearance            | System    | Controls whether the interface uses light, dark, or your OS preference           |
+| Language              | Auto      | Sets the display language (English, Spanish, or auto-detected from your browser) |

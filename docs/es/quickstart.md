@@ -14,7 +14,7 @@ const quickstartFlow = `
 flowchart TD
   A[Abre ALPR Vue en un navegador compatible] --> B{Como quieres probarla?}
   B -->|Camara en vivo| C[Haz clic en Iniciar camara]
-  B -->|No tienes una camara a mano| D[Haz clic en Cargar archivo y abre la galeria de muestras]
+  B -->|No tienes una camara a mano| D[Haz clic en Subir archivo y abre la galeria de muestras]
 
   C --> E{Se concede permiso de camara?}
   E -->|No| F[Permite el acceso en los ajustes del navegador y recarga]
@@ -103,6 +103,6 @@ Toca o haz clic en cualquier matrícula del historial para abrir la vista detall
 
 ## Pruébalo sin cámara
 
-No necesitas tener un vehículo cerca para explorar la aplicación. ALPR Vue incluye una galería de muestras integrada con **10 fotos reales de coches** y **3 clips de vídeo de tráfico**. Haz clic en **Cargar archivo** en la pantalla principal y abre la galería de muestras para elegir cualquier muestra. La aplicación la procesa a través del mismo canal de IA y añade las matrículas detectadas a tu historial, igual que con la cámara en vivo.
+No necesitas tener un vehículo cerca para explorar la aplicación. ALPR Vue incluye una galería de muestras integrada con **10 fotos reales de coches** y **3 clips de vídeo de tráfico**. Haz clic en **Subir archivo** en la pantalla principal y abre la galería de muestras para elegir cualquier muestra. La aplicación la procesa a través del mismo canal de IA y añade las matrículas detectadas a tu historial, igual que con la cámara en vivo.
 
 Es una excelente forma de familiarizarte con los resultados, las puntuaciones de confianza y la vista detallada antes de probar con tus propias imágenes.

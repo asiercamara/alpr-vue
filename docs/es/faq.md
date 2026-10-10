@@ -35,7 +35,7 @@ Si trabajas regularmente con matrículas de una región específica fuera de Eur
 Sí. ALPR Vue está diseñado teniendo en cuenta los dispositivos móviles y funciona en navegadores modernos de iOS y Android. En móvil puedes:
 
 - Tocar **Cambiar cámara** para alternar entre la cámara frontal y trasera.
-- Usar los botones **Zoom +** / **Zoom −** para ajustar la vista (zoom de hardware cuando tu dispositivo lo admite, zoom digital en caso contrario).
+- Usar los botones **Acercar** / **Alejar** para ajustar la vista (zoom de hardware cuando tu dispositivo lo admite, zoom digital en caso contrario).
 - Añadir la aplicación a la pantalla de inicio desde el menú de tu navegador para una experiencia a pantalla completa similar a una app nativa.
 
 Consulta [modo cámara](./camera-mode) para obtener detalles sobre todos los controles de la cámara.
@@ -57,7 +57,7 @@ Si necesitas que la cámara siga funcionando tras cada detección — por ejempl
 
 <VTDocAccordion title="¿Puedo leer matrículas de fotos o vídeos que ya tengo?">
 
-Sí. Toca el botón **Cargar archivo** en la pantalla principal y selecciona cualquier imagen o archivo de vídeo guardado en tu dispositivo. La aplicación procesa las imágenes de inmediato y escanea los vídeos fotograma a fotograma, extrayendo cada matrícula que aparece en el clip.
+Sí. Toca el botón **Subir archivo** en la pantalla principal y selecciona cualquier imagen o archivo de vídeo guardado en tu dispositivo. La aplicación procesa las imágenes de inmediato y escanea los vídeos fotograma a fotograma, extrayendo cada matrícula que aparece en el clip.
 
 También puedes explorar la galería de muestras integrada, que incluye 10 fotos reales de coches y 3 clips de vídeo de tráfico — útil para probar la aplicación sin necesitar un vehículo cerca.
 
@@ -79,13 +79,13 @@ Los caracteres con baja confianza se muestran en la vista detallada de la matrí
 
 </VTDocAccordion>
 
-<VTDocAccordion title="¿Qué hace 'Omitir duplicados'?">
+<VTDocAccordion title="¿Qué hace 'No alertar duplicados'?">
 
-Cuando **Omitir duplicados** está activado (el valor predeterminado), la aplicación ignora silenciosamente cualquier detección cuyo texto ya exista en tu historial. Esto evita que el mismo vehículo aparezca varias veces cuando lo escaneas más de una vez.
+Cuando **No alertar duplicados** está activado (el valor predeterminado), la aplicación ignora silenciosamente cualquier detección cuyo texto ya exista en tu historial. Esto evita que el mismo vehículo aparezca varias veces cuando lo escaneas más de una vez.
 
-Desactiva **Omitir duplicados** en Ajustes si necesitas registrar cada evento de detección individualmente — por ejemplo, si estás registrando la misma matrícula apareciendo en diferentes momentos a lo largo de un turno.
+Desactiva **No alertar duplicados** en Ajustes si necesitas registrar cada evento de detección individualmente — por ejemplo, si estás registrando la misma matrícula apareciendo en diferentes momentos a lo largo de un turno.
 
-Puedes encontrar este interruptor en **Ajustes > Omitir alertas de duplicados**. Consulta [ajustes de detección](./detection-settings) para todas las opciones relacionadas con la detección.
+Puedes encontrar este interruptor en **Configuración > No alertar duplicados**. Consulta [ajustes de detección](./detection-settings) para todas las opciones relacionadas con la detección.
 
 </VTDocAccordion>
 

@@ -27,9 +27,9 @@ MP4, WebM, and other video formats supported by your browser's built-in media de
 
 <VTDocSteps>
 
-<VTDocStep title="Click Upload File">
+<VTDocStep title="Click Upload file">
 
-On the main screen, click the **Upload File** button. A file picker will open.
+On the main screen, click the **Upload file** button. A file picker will open.
 
 </VTDocStep>
 
