@@ -17,7 +17,9 @@
                 class="heading-display text-xl font-bold text-surface-900 dark:text-white tracking-tight"
                 >ALPR</span
               >
-              <span class="heading-display text-xl font-semibold text-brand-500">Vue</span>
+              <span class="heading-display text-xl font-semibold text-brand-600 dark:text-brand-400"
+                >Vue</span
+              >
             </div>
           </div>
         </div>
