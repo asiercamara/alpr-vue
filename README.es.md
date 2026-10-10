@@ -132,6 +132,10 @@ Para ejecutar la documentación en local: `pnpm docs:dev`
 
 Ver [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## Licencia
+
+[MIT](./LICENSE). El trabajo de terceros y el contenido de muestra de `public/test/` se describen en [NOTICE](./NOTICE).
+
 ## Reconocimientos
 
 - [fast-alpr](https://github.com/ankandrew/fast-alpr) — proyecto original
