@@ -63,7 +63,7 @@
     "vite": "^8.3.3",
     "vite-plugin-vue-devtools": "^8.2.1",
     "vitepress": "^1.6.4",
-    "vitepress-theme-app-docs": "^1.1.0",
+    "vitepress-theme-app-docs": "^1.2.0",
     "vitest": "^4.1.11",
     "vue-tsc": "^3.3.12"
   },
