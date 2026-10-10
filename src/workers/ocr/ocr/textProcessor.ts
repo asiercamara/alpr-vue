@@ -119,5 +119,7 @@ function mapIndicesToChars(indices: number[], alphabet: string): string[] {
  */
 export function cleanPlateText(plateText: string, padChar = '-'): string {
   const escapedPadChar = padChar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // padChar se escapa arriba, por lo que no puede inyectar sintaxis de regex
+  // eslint-disable-next-line security/detect-non-literal-regexp
   return plateText.replace(new RegExp(`${escapedPadChar}+$`), '')
 }
