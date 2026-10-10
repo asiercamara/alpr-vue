@@ -6,14 +6,9 @@ import { expect, test } from './fixtures'
  */
 test('detects a plate in a sample image, shows its details and exports CSV', async ({ page }) => {
   test.slow()
-  // The app gives no "model ready" signal in the UI and ignores an image picked before
-  // the worker has finished loading, so wait for the worker's own log line.
-  const modelsLoaded = page.waitForEvent('console', {
-    predicate: (message) => message.text().includes('Modelo OCR cargado correctamente'),
-    timeout: 90_000,
-  })
+  // Picked right after load, while the worker is still loading the models: the image
+  // must be processed once they are ready, not dropped.
   await page.goto('/')
-  await modelsLoaded
 
   await page.getByRole('button', { name: 'Or try a sample' }).click()
   await page.getByRole('button', { name: /Kia Stinger/ }).click()

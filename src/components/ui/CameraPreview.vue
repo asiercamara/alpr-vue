@@ -222,9 +222,12 @@ watch(
       appStore.uploadMediaUrl,
       appStore.uploadMediaType,
       appStore.uploadFile,
+      appStore.isModelLoading,
     ] as const,
-  async ([isUpload, url, type, file]) => {
-    if (!isUpload || !url || !type) return
+  async ([isUpload, url, type, file, modelLoading]) => {
+    // Media picked before the model is ready is processed once it is: the watcher
+    // runs again when `isModelLoading` flips, and processing now would be dropped.
+    if (!isUpload || !url || !type || modelLoading) return
 
     const video = videoRef.value
     const canvas = canvasRef.value
