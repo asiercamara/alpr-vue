@@ -26,6 +26,7 @@ export function useLocale(): void {
     () => settingsStore.language,
     (lang) => {
       locale.value = lang === 'auto' ? detectLocale() : lang
+      document.documentElement.lang = locale.value
     },
     { immediate: true },
   )

@@ -73,6 +73,7 @@ test.describe('language', () => {
   test('switches between English and Spanish and persists the choice', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByRole('heading', { name: 'Detected Plates' })).toBeVisible()
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en')
 
     await page.getByTitle('Settings').click()
     await page.getByRole('button', { name: /ES$/ }).click()
@@ -83,6 +84,7 @@ test.describe('language', () => {
 
     await page.reload()
     await expect(page.getByRole('heading', { name: 'Matrículas Detectadas' })).toBeVisible()
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es')
   })
 
   test('opens the Spanish docs when the app is in Spanish', async ({ page }) => {

@@ -15,6 +15,7 @@ describe('useLocale', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     mockLocale.value = 'en'
+    document.documentElement.lang = ''
   })
 
   it('sets locale to en immediately when language is auto and navigator is english', () => {
@@ -73,5 +74,44 @@ describe('useLocale', () => {
     vi.stubGlobal('navigator', { language: 'es-AR' })
     useLocale()
     expect(mockLocale.value).toBe('es')
+  })
+
+  describe('document language', () => {
+    it('sets <html lang> to the resolved locale on start', () => {
+      vi.stubGlobal('navigator', { language: 'es-ES' })
+      useSettingsStore().setLanguage('auto')
+      useLocale()
+      expect(document.documentElement.lang).toBe('es')
+    })
+
+    it('uses en when the browser is not Spanish', () => {
+      vi.stubGlobal('navigator', { language: 'fr-FR' })
+      useSettingsStore().setLanguage('auto')
+      useLocale()
+      expect(document.documentElement.lang).toBe('en')
+    })
+
+    it('follows an explicit language choice over the browser language', () => {
+      vi.stubGlobal('navigator', { language: 'en-US' })
+      useSettingsStore().setLanguage('es')
+      useLocale()
+      expect(document.documentElement.lang).toBe('es')
+    })
+
+    it('updates <html lang> when the language changes', async () => {
+      vi.stubGlobal('navigator', { language: 'en-US' })
+      const settingsStore = useSettingsStore()
+      settingsStore.setLanguage('auto')
+      useLocale()
+      expect(document.documentElement.lang).toBe('en')
+
+      settingsStore.setLanguage('es')
+      await nextTick()
+      expect(document.documentElement.lang).toBe('es')
+
+      settingsStore.setLanguage('en')
+      await nextTick()
+      expect(document.documentElement.lang).toBe('en')
+    })
   })
 })
