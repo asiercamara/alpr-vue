@@ -3,11 +3,13 @@ import ts from 'typescript-eslint'
 import vue from 'eslint-plugin-vue'
 import prettier from 'eslint-config-prettier'
 import globals from 'globals'
+import security from 'eslint-plugin-security'
 
 export default [
   js.configs.recommended,
   ...ts.configs.recommended,
   ...vue.configs['flat/recommended'],
+  security.configs.recommended,
   prettier,
   // Configuración para archivos .ts y .vue (código fuente)
   {
@@ -76,7 +78,40 @@ export default [
       'vue/block-order': ['error', { order: ['template', 'script', 'style'] }],
     },
   },
+  // Scripts de Node, configs, E2E y tests que leen ficheros del repo (entorno Node)
   {
-    ignores: ['dist/**', 'node_modules/**', 'public/**'],
+    files: ['scripts/**/*.mjs', '*.config.ts', 'e2e/**/*.ts', 'src/tests/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
+      },
+    },
+    rules: {
+      // Las rutas se derivan de la raíz del proyecto, no de entrada externa
+      'security/detect-non-literal-fs-filename': 'off',
+    },
+  },
+  // detect-object-injection da demasiados falsos positivos con índices tipados
+  {
+    rules: {
+      'security/detect-object-injection': 'off',
+    },
+  },
+  {
+    ignores: [
+      'dist/**',
+      'coverage/**',
+      'node_modules/**',
+      'public/**',
+      'docs/.vitepress/dist/**',
+      'docs/.vitepress/cache/**',
+      'docs/vtdoc-merged/**',
+      '.agents/**',
+      '.claude/**',
+      '.playwright*/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
 ]

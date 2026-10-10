@@ -6,13 +6,15 @@
   "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && tsc -p tsconfig.workers.json --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit && tsc -p tsconfig.workers.json --noEmit && tsc -p tsconfig.e2e.json --noEmit",
+    "build": "pnpm typecheck && vite build",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write src",
     "prepare": "husky",
     "docs:dev": "vitepress dev docs",
@@ -21,7 +23,12 @@
     "build:all": "pnpm build && pnpm docs:build",
     "deploy:surge": "bash ./scripts/deploy-surge.sh",
     "security:audit": "pnpm audit --audit-level high",
-    "security:audit:ci": "pnpm audit --audit-level high --prod"
+    "security:audit:ci": "pnpm audit --audit-level high --prod",
+    "format:check": "prettier --check .",
+    "knip": "knip",
+    "test:e2e": "playwright test",
+    "check": "node scripts/check.mjs",
+    "check:all": "node scripts/check.mjs --all"
   },
   "dependencies": {
     "gsap": "^3.15.0",
@@ -31,19 +38,24 @@
     "vue-i18n": "^11.4.13"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@heroicons/vue": "^2.2.0",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^25.9.9",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vitest/coverage-v8": "^4.1.11",
     "@vue/test-utils": "^2.5.1",
     "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-security": "^4.2.0",
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "knip": "^6.40.0",
     "lint-staged": "^16.4.0",
     "mermaid": "^11.17.2",
     "prettier": "^3.9.9",
@@ -85,7 +97,11 @@
   },
   "lint-staged": {
     "*.{ts,vue}": [
-      "eslint --fix",
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.mjs": [
+      "eslint --fix --max-warnings 0",
       "prettier --write"
     ],
     "*.{json,css,md}": "prettier --write"
