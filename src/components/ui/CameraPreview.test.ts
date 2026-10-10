@@ -1,6 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { reactive, ref } from 'vue'
+
+// Every component watches the same mocked store: unmount between tests so they do not pile up
+enableAutoUnmount(afterEach)
 
 const mockStartCamera = vi.fn()
 const mockStopCamera = vi.fn()
@@ -434,5 +437,76 @@ describe('CameraPreview', () => {
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
     const innerDiv = wrapper.find('div.w-full.h-full.transition-transform')
     expect(innerDiv.attributes('style')).toBeUndefined()
+  })
+})
+
+describe('CameraPreview — media picked while the model is still loading', () => {
+  const globalStubs = { MediaUploader: { template: '<div></div>' } }
+  const waitForWatcher = () => new Promise((resolve) => setTimeout(resolve, 80))
+
+  const pickMedia = (type: 'image' | 'video') => {
+    mockAppState.uploadMediaType = type
+    mockAppState.uploadMediaUrl = 'blob:sample'
+    mockAppState.uploadFile = new File(['x'], `sample.${type}`)
+    mockAppState.isUploadMode = true
+  }
+
+  beforeEach(() => {
+    mockAppState.isModelLoading = true
+    mockAppState.isUploadMode = false
+    mockAppState.uploadMediaType = null
+    mockAppState.uploadMediaUrl = null
+    mockAppState.uploadFile = null
+    mockProcessImage.mockClear()
+    mockProcessVideoStream.mockClear()
+    mockSetVideoSource.mockClear()
+  })
+
+  it('does not process an image until the model is ready, then processes it once', async () => {
+    mount(CameraPreview, { global: { stubs: globalStubs } })
+
+    pickMedia('image')
+    await waitForWatcher()
+    expect(mockProcessImage).not.toHaveBeenCalled()
+
+    mockAppState.isModelLoading = false
+    await waitForWatcher()
+    expect(mockProcessImage).toHaveBeenCalledTimes(1)
+    expect(mockProcessImage).toHaveBeenCalledWith(mockAppState.uploadFile, expect.anything())
+  })
+
+  it('does not start a video until the model is ready, then starts it once', async () => {
+    mount(CameraPreview, { global: { stubs: globalStubs } })
+
+    pickMedia('video')
+    await waitForWatcher()
+    expect(mockProcessVideoStream).not.toHaveBeenCalled()
+
+    mockAppState.isModelLoading = false
+    await waitForWatcher()
+    expect(mockSetVideoSource).toHaveBeenCalledWith(expect.anything(), 'blob:sample')
+    expect(mockProcessVideoStream).toHaveBeenCalledTimes(1)
+  })
+
+  it('processes immediately when the model is already ready', async () => {
+    mockAppState.isModelLoading = false
+    mount(CameraPreview, { global: { stubs: globalStubs } })
+
+    pickMedia('image')
+    await waitForWatcher()
+
+    expect(mockProcessImage).toHaveBeenCalledTimes(1)
+  })
+
+  it('does nothing when the viewer is closed while the model loads', async () => {
+    mount(CameraPreview, { global: { stubs: globalStubs } })
+
+    pickMedia('image')
+    mockAppState.isUploadMode = false
+    mockAppState.uploadMediaUrl = null
+    mockAppState.isModelLoading = false
+    await waitForWatcher()
+
+    expect(mockProcessImage).not.toHaveBeenCalled()
   })
 })
