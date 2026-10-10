@@ -57,7 +57,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat: add zoom controls to CameraPreview
 fix: correct confidence threshold in detectionProcessor
-chore: update vitepress-theme-app-docs to 0.8.2
+chore: update vitepress-theme-app-docs to 1.1.0
 ```
 
 Subject line ≤ 72 characters. Body only when the _why_ isn't obvious from the subject.

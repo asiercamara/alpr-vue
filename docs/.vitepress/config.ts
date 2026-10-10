@@ -60,6 +60,8 @@ export default withAppDocs({
     socialLinks: [{ icon: 'github', link: 'https://github.com/asiercamara/alpr-vue' }],
     search: { provider: 'local' },
     mergeDocs: { enabled: true },
+    // Language flags are opt-in since 1.0 (the 0.9 theme always showed them).
+    languageFlags: true,
   },
 
   head: [
