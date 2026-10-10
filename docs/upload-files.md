@@ -27,9 +27,9 @@ MP4, WebM, and other video formats supported by your browser's built-in media de
 
 <VTDocSteps>
 
-<VTDocStep title="Click Upload File">
+<VTDocStep title="Click Upload file">
 
-On the main screen, click the **Upload File** button. A file picker will open.
+On the main screen, click the **Upload file** button. A file picker will open.
 
 </VTDocStep>
 
@@ -93,6 +93,8 @@ Not near a vehicle? The app includes built-in sample media so you can explore al
 - **3 traffic video clips** — short clips showing vehicles in motion.
 
 Click **Or try a sample** below the upload button to browse the gallery and load any sample with a single click.
+
+<VTDocFrame src="/screenshots/en/gallery.png" alt="The sample gallery open above the Upload file button, listing sample photos such as Porsche 918 and Kia Stinger." caption="The sample gallery." />
 
 <VTDocTip>
 

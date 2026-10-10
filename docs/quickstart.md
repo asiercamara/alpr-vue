@@ -13,8 +13,8 @@ This diagram shows the two main ways to try ALPR Vue for the first time: live ca
 const quickstartFlow = `
 flowchart TD
   A[Open ALPR Vue in a supported browser] --> B{How do you want to try it?}
-  B -->|Live camera| C[Click Start Camera]
-  B -->|No camera nearby| D[Click Upload File and open the sample gallery]
+  B -->|Live camera| C[Click Start camera]
+  B -->|No camera nearby| D[Click Upload file and open the sample gallery]
 
   C --> E{Camera permission granted?}
   E -->|No| F[Allow camera access in browser settings and reload]
@@ -54,7 +54,7 @@ Not sure your browser is supported? See [Supported Browsers and Device Requireme
 
 <VTDocStep title="Grant camera permissions">
 
-Click **Start Camera**. Your browser will ask whether ALPR Vue can access your camera. Click **Allow**.
+Click **Start camera**. Your browser will ask whether ALPR Vue can access your camera. Click **Allow**.
 
 <VTDocTip>
 
@@ -79,6 +79,8 @@ automatically — you don't need to press anything. A bounding box appears on sc
 When the app confirms a detection, it adds the plate to the history list on the right (or below the camera on mobile).
 Each entry shows the plate text, a confidence score, and the time it was detected. The camera stops scanning automatically
 after confirmation.
+
+<VTDocFrame src="/screenshots/en/detection.jpg" alt="ALPR Vue after analyzing a photo: two plates are outlined in green on the image, and both appear in the Detected Plates list with their confidence rings." caption="An analyzed image with its detections in the history list." />
 
 <VTDocNote>
 
@@ -105,6 +107,6 @@ Tap or click any plate in the history list to open the detail view. Here you can
 
 ## Try without a camera
 
-You don't need a vehicle nearby to explore the app. ALPR Vue includes a built-in sample gallery with **10 real car photos** and **3 traffic video clips**. Click **Upload File** on the main screen, then open the sample gallery to pick any sample. The app processes it through the same AI pipeline and adds the detected plates to your history list, just as it would with a live camera.
+You don't need a vehicle nearby to explore the app. ALPR Vue includes a built-in sample gallery with **10 real car photos** and **3 traffic video clips**. Click **Upload file** on the main screen, then open the sample gallery to pick any sample. The app processes it through the same AI pipeline and adds the detected plates to your history list, just as it would with a live camera.
 
 This is a great way to get a feel for the results, confidence scores, and the detail view before you try it with your own images.

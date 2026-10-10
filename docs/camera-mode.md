@@ -13,7 +13,7 @@ This state diagram shows the main camera lifecycle while live scanning is active
 const cameraStates = `
 stateDiagram-v2
   [*] --> Idle
-  Idle --> RequestingPermission: Start Camera
+  Idle --> RequestingPermission: Start camera
   RequestingPermission --> CameraActive: Permission granted
   RequestingPermission --> CameraError: Permission denied or no device
   CameraActive --> Scanning: First frame arrives
@@ -34,9 +34,9 @@ stateDiagram-v2
 
 <VTDocSteps>
 
-<VTDocStep title="Click Start Camera">
+<VTDocStep title="Click Start camera">
 
-On the main screen, click the **Start Camera** button. If this is your first time, your browser will ask for camera permission — click **Allow**.
+On the main screen, click the **Start camera** button. If this is your first time, your browser will ask for camera permission — click **Allow**.
 
 </VTDocStep>
 
@@ -67,7 +67,7 @@ Once the camera is active, a row of controls appears at the bottom of the previe
 | Control                | What it does                                                                                                        |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | **Stop**               | Stops the camera immediately and returns to the idle screen.                                                        |
-| **Flip camera**        | Switches between the front and rear camera on mobile devices.                                                       |
+| **Switch camera**      | Switches between the front and rear camera on mobile devices.                                                       |
 | **Zoom in / Zoom out** | Adjusts the zoom level. The app uses native hardware zoom when available, and falls back to digital zoom otherwise. |
 
 ## Auto-stop behavior
@@ -81,7 +81,7 @@ To keep the camera running continuously without stopping on each detection, enab
 
 <VTDocNote>
 
-When **Skip duplicates** is on, confirming a plate already in your history will **not** stop the camera — even in single-capture mode. The camera only stops for genuinely new plates. This lets you keep scanning in a busy area without being interrupted by vehicles you have already logged.
+When **Skip duplicate alerts** is on, confirming a plate already in your history will **not** stop the camera — even in single-capture mode. The camera only stops for genuinely new plates. This lets you keep scanning in a busy area without being interrupted by vehicles you have already logged.
 
 </VTDocNote>
 
