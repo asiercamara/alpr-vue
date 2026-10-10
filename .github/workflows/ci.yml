@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci:
-    name: Lint · Types · Tests
+    name: Lint · Types · Knip · Format · Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -33,11 +33,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Type check (app)
-        run: pnpm vue-tsc --noEmit
+      - name: Type check (app, workers, e2e)
+        run: pnpm typecheck
 
-      - name: Type check (workers)
-        run: pnpm tsc -p tsconfig.workers.json --noEmit
+      - name: Unused code and dependencies (knip)
+        run: pnpm knip
 
-      - name: Tests with coverage
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Tests with coverage thresholds
         run: pnpm test:coverage
