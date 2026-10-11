@@ -84,19 +84,24 @@
             </div>
           </div>
 
-          <a
-            :href="docsUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mt-5 flex items-center gap-2 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
-          >
-            <span
-              class="flex-none inline-flex items-center justify-center w-5 h-5 rounded-full border border-brand-400 dark:border-brand-500"
+          <div class="mt-5 flex items-center justify-between gap-2">
+            <a
+              :href="docsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-2 text-xs font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors"
             >
-              <IconDocs class="w-2.5 h-2.5" />
-            </span>
-            <span>{{ t('help.moreInfo') }} →</span>
-          </a>
+              <span
+                class="flex-none inline-flex items-center justify-center w-5 h-5 rounded-full border border-brand-400 dark:border-brand-500"
+              >
+                <IconDocs class="w-2.5 h-2.5" />
+              </span>
+              <span>{{ t('help.moreInfo') }} →</span>
+            </a>
+            <span data-testid="app-version" class="text-xs text-surface-500 dark:text-white/50"
+              >v{{ appVersion }}</span
+            >
+          </div>
 
           <button
             class="w-full mt-4 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-white/70 font-medium text-sm hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
@@ -119,6 +124,7 @@ import IconSettings from '@/components/icons/IconSettings.vue'
 const { t, locale } = useI18n()
 
 const docsUrl = computed(() => (locale.value === 'es' ? '/docs/es/' : '/docs/'))
+const appVersion = __APP_VERSION__
 
 defineProps<{
   modelValue: boolean
