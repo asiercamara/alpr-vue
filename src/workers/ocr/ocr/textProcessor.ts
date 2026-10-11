@@ -16,6 +16,8 @@ interface OcrConfig {
 interface OcrResult {
   text: string
   confidence: number[]
+  /** País o región reconocidos, si el modelo los predice. */
+  region?: string
 }
 
 /**
@@ -38,7 +40,7 @@ export function postprocessOutput(
   const predictionIndices = getMaxIndices(predictions, maxPlateSlots)
   const plateChars = mapIndicesToChars(predictionIndices, alphabet)
   const plateText = plateChars.join('')
-  const cleanedPlateText = cleanPlateText(plateText, padChar)
+  const cleanedPlateText = fixSpanishPlateDigits(cleanPlateText(plateText, padChar))
 
   if (returnConfidence) {
     const confidenceValues = getMaxValues(predictions, maxPlateSlots)
@@ -71,6 +73,26 @@ function reshapeOutput(
     reshaped.push(Array.from(output.slice(start, start + alphabetLength)))
   }
   return reshaped
+}
+
+/**
+ * Decodifica la cabeza de región del modelo OCR.
+ *
+ * @param regionOutput - Probabilidades por región en formato plano.
+ * @param regions - Nombres de región en el orden de salida del modelo.
+ * @returns Nombre de la región con mayor probabilidad.
+ */
+export function decodeRegion(regionOutput: Float32Array, regions: string[]): string {
+  if (regionOutput.length !== regions.length) {
+    throw new Error(
+      `Tamaño de región incorrecto. Esperado: ${regions.length}, Recibido: ${regionOutput.length}`,
+    )
+  }
+  let maxIndex = 0
+  for (let i = 1; i < regionOutput.length; i++) {
+    if (regionOutput[i] > regionOutput[maxIndex]) maxIndex = i
+  }
+  return regions[maxIndex]
 }
 
 /** Obtiene el índice del valor máximo por cada slot de carácter. */
@@ -122,4 +144,17 @@ export function cleanPlateText(plateText: string, padChar = '-'): string {
   // padChar se escapa arriba, por lo que no puede inyectar sintaxis de regex
   // eslint-disable-next-line security/detect-non-literal-regexp
   return plateText.replace(new RegExp(`${escapedPadChar}+$`), '')
+}
+
+/**
+ * Corrige confusiones letra/dígito en matrículas españolas actuales (4 dígitos + 3 consonantes).
+ * Las letras de la matrícula nunca son vocales ni Q, así que una O, Q o I en el bloque numérico
+ * solo puede ser un 0 o un 1. Cualquier texto con otra forma se devuelve sin cambios.
+ *
+ * @param plateText - Texto de la matrícula ya limpio.
+ * @returns Texto con los dígitos corregidos si encaja con el formato español.
+ */
+export function fixSpanishPlateDigits(plateText: string): string {
+  if (!/^[0-9OQI]{4}[BCDFGHJKLMNPRSTVWXYZ]{3}$/.test(plateText)) return plateText
+  return plateText.slice(0, 4).replace(/[OQ]/g, '0').replace(/I/g, '1') + plateText.slice(4)
 }

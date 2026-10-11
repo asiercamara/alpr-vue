@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest'
 import {
   calculateTextSimilarity,
   evaluatePlateQuality,
+  isPlateTouchingFrameEdge,
+  PLATE_CUT_SCORE_FACTOR,
+  PLATE_EDGE_GAP_RATIO,
   PLATE_FORMAT_REGEX,
   PLATE_CONF_THRESHOLD,
   PLATE_CHAR_MIN_CONF,
@@ -143,5 +146,77 @@ describe('evaluatePlateQuality', () => {
       confidenceMean: 0.1,
     })
     expect(result.reasons.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('isPlateTouchingFrameEdge', () => {
+  const frame = { width: 640, height: 480 }
+
+  it('detects a box on each edge of the frame', () => {
+    expect(isPlateTouchingFrameEdge({ x1: 0, y1: 200, x2: 100, y2: 230 }, frame)).toBe(true)
+    expect(isPlateTouchingFrameEdge({ x1: 540, y1: 200, x2: 640, y2: 230 }, frame)).toBe(true)
+    expect(isPlateTouchingFrameEdge({ x1: 300, y1: 0, x2: 400, y2: 30 }, frame)).toBe(true)
+    expect(isPlateTouchingFrameEdge({ x1: 300, y1: 450, x2: 400, y2: 480 }, frame)).toBe(true)
+  })
+
+  it('treats a gap under the ratio as touching and a gap above it as free', () => {
+    // 100 px wide box: the limit is 100 * PLATE_EDGE_GAP_RATIO = 3 px
+    expect(isPlateTouchingFrameEdge({ x1: 2, y1: 200, x2: 102, y2: 230 }, frame)).toBe(true)
+    expect(isPlateTouchingFrameEdge({ x1: 4, y1: 200, x2: 104, y2: 230 }, frame)).toBe(false)
+    expect(PLATE_EDGE_GAP_RATIO).toBe(0.03)
+  })
+
+  it('accepts a box away from every edge', () => {
+    expect(isPlateTouchingFrameEdge({ x1: 200, y1: 200, x2: 300, y2: 230 }, frame)).toBe(false)
+  })
+
+  it('ignores an empty box', () => {
+    expect(isPlateTouchingFrameEdge({ x1: 0, y1: 0, x2: 0, y2: 0 }, frame)).toBe(false)
+  })
+})
+
+describe('evaluatePlateQuality with the box position', () => {
+  const plateText = { text: '1234BCD', confidence: Array(7).fill(0.95) }
+  const frame = { width: 640, height: 480 }
+
+  it('keeps a plate away from the frame edge valid', () => {
+    const result = evaluatePlateQuality({
+      plateText,
+      confidenceMean: 0.95,
+      box: { x1: 200, y1: 200, x2: 320, y2: 240 },
+      frame,
+    })
+    expect(result.isValid).toBe(true)
+    expect(result.score).toBe(1)
+  })
+
+  it('lowers and rejects a plate that touches the frame edge', () => {
+    const result = evaluatePlateQuality({
+      plateText,
+      confidenceMean: 0.95,
+      box: { x1: 0, y1: 200, x2: 120, y2: 240 },
+      frame,
+    })
+    expect(result.isValid).toBe(false)
+    expect(result.score).toBe(PLATE_CUT_SCORE_FACTOR)
+    expect(result.reasons).toContain('Matrícula posiblemente cortada por el borde')
+  })
+
+  it('rejects an edge plate even when every other criterion is perfect', () => {
+    const perfect = evaluatePlateQuality({ plateText, confidenceMean: 1 })
+    expect(perfect.score).toBe(1)
+    expect(perfect.score * PLATE_CUT_SCORE_FACTOR).toBeLessThan(0.7)
+  })
+
+  it('skips the cut check when the box or the frame is missing', () => {
+    expect(evaluatePlateQuality({ plateText, confidenceMean: 0.95 }).isValid).toBe(true)
+    expect(
+      evaluatePlateQuality({
+        plateText,
+        confidenceMean: 0.95,
+        box: { x1: 0, y1: 0, x2: 50, y2: 20 },
+      }).isValid,
+    ).toBe(true)
+    expect(evaluatePlateQuality({ plateText, confidenceMean: 0.95, frame }).isValid).toBe(true)
   })
 })

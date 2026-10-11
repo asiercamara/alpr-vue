@@ -62,7 +62,7 @@ La aplicación requiere que la misma matrícula se detecte de forma continua dur
 Abre **Configuración** (icono de engranaje en el encabezado) y baja el **Umbral de confianza** desde su valor predeterminado de 0,7. Probar con un valor de 0,6 o 0,5 puede permitir que pasen detecciones más marginales.
 
 **Ten en cuenta las limitaciones regionales:**
-Los modelos de IA están optimizados para matrículas europeas. Las matrículas de otras regiones pueden detectarse con menor precisión o no detectarse en absoluto. Consulta [cómo funcionan los modelos de IA](./how-it-works) para más detalles.
+El modelo OCR se entrenó con matrículas de 65 países y regiones, pero la precisión solo se ha medido con matrículas españolas. Las matrículas de otras regiones, o con caracteres fuera de A–Z y 0–9, pueden leerse con menor precisión o no leerse en absoluto. Consulta [cómo funcionan los modelos de IA](./how-it-works) para más detalles.
 
 **Intenta cargar una foto:**
 Si la detección con cámara en vivo no funciona, intenta usar el botón **Subir archivo** para procesar una imagen fija de la matrícula. Esto descarta problemas relacionados con la cámara y da al modelo más tiempo de procesamiento por fotograma. Consulta [cargar archivos](./upload-files) para obtener instrucciones.

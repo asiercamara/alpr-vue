@@ -36,7 +36,7 @@ ALPR Vue runs the AI models directly in your browser using WebAssembly. After th
 
 <VTDocNote>
 
-ALPR Vue is optimized for **European license plates**. Detection accuracy may be lower for plates from other regions.
+ALPR Vue reads plates from many countries: its OCR model was trained on plates from **65 countries and regions** in Europe, the Americas, Asia and Oceania. Accuracy was measured on Spanish plates (see the [benchmark](./benchmark)) and may be lower for other formats.
 
 </VTDocNote>
 

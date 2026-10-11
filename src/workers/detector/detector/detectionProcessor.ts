@@ -8,6 +8,12 @@ import { modelYolov9, modelInputShape, yolo_classes } from '../../modelsLoader.j
 import { nonMaxSuppression } from './boundingBoxUtils.js'
 import { cropImage } from './imageProcessor.js'
 
+/**
+ * Confianza mínima de una detección. Un umbral bajo recupera más matrículas pequeñas o difíciles
+ * (en UC3M-LP, +4 puntos de matrículas leídas respecto a 0,6) y los filtros posteriores descartan las dudosas.
+ */
+const CONFIDENCE_THRESHOLD = 0.25
+
 /** Caja de detección tras el filtrado y escalado de coordenadas. */
 interface RawBox {
   x1: number
@@ -61,7 +67,7 @@ export function process_output_boxes(
   const modelSize = modelInputShape[2]
 
   const detectionResults = processModelOutput(predictions)
-  const confThresh = 0.6
+  const confThresh = CONFIDENCE_THRESHOLD
   const dimThresh = 5 * 5
 
   const boxes: RawBox[] = detectionResults

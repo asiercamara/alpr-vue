@@ -56,7 +56,7 @@ describe('initializeModels', () => {
     expect(loader.ocrModel).toBe(ocr)
     expect(ort.create).toHaveBeenCalledTimes(2)
     expect(ort.create.mock.calls[0][0]).toBe('/models/yolo-v9-t-384-license-plates-end2end.onnx')
-    expect(ort.create.mock.calls[1][0]).toBe('/models/european_mobile_vit_v2_ocr.onnx')
+    expect(ort.create.mock.calls[1][0]).toBe('/models/cct_xs_v2_global_ocr.onnx')
     expect(ort.create.mock.calls[0][1]).toMatchObject({ executionProviders: ['wasm'] })
     expect(yolo.run).toHaveBeenCalledTimes(1)
     const warmup = yolo.run.mock.calls[0][0].images

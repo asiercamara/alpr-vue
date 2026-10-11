@@ -36,7 +36,7 @@ ALPR Vue ejecuta los modelos de IA directamente en tu navegador usando WebAssemb
 
 <VTDocNote>
 
-ALPR Vue está optimizado para **matrículas europeas**. La precisión de detección puede ser menor para matrículas de otras regiones.
+ALPR Vue lee matrículas de muchos países: su modelo OCR se entrenó con matrículas de **65 países y regiones** de Europa, América, Asia y Oceanía. La precisión se ha medido con matrículas españolas (ver el [benchmark](./benchmark)) y puede ser menor con otros formatos.
 
 </VTDocNote>
 

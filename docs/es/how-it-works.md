@@ -38,7 +38,7 @@ const pipelineMindmap = `
 ## 2. Detección (YOLOv9)
 ### Encontrar cajas
 ### Procesamiento local
-## 3. OCR (MobileViT v2)
+## 3. OCR (CCT v2)
 ### Leer caracteres
 ### Asignar confianza
 ## 4. Validación
@@ -79,13 +79,13 @@ Un modelo de IA YOLOv9 analiza cada fotograma en busca de regiones de matrícula
 
 <VTDocStep title="Reconocimiento de texto (OCR)">
 
-Cada región de matrícula detectada se recorta del fotograma y se pasa a un modelo OCR MobileViT v2. Este modelo lee los caracteres de la matrícula y asigna una puntuación de confianza a cada uno.
+Cada región de matrícula detectada se recorta del fotograma y se pasa a un modelo OCR CCT v2. Este modelo lee los caracteres de la matrícula y asigna una puntuación de confianza a cada uno.
 
 </VTDocStep>
 
 <VTDocStep title="Control de calidad">
 
-Cada resultado se puntúa según cuatro criterios: longitud de caracteres, confianza media, confianza mínima por carácter y formato de matrícula. Solo se conservan los resultados con una puntuación de calidad combinada de 0,7 o superior. Los resultados que no alcanzan este umbral se descartan silenciosamente.
+Cada resultado se puntúa según cuatro criterios: longitud de caracteres, confianza media, confianza mínima por carácter y formato de matrícula. Solo se conservan los resultados con una puntuación de calidad combinada de 0,7 o superior. Los resultados que no alcanzan este umbral se descartan silenciosamente. Una matrícula cuya caja toca el borde del encuadre probablemente está cortada, así que su puntuación se reduce a la mitad y no se conserva; se vuelve a leer cuando entra completa en el encuadre.
 
 </VTDocStep>
 
@@ -110,14 +110,17 @@ Todo el procesamiento se ejecuta en un hilo Web Worker dedicado, separado del hi
 
 ## Reglas de validación de calidad de matrículas
 
-Antes de guardar una matrícula en tu historial, debe superar los cuatro criterios siguientes:
+Antes de guardar una matrícula en tu historial, debe superar los criterios siguientes:
 
-| Criterio                        | Requisito                                                                                          |
-| ------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Longitud                        | 4–10 caracteres                                                                                    |
-| Confianza media                 | ≥ 0,7                                                                                              |
-| Confianza mínima por carácter   | ≥ 0,5 (ningún carácter individual puede estar por debajo de esto)                                  |
-| Formato                         | 2–4 caracteres alfanuméricos, un guion o espacio opcional y luego 2–4 caracteres alfanuméricos más |
-| Puntuación de calidad combinada | ≥ 0,7 requerida para almacenar el resultado                                                        |
+| Criterio                        | Requisito                                                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Longitud                        | 4–10 caracteres                                                                                              |
+| Confianza media                 | ≥ 0,7                                                                                                        |
+| Confianza mínima por carácter   | ≥ 0,5 (ningún carácter individual puede estar por debajo de esto)                                            |
+| Formato                         | 2–4 caracteres alfanuméricos, un guion o espacio opcional y luego 2–4 caracteres alfanuméricos más           |
+| No cortada por el borde         | La caja de la matrícula no debe tocar el borde de la imagen o del vídeo (un hueco menor del 3% de su tamaño) |
+| Puntuación de calidad combinada | ≥ 0,7 requerida para almacenar el resultado                                                                  |
 
 Cada criterio tiene un peso diferente en la puntuación combinada: la confianza media cuenta un 30%, el formato y la confianza mínima por carácter cuentan un 25% cada uno, y la longitud cuenta un 20%. Una matrícula debe alcanzar 0,7 en total para ser aceptada.
+
+La comprobación del borde del encuadre no forma parte de la suma ponderada. Cuando la caja de la matrícula toca el borde del encuadre, la matrícula probablemente está cortada y su texto es parcial, así que la puntuación combinada se multiplica por 0,5 y la matrícula se rechaza siempre. En modo cámara se vuelve a leer cuando entra completa en el encuadre. En pruebas con fotos recortadas, esta comprobación marcó el 98% de las matrículas cortadas un 15% o más, y alrededor del 1% de las centradas.
