@@ -738,8 +738,7 @@ El multihilo exige `Cross-Origin-Opener-Policy: same-origin` y `Cross-Origin-Emb
 
 5. **Multihilo con este detector** (4 hilos): 56 ms frente a 156 ms en escritorio, con exactamente las mismas lecturas. Necesita `Cross-Origin-Opener-Policy: same-origin` y `Cross-Origin-Embedder-Policy: require-corp`; sin ellas la app sigue en un hilo. No se ha medido en móvil con t-384 (solo con t-640, donde bajó de 7,0 a 2,0 s en el OnePlus 6).
 6. **Detector mayor, solo según el dispositivo** ([Por qué esta rama mantiene el detector t-384](#por-que-esta-rama-mantiene-el-detector-t-384)): t-640 con 4 hilos da 78,4 % en 134 ms en escritorio y es más rápido que esta rama en el OnePlus 6 (2049 frente a 2884 ms), con 7 puntos más de matrículas encontradas; s-608 da 81,6 % en 287 ms, pero no compensa en móvil. Antes de usarlos: medir los dispositivos objetivo (gama baja y terminales robustos), la batería y el calor con uso continuo, y el comportamiento con vídeo/cámara.
-7. Actualizar la documentación: «matrículas europeas» describe el modelo anterior; el CCT es global.
-8. No mostrar la región que predice el CCT.
+7. No mostrar la región que predice el CCT.
 
 </VTDocInfo>
 

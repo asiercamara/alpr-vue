@@ -20,7 +20,7 @@ The plate detector scans each frame and draws bounding boxes around any license 
 
 **How it works:** The model resizes each frame to 384 × 384 pixels, then analyzes the entire image in a single forward pass through the neural network. It divides the image into a grid and predicts bounding boxes and confidence scores for each cell. The result is a set of bounding boxes — one for each plate region the model found.
 
-The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It has been specifically trained on European plates under a variety of lighting conditions and camera angles.
+The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It was trained to find license plates under a variety of lighting conditions and camera angles.
 
 </VTDocTab>
 
@@ -59,11 +59,11 @@ ALPR Vue uses **ONNX Runtime Web** to run inference. This library compiles the m
 
 <VTDocWarning>
 
-The models are optimized for European license plates. Detection and OCR accuracy may be lower for plates from other regions, especially those that use different character sets, plate dimensions, or layouts.
+The OCR model was trained on plates from 65 countries and regions, including most of Europe and countries in the Americas, Asia and Oceania. Accuracy was measured only on Spanish plates (see the [benchmark](./benchmark)) and may be lower for plates that use other plate dimensions or layouts.
 
 </VTDocWarning>
 
-- **Regional coverage:** Both models were trained primarily on European plates. Accuracy varies for plates from North America, Asia, and other regions.
+- **Regional coverage:** The OCR model covers plates from 65 countries and regions, but accuracy was only measured on Spanish plates. It only reads the characters A–Z and 0–9.
 - **Device performance:** Inference speed depends on your device's CPU. Older or low-power devices may experience slower frame rates.
 - **Browser requirements:** ONNX Runtime Web requires WebAssembly support. All modern browsers support this, but very old browser versions may not.
 

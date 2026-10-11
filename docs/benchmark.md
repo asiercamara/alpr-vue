@@ -738,8 +738,7 @@ Multithreading requires `Cross-Origin-Opener-Policy: same-origin` and `Cross-Ori
 
 5. **Multithreading with this detector** (4 threads): 56 ms against 156 ms on the desktop with exactly the same readings. It needs `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`; without them the app stays on one thread. It was not measured on phones with t-384 (only with t-640, where it went from 7.0 to 2.0 s on the OnePlus 6).
 6. **Larger detector, only per device** ([Why this branch keeps the t-384 detector](#why-this-branch-keeps-the-t-384-detector)): t-640 with 4 threads gives 78.4% at 134 ms on the desktop and is faster than this branch on the OnePlus 6 (2,049 against 2,884 ms), with 7 more points of plates found; s-608 gives 81.6% at 287 ms, but does not pay off on phones. Before using them: measure the target devices (low-end and rugged handhelds), battery and heat under continuous use, and video/camera behaviour.
-7. Update the documentation: "European plates" describes the previous model; CCT is global.
-8. Do not show the region that CCT predicts.
+7. Do not show the region that CCT predicts.
 
 </VTDocInfo>
 

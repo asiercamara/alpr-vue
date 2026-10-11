@@ -20,11 +20,11 @@ No. Todo el procesamiento ocurre completamente dentro de tu navegador usando Web
 
 <VTDocAccordion title="¿Qué formatos de matrícula son compatibles?">
 
-ALPR Vue está optimizado para **matrículas europeas**. El modelo OCR lee matrículas alfanuméricas de 4 a 10 caracteres y gestiona mejor los formatos europeos habituales. Las matrículas de otras regiones pueden detectarse y leerse, pero la precisión tiende a ser menor. El modelo valida específicamente las matrículas que coinciden con el patrón de 2–4 caracteres alfanuméricos, un separador opcional y otros 2–4 caracteres alfanuméricos.
+ALPR Vue lee matrículas de muchos países: el modelo OCR se entrenó con matrículas de **65 países y regiones** y lee matrículas alfanuméricas de 4 a 10 caracteres (A–Z y 0–9). La precisión se ha medido con matrículas españolas (ver el [benchmark](./benchmark)) y puede ser menor con otros formatos. El modelo valida específicamente las matrículas que coinciden con el patrón de 2–4 caracteres alfanuméricos, un separador opcional y otros 2–4 caracteres alfanuméricos.
 
 <VTDocNote>
 
-Si trabajas regularmente con matrículas de una región específica fuera de Europa y la precisión es baja, intenta bajar el **Umbral de confianza** en Ajustes para permitir que pasen más detecciones, y corrige manualmente los caracteres mal leídos.
+Si trabajas regularmente con matrículas de una región en la que la precisión es baja, intenta bajar el **Umbral de confianza** en Ajustes para permitir que pasen más detecciones, y corrige manualmente los caracteres mal leídos.
 
 </VTDocNote>
 

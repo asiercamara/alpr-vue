@@ -102,7 +102,7 @@ Requires a Surge account (`surge login`). Script falls back to `npx surge` / `pn
 ## Limitations
 
 - Performance depends on device processing capability
-- Models optimized for European license plates
+- OCR trained on plates from 65 countries and regions; accuracy measured on Spanish plates
 - Requires WebAssembly and OffscreenCanvas support
 - Camera access requires a secure context (HTTPS or localhost)
 

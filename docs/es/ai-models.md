@@ -19,7 +19,7 @@ El detector de matrículas analiza cada fotograma y dibuja recuadros delimitador
 
 **Cómo funciona:** El modelo redimensiona cada fotograma a 384 × 384 píxeles y analiza toda la imagen en una sola pasada hacia adelante por la red neuronal. Divide la imagen en una cuadrícula y predice recuadros delimitadores y puntuaciones de confianza para cada celda. El resultado es un conjunto de recuadros — uno para cada región de matrícula encontrada.
 
-El modelo es una variante compacta YOLOv9-t, diseñada para funcionar eficientemente en dispositivos con recursos limitados como teléfonos y portátiles. Ha sido entrenada específicamente en matrículas europeas bajo diversas condiciones de iluminación y ángulos de cámara.
+El modelo es una variante compacta YOLOv9-t, diseñada para funcionar eficientemente en dispositivos con recursos limitados como teléfonos y portátiles. Se entrenó para encontrar matrículas con diversas condiciones de iluminación y ángulos de cámara.
 
 </VTDocTab>
 
@@ -57,11 +57,11 @@ ALPR Vue usa **ONNX Runtime Web** para ejecutar la inferencia. Esta biblioteca c
 
 <VTDocWarning>
 
-Los modelos están optimizados para matrículas europeas. La precisión de detección y OCR puede ser menor para matrículas de otras regiones, especialmente las que usan diferentes juegos de caracteres, dimensiones o formatos de matrícula.
+El modelo OCR se entrenó con matrículas de 65 países y regiones, entre ellos la mayor parte de Europa y países de América, Asia y Oceanía. La precisión solo se ha medido con matrículas españolas (ver el [benchmark](./benchmark)) y puede ser menor con matrículas de otras dimensiones o formatos.
 
 </VTDocWarning>
 
-- **Cobertura regional:** Ambos modelos fueron entrenados principalmente con matrículas europeas. La precisión varía para matrículas de Norteamérica, Asia y otras regiones.
+- **Cobertura regional:** El modelo OCR cubre matrículas de 65 países y regiones, pero la precisión solo se ha medido con matrículas españolas. Solo lee los caracteres A–Z y 0–9.
 - **Rendimiento del dispositivo:** La velocidad de inferencia depende de la CPU de tu dispositivo. Los dispositivos más antiguos o de bajo consumo pueden experimentar tasas de fotogramas más lentas.
 - **Requisitos del navegador:** ONNX Runtime Web requiere compatibilidad con WebAssembly. Todos los navegadores modernos lo admiten, pero versiones muy antiguas pueden no hacerlo.
 

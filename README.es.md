@@ -102,7 +102,7 @@ Requiere cuenta en Surge (`surge login`). El script usa `npx surge` / `pnpm dlx 
 ## Limitaciones
 
 - El rendimiento depende de la capacidad del dispositivo
-- Modelos optimizados para matrículas europeas
+- OCR entrenado con matrículas de 65 países y regiones; precisión medida con matrículas españolas
 - Requiere soporte de WebAssembly y OffscreenCanvas
 - El acceso a la cámara requiere contexto seguro (HTTPS o localhost)
 
