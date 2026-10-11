@@ -89,11 +89,11 @@ describe('process_output_boxes', () => {
     expect(box.croppedImage).toEqual({ fromCanvas: crops[0] })
   })
 
-  it('discards detections below the 0.6 confidence threshold', () => {
+  it('discards detections below the 0.25 confidence threshold', () => {
     const boxes = process_output_boxes(
       makeTensor([
-        [0, 10, 10, 50, 50, 0, 0.59],
-        [0, 10, 10, 50, 50, 0, 0.3],
+        [0, 10, 10, 50, 50, 0, 0.24],
+        [0, 10, 10, 50, 50, 0, 0.1],
       ]),
       bitmap,
     )
