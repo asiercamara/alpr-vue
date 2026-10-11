@@ -226,7 +226,12 @@ export function useDetection(options?: UseDetectionOptions) {
     for (const box of bestBoxes) {
       const conf = box.plateText.confidence
       const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
-      const quality = evaluatePlateQuality({ ...box, confidenceMean: confMean })
+      const quality = evaluatePlateQuality({
+        plateText: box.plateText,
+        confidenceMean: confMean,
+        box,
+        frame: { width: canvas.width, height: canvas.height },
+      })
       if (!quality.isValid) continue
 
       const isDuplicateText = settingsStore.skipDuplicates
