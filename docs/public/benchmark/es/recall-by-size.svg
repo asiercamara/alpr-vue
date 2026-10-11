@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" font-family="system-ui,sans-serif" font-size="12"><rect width="760" height="400" fill="#fff"/>
+<line x1="64" x2="560" y1="340" y2="340" stroke="#e5e5ea"/><text x="56" y="344" text-anchor="end" fill="#555">0%</text>
+<line x1="64" x2="560" y1="276.8" y2="276.8" stroke="#e5e5ea"/><text x="56" y="280.8" text-anchor="end" fill="#555">20%</text>
+<line x1="64" x2="560" y1="213.6" y2="213.6" stroke="#e5e5ea"/><text x="56" y="217.6" text-anchor="end" fill="#555">40%</text>
+<line x1="64" x2="560" y1="150.39999999999998" y2="150.39999999999998" stroke="#e5e5ea"/><text x="56" y="154.39999999999998" text-anchor="end" fill="#555">60%</text>
+<line x1="64" x2="560" y1="87.19999999999999" y2="87.19999999999999" stroke="#e5e5ea"/><text x="56" y="91.19999999999999" text-anchor="end" fill="#555">80%</text>
+<line x1="64" x2="560" y1="24" y2="24" stroke="#e5e5ea"/><text x="56" y="28" text-anchor="end" fill="#555">100%</text>
+<text x="64" y="360" text-anchor="middle" fill="#555">&lt;16 px</text>
+<text x="188" y="360" text-anchor="middle" fill="#555">16–24</text>
+<text x="312" y="360" text-anchor="middle" fill="#555">24–32</text>
+<text x="436" y="360" text-anchor="middle" fill="#555">32–48</text>
+<text x="560" y="360" text-anchor="middle" fill="#555">≥48</text>
+<text x="312" y="386" text-anchor="middle" fill="#222">ancho de la matrícula en la entrada de 384 px de la app</text>
+<text transform="translate(16 200) rotate(-90)" text-anchor="middle" fill="#222">matrículas encontradas (IoU ≥ 0,5)</text>
+<polyline points="64,289.72727272727275 188,88.55106888361047 312,40.74172185430467 436,32.924261874197725 560,36.94197952218434" fill="none" stroke="#0072B2" stroke-width="2.2"/>
+<circle cx="64" cy="289.72727272727275" r="3.5" fill="#0072B2"/>
+<circle cx="188" cy="88.55106888361047" r="3.5" fill="#0072B2"/>
+<circle cx="312" cy="40.74172185430467" r="3.5" fill="#0072B2"/>
+<circle cx="436" cy="32.924261874197725" r="3.5" fill="#0072B2"/>
+<circle cx="560" cy="36.94197952218434" r="3.5" fill="#0072B2"/>
+<line x1="574" x2="594" y1="38" y2="38" stroke="#0072B2" stroke-width="2.5"/><text x="600" y="42" fill="#222">Referencia (t-384)</text>
+<polyline points="64,333.84415584415586 188,225.90973871733968 312,93.05960264900662 436,45.09370988446727 560,50.423208191126264" fill="none" stroke="#D55E00" stroke-width="2.2"/>
+<circle cx="64" cy="333.84415584415586" r="3.5" fill="#D55E00"/>
+<circle cx="188" cy="225.90973871733968" r="3.5" fill="#D55E00"/>
+<circle cx="312" cy="93.05960264900662" r="3.5" fill="#D55E00"/>
+<circle cx="436" cy="45.09370988446727" r="3.5" fill="#D55E00"/>
+<circle cx="560" cy="50.423208191126264" r="3.5" fill="#D55E00"/>
+<line x1="574" x2="594" y1="58" y2="58" stroke="#D55E00" stroke-width="2.5"/><text x="600" y="62" fill="#222">t-256</text>
+<polyline points="64,259.97402597402595 188,70.53681710213777 312,39.3465783664459 436,35.358151476251635 560,54.19795221843003" fill="none" stroke="#009E73" stroke-width="2.2"/>
+<circle cx="64" cy="259.97402597402595" r="3.5" fill="#009E73"/>
+<circle cx="188" cy="70.53681710213777" r="3.5" fill="#009E73"/>
+<circle cx="312" cy="39.3465783664459" r="3.5" fill="#009E73"/>
+<circle cx="436" cy="35.358151476251635" r="3.5" fill="#009E73"/>
+<circle cx="560" cy="54.19795221843003" r="3.5" fill="#009E73"/>
+<line x1="574" x2="594" y1="78" y2="78" stroke="#009E73" stroke-width="2.5"/><text x="600" y="82" fill="#222">t-416</text>
+<polyline points="64,265.1038961038961 188,75.79097387173397 312,53.29801324503313 436,41.44287548138641 560,56.894197952218406" fill="none" stroke="#CC79A7" stroke-width="2.2"/>
+<circle cx="64" cy="265.1038961038961" r="3.5" fill="#CC79A7"/>
+<circle cx="188" cy="75.79097387173397" r="3.5" fill="#CC79A7"/>
+<circle cx="312" cy="53.29801324503313" r="3.5" fill="#CC79A7"/>
+<circle cx="436" cy="41.44287548138641" r="3.5" fill="#CC79A7"/>
+<circle cx="560" cy="56.894197952218406" r="3.5" fill="#CC79A7"/>
+<line x1="574" x2="594" y1="98" y2="98" stroke="#CC79A7" stroke-width="2.5"/><text x="600" y="102" fill="#222">t-512</text>
+<polyline points="64,191.23376623376623 188,47.26840855106889 312,35.8587196467991 436,37.38639281129656 560,48.26621160409559" fill="none" stroke="#E69F00" stroke-width="2.2"/>
+<circle cx="64" cy="191.23376623376623" r="3.5" fill="#E69F00"/>
+<circle cx="188" cy="47.26840855106889" r="3.5" fill="#E69F00"/>
+<circle cx="312" cy="35.8587196467991" r="3.5" fill="#E69F00"/>
+<circle cx="436" cy="37.38639281129656" r="3.5" fill="#E69F00"/>
+<circle cx="560" cy="48.26621160409559" r="3.5" fill="#E69F00"/>
+<line x1="574" x2="594" y1="118" y2="118" stroke="#E69F00" stroke-width="2.5"/><text x="600" y="122" fill="#222">t-640</text>
+<polyline points="64,180.97402597402598 188,39.01187648456056 312,30.97571743929359 436,28.05648267008985 560,26.696245733788373" fill="none" stroke="#56B4E9" stroke-width="2.2"/>
+<circle cx="64" cy="180.97402597402598" r="3.5" fill="#56B4E9"/>
+<circle cx="188" cy="39.01187648456056" r="3.5" fill="#56B4E9"/>
+<circle cx="312" cy="30.97571743929359" r="3.5" fill="#56B4E9"/>
+<circle cx="436" cy="28.05648267008985" r="3.5" fill="#56B4E9"/>
+<circle cx="560" cy="26.696245733788373" r="3.5" fill="#56B4E9"/>
+<line x1="574" x2="594" y1="138" y2="138" stroke="#56B4E9" stroke-width="2.5"/><text x="600" y="142" fill="#222">s-608</text>
+<polyline points="64,318.45454545454544 188,164.36104513064134 312,54.69315673289185 436,36.16944801026955 560,34.78498293515355" fill="none" stroke="#999999" stroke-width="2.2"/>
+<circle cx="64" cy="318.45454545454544" r="3.5" fill="#999999"/>
+<circle cx="188" cy="164.36104513064134" r="3.5" fill="#999999"/>
+<circle cx="312" cy="54.69315673289185" r="3.5" fill="#999999"/>
+<circle cx="436" cy="36.16944801026955" r="3.5" fill="#999999"/>
+<circle cx="560" cy="34.78498293515355" r="3.5" fill="#999999"/>
+<line x1="574" x2="594" y1="158" y2="158" stroke="#999999" stroke-width="2.5"/><text x="600" y="162" fill="#222">Letterbox (t-384)</text>
+</svg>

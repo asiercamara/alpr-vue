@@ -1,6 +1,6 @@
 ---
 title: 'Modelos de IA para el Reconocimiento de Matrículas'
-description: 'Conoce el detector de matrículas YOLOv9 y el modelo OCR MobileViT v2 que impulsan ALPR Vue — ambos se ejecutan localmente en tu navegador sin necesidad de ninguna API en la nube.'
+description: 'Conoce el detector de matrículas YOLOv9 y el modelo OCR CCT v2 que impulsan ALPR Vue — ambos se ejecutan localmente en tu navegador sin necesidad de ninguna API en la nube.'
 ---
 
 ALPR Vue utiliza dos modelos ONNX que se ejecutan localmente en tu navegador — sin API en la nube, sin inferencia remota. El primer modelo detecta dónde están las matrículas en la imagen; el segundo lee los caracteres de cada matrícula. Ambos modelos se cargan directamente en tu pestaña del navegador usando ONNX Runtime Web.
@@ -27,21 +27,25 @@ El modelo es una variante compacta YOLOv9-t, diseñada para funcionar eficientem
 
 El modelo OCR de matrículas lee los caracteres de cada región de matrícula detectada y asigna una puntuación de confianza a cada carácter.
 
-| Propiedad                    | Valor                                                               |
-| ---------------------------- | ------------------------------------------------------------------- |
-| Archivo del modelo           | `european_mobile_vit_v2_ocr.onnx`                                   |
-| Arquitectura                 | MobileViT v2 (CNN con múltiples cabezas de salida)                  |
-| Resolución de entrada        | 140 × 70 píxeles                                                    |
-| Alfabeto                     | A–Z, 0–9, guion, guion bajo (usado como relleno)                    |
-| Longitud máxima de matrícula | 9 caracteres                                                        |
-| Fuente                       | [open-image-models](https://github.com/ankandrew/open-image-models) |
+| Propiedad                    | Valor                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| Archivo del modelo           | `cct_xs_v2_global_ocr.onnx`                                                   |
+| Arquitectura                 | CCT v2 (tokenizador convolucional + transformer, múltiples cabezas de salida) |
+| Resolución de entrada        | 128 × 64 píxeles, RGB                                                         |
+| Alfabeto                     | A–Z, 0–9, guion bajo (usado como relleno)                                     |
+| Longitud máxima de matrícula | 10 caracteres                                                                 |
+| Fuente                       | [fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr)                 |
 
-**Cómo funciona:** La región de la matrícula recortada se redimensiona a 140 × 70 píxeles y se convierte a escala de grises. El modelo procesa esta imagen a través de una serie de capas convolucionales. Tiene 9 cabezas de salida — una por cada posición de carácter posible en la matrícula. Cada cabeza produce una distribución de probabilidad sobre el alfabeto completo, y el carácter con mayor probabilidad se selecciona para esa posición. Los caracteres de relleno se eliminan del resultado final, dejando solo el texto real de la matrícula.
+**Cómo funciona:** La región de la matrícula recortada se redimensiona a 128 × 64 píxeles y se entrega al modelo como imagen en color. El modelo la procesa con capas convolucionales seguidas de un transformer. Tiene 10 cabezas de salida de carácter — una por cada posición posible en la matrícula — y una cabeza de región que estima el país de la matrícula (o `Unknown`). Cada cabeza produce una distribución de probabilidad sobre el alfabeto completo, y el carácter con mayor probabilidad se selecciona para esa posición. Los caracteres de relleno se eliminan del resultado final, dejando solo el texto real de la matrícula.
 
 Como cada carácter tiene su propia cabeza de salida, el modelo reporta una puntuación de confianza individual por carácter. Puedes ver estas puntuaciones en la vista detallada de la matrícula tocando cualquier entrada de tu historial.
 
 </VTDocTab>
 </VTDocTabs>
+
+## Comparación de modelos
+
+Comparamos modelos OCR, detectores y ajustes del runtime con 1975 fotos reales con ground truth. Consulta el [benchmark](./benchmark) para ver el método, los resultados y las recomendaciones.
 
 ## Formato de los modelos
 

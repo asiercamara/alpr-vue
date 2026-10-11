@@ -1,6 +1,6 @@
 ---
 title: 'AI Models Used for License Plate Recognition'
-description: 'Learn about the YOLOv9 plate detector and MobileViT v2 OCR model that power ALPR Vue — both run locally in your browser with no cloud API required.'
+description: 'Learn about the YOLOv9 plate detector and CCT v2 OCR model that power ALPR Vue — both run locally in your browser with no cloud API required.'
 ---
 
 ALPR Vue relies on two ONNX models that run locally in your browser — no cloud API, no remote inference. The first model detects where license plates are in the image; the second reads the characters on each plate. Both models load directly in your browser tab using ONNX Runtime Web.
@@ -28,22 +28,26 @@ The model is a compact YOLOv9-t variant, designed to run efficiently on resource
 
 The plate OCR model reads the characters from each detected plate region and assigns a confidence score to each character.
 
-| Property             | Value                                                               |
-| -------------------- | ------------------------------------------------------------------- |
-| Model file           | `european_mobile_vit_v2_ocr.onnx`                                   |
-| Architecture         | MobileViT v2 (CNN with multiple output heads)                       |
-| Input resolution     | 140 × 70 pixels                                                     |
-| Alphabet             | A–Z, 0–9, hyphen, underscore (used as padding)                      |
-| Maximum plate length | 9 characters                                                        |
-| Source               | [open-image-models](https://github.com/ankandrew/open-image-models) |
+| Property             | Value                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
+| Model file           | `cct_xs_v2_global_ocr.onnx`                                           |
+| Architecture         | CCT v2 (convolutional tokenizer + transformer, multiple output heads) |
+| Input resolution     | 128 × 64 pixels, RGB                                                  |
+| Alphabet             | A–Z, 0–9, underscore (used as padding)                                |
+| Maximum plate length | 10 characters                                                         |
+| Source               | [fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr)         |
 
-**How it works:** The cropped plate region is resized to 140 × 70 pixels and converted to grayscale. The model then processes this image through a series of convolutional layers. It has 9 output heads — one for each possible character position on the plate. Each head produces a probability distribution across the full alphabet, and the character with the highest probability is selected for that position. Padding characters are stripped from the final result, leaving only the actual plate text.
+**How it works:** The cropped plate region is resized to 128 × 64 pixels and fed to the model as a colour image. The model processes it with convolutional layers followed by a transformer. It has 10 character output heads — one for each possible character position on the plate — plus a region head that guesses the plate's country (or `Unknown`). Each head produces a probability distribution across the full alphabet, and the character with the highest probability is selected for that position. Padding characters are stripped from the final result, leaving only the actual plate text.
 
 Because each character has its own output head, the model reports an individual confidence score per character. You can view these scores in the plate detail view by tapping any entry in your history.
 
 </VTDocTab>
 
 </VTDocTabs>
+
+## Model comparison
+
+We compared OCR models, detectors and runtime settings on 1,975 real photos with ground truth. See the [benchmark](./benchmark) for the method, results and recommendations.
 
 ## Model format
 
