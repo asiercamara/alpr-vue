@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { postprocessOutput, cleanPlateText } from './textProcessor'
+import { postprocessOutput, cleanPlateText, decodeRegion } from './textProcessor'
 
 /** Crea un Float32Array para `maxPlateSlots` slots y `alphabetLength` caracteres.
  *  Para cada slot se establece el índice ganador en `winnerIndices[slot]`
@@ -147,5 +147,23 @@ describe('postprocessOutput', () => {
   it('throws when output length does not match config', () => {
     const badOutput = new Float32Array(10) // wrong size
     expect(() => postprocessOutput(badOutput, config, false)).toThrow()
+  })
+})
+
+describe('decodeRegion', () => {
+  const regions = ['Spain', 'France', 'Unknown']
+
+  it('returns the region with the highest probability', () => {
+    expect(decodeRegion(new Float32Array([0.1, 0.7, 0.2]), regions)).toBe('France')
+  })
+
+  it('returns the first region on a tie', () => {
+    expect(decodeRegion(new Float32Array([0.5, 0.5, 0]), regions)).toBe('Spain')
+  })
+
+  it('throws when the output size does not match the region list', () => {
+    expect(() => decodeRegion(new Float32Array([1, 0]), regions)).toThrow(
+      'Tamaño de región incorrecto. Esperado: 3, Recibido: 2',
+    )
   })
 })

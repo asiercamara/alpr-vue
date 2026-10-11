@@ -6,7 +6,7 @@
 
 # ALPR Vue - Reconocimiento Automático de Matrículas en Navegador
 
-**ALPR Vue** es una reescritura en Vue 3 de [fast-alpr](https://github.com/ankandrew/fast-alpr) que funciona completamente en el navegador — sin servidor. YOLOv9 detecta matrículas, MobileViT v2 lee los caracteres, ambos vía ONNX Runtime Web (WebAssembly). Todo el procesamiento permanece en tu dispositivo.
+**ALPR Vue** es una reescritura en Vue 3 de [fast-alpr](https://github.com/ankandrew/fast-alpr) que funciona completamente en el navegador — sin servidor. YOLOv9 detecta matrículas, CCT v2 lee los caracteres, ambos vía ONNX Runtime Web (WebAssembly). Todo el procesamiento permanece en tu dispositivo.
 
 ## Características
 
@@ -114,7 +114,7 @@ El sitio de documentación completo cubre todo lo que va más allá de este READ
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | [Introducción](https://alpr-vue.vercel.app/docs/es/introduction)               | Qué es ALPR Vue y para quién es                              |
 | [Inicio rápido](https://alpr-vue.vercel.app/docs/es/quickstart)                | Detecta tu primera matrícula en minutos                      |
-| [Cómo funciona](https://alpr-vue.vercel.app/docs/es/how-it-works)              | Pipeline YOLOv9 + MobileViT v2 explicado                     |
+| [Cómo funciona](https://alpr-vue.vercel.app/docs/es/how-it-works)              | Pipeline YOLOv9 + CCT v2 explicado                           |
 | [Modo cámara](https://alpr-vue.vercel.app/docs/es/camera-mode)                 | Detección en vivo, parada automática, cambio de cámara, zoom |
 | [Subir archivos](https://alpr-vue.vercel.app/docs/es/upload-files)             | Subida de imagen / vídeo y galería de muestras               |
 | [Ver resultados](https://alpr-vue.vercel.app/docs/es/viewing-results)          | Historial, confianza por carácter, edición, portapapeles     |

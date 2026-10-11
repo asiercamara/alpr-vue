@@ -4,6 +4,8 @@ export interface PlateTextResult {
   text: string
   /** Per-character confidence scores in `[0, 1]`, parallel to each character in `text`. */
   confidence: number[]
+  /** Country or region the OCR model attributes to the plate (`'Unknown'` when undetermined). */
+  region?: string
 }
 
 /** Raw detection result from the Web Worker, containing bounding box coordinates, OCR output, and cropped image. */

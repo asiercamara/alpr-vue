@@ -57,7 +57,7 @@ You can clear this data at any time by clearing your browser's site data for the
 The only network activity occurs on your **first visit**, when your browser downloads the app files:
 
 - HTML, JavaScript, and CSS (the app itself)
-- The two ONNX model files (`yolo-v9-t-384-license-plates-end2end.onnx` and `european_mobile_vit_v2_ocr.onnx`)
+- The two ONNX model files (`yolo-v9-t-384-license-plates-end2end.onnx` and `cct_xs_v2_global_ocr.onnx`)
 - The fonts (Inter, Space Grotesk and JetBrains Mono), served by the app itself
 
 All of these come from the same address as the app. ALPR Vue never contacts a CDN or any other server, not even for fonts, and the project's test suite fails if any page makes a request to another origin.

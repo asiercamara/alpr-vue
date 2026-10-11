@@ -57,7 +57,7 @@ Puedes borrar estos datos en cualquier momento limpiando los datos del sitio de 
 La única actividad de red ocurre en tu **primera visita**, cuando tu navegador descarga los archivos de la aplicación:
 
 - HTML, JavaScript y CSS (la propia aplicación)
-- Los dos archivos de modelo ONNX (`yolo-v9-t-384-license-plates-end2end.onnx` y `european_mobile_vit_v2_ocr.onnx`)
+- Los dos archivos de modelo ONNX (`yolo-v9-t-384-license-plates-end2end.onnx` y `cct_xs_v2_global_ocr.onnx`)
 - Las fuentes (Inter, Space Grotesk y JetBrains Mono), servidas por la propia aplicación
 
 Todo esto viene de la misma dirección que la aplicación. ALPR Vue nunca contacta con una CDN ni con ningún otro servidor, ni siquiera para las fuentes, y las pruebas automáticas del proyecto fallan si alguna página hace una petición a otro origen.

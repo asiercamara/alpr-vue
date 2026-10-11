@@ -7,7 +7,7 @@ fast-alpr, fast-plate-ocr and open-image-models
   https://github.com/ankandrew/open-image-models
   Copyright (c) 2024 ankandrew, MIT License.
   ALPR Vue is a Vue 3 rewrite of fast-alpr. The ONNX models in public/models/
-  (a YOLOv9 plate detector and a MobileViT v2 OCR) come from fast-plate-ocr
+  (a YOLOv9 plate detector and a CCT v2 OCR) come from fast-plate-ocr
   and open-image-models.
 
 Icons

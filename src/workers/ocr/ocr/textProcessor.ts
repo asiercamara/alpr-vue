@@ -16,6 +16,8 @@ interface OcrConfig {
 interface OcrResult {
   text: string
   confidence: number[]
+  /** País o región reconocidos, si el modelo los predice. */
+  region?: string
 }
 
 /**
@@ -71,6 +73,26 @@ function reshapeOutput(
     reshaped.push(Array.from(output.slice(start, start + alphabetLength)))
   }
   return reshaped
+}
+
+/**
+ * Decodifica la cabeza de región del modelo OCR.
+ *
+ * @param regionOutput - Probabilidades por región en formato plano.
+ * @param regions - Nombres de región en el orden de salida del modelo.
+ * @returns Nombre de la región con mayor probabilidad.
+ */
+export function decodeRegion(regionOutput: Float32Array, regions: string[]): string {
+  if (regionOutput.length !== regions.length) {
+    throw new Error(
+      `Tamaño de región incorrecto. Esperado: ${regions.length}, Recibido: ${regionOutput.length}`,
+    )
+  }
+  let maxIndex = 0
+  for (let i = 1; i < regionOutput.length; i++) {
+    if (regionOutput[i] > regionOutput[maxIndex]) maxIndex = i
+  }
+  return regions[maxIndex]
 }
 
 /** Obtiene el índice del valor máximo por cada slot de carácter. */
