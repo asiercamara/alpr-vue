@@ -6,7 +6,7 @@
 
 # ALPR Vue - Automatic License Plate Recognition in Browser
 
-**ALPR Vue** is a Vue 3 rewrite of [fast-alpr](https://github.com/ankandrew/fast-alpr) that runs entirely in the browser — no server required. YOLOv9 detects plates, MobileViT v2 reads characters, both via ONNX Runtime Web (WebAssembly). All processing stays on your device.
+**ALPR Vue** is a Vue 3 rewrite of [fast-alpr](https://github.com/ankandrew/fast-alpr) that runs entirely in the browser — no server required. YOLOv9 detects plates, CCT v2 reads characters, both via ONNX Runtime Web (WebAssembly). All processing stays on your device.
 
 ## Features
 
@@ -102,7 +102,7 @@ Requires a Surge account (`surge login`). Script falls back to `npx surge` / `pn
 ## Limitations
 
 - Performance depends on device processing capability
-- Models optimized for European license plates
+- OCR trained on plates from 65 countries and regions; accuracy measured on Spanish plates
 - Requires WebAssembly and OffscreenCanvas support
 - Camera access requires a secure context (HTTPS or localhost)
 
@@ -110,21 +110,21 @@ Requires a Surge account (`surge login`). Script falls back to `npx surge` / `pn
 
 The full documentation site covers everything beyond this README:
 
-| Section                                                                       | What it covers                                     |
-| ----------------------------------------------------------------------------- | -------------------------------------------------- |
-| [Introduction](https://alpr-vue.vercel.app/docs/introduction)                 | What ALPR Vue is and who it is for                 |
-| [Quickstart](https://alpr-vue.vercel.app/docs/quickstart)                     | Detect your first plate in minutes                 |
-| [How it works](https://alpr-vue.vercel.app/docs/how-it-works)                 | Two-stage YOLOv9 + MobileViT v2 pipeline explained |
-| [Camera mode](https://alpr-vue.vercel.app/docs/camera-mode)                   | Live detection, auto-stop, flip camera, zoom       |
-| [Upload files](https://alpr-vue.vercel.app/docs/upload-files)                 | Image / video upload and sample gallery            |
-| [Viewing results](https://alpr-vue.vercel.app/docs/viewing-results)           | History, confidence scores, editing, clipboard     |
-| [Detection settings](https://alpr-vue.vercel.app/docs/detection-settings)     | Confidence threshold, timing, continuous mode      |
-| [Exporting data](https://alpr-vue.vercel.app/docs/exporting-data)             | CSV export format and usage                        |
-| [Appearance & language](https://alpr-vue.vercel.app/docs/appearance-language) | Theme and locale settings                          |
-| [AI models](https://alpr-vue.vercel.app/docs/ai-models)                       | ONNX model details and metrics                     |
-| [Privacy](https://alpr-vue.vercel.app/docs/privacy)                           | On-device processing, local storage, no telemetry  |
-| [FAQ](https://alpr-vue.vercel.app/docs/faq)                                   | Common questions                                   |
-| [Troubleshooting](https://alpr-vue.vercel.app/docs/troubleshooting)           | Camera errors, model loading, detection issues     |
+| Section                                                                       | What it covers                                    |
+| ----------------------------------------------------------------------------- | ------------------------------------------------- |
+| [Introduction](https://alpr-vue.vercel.app/docs/introduction)                 | What ALPR Vue is and who it is for                |
+| [Quickstart](https://alpr-vue.vercel.app/docs/quickstart)                     | Detect your first plate in minutes                |
+| [How it works](https://alpr-vue.vercel.app/docs/how-it-works)                 | Two-stage YOLOv9 + CCT v2 pipeline explained      |
+| [Camera mode](https://alpr-vue.vercel.app/docs/camera-mode)                   | Live detection, auto-stop, flip camera, zoom      |
+| [Upload files](https://alpr-vue.vercel.app/docs/upload-files)                 | Image / video upload and sample gallery           |
+| [Viewing results](https://alpr-vue.vercel.app/docs/viewing-results)           | History, confidence scores, editing, clipboard    |
+| [Detection settings](https://alpr-vue.vercel.app/docs/detection-settings)     | Confidence threshold, timing, continuous mode     |
+| [Exporting data](https://alpr-vue.vercel.app/docs/exporting-data)             | CSV export format and usage                       |
+| [Appearance & language](https://alpr-vue.vercel.app/docs/appearance-language) | Theme and locale settings                         |
+| [AI models](https://alpr-vue.vercel.app/docs/ai-models)                       | ONNX model details and metrics                    |
+| [Privacy](https://alpr-vue.vercel.app/docs/privacy)                           | On-device processing, local storage, no telemetry |
+| [FAQ](https://alpr-vue.vercel.app/docs/faq)                                   | Common questions                                  |
+| [Troubleshooting](https://alpr-vue.vercel.app/docs/troubleshooting)           | Camera errors, model loading, detection issues    |
 
 To run the docs locally: `pnpm docs:dev`
 

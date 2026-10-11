@@ -103,4 +103,19 @@ describe('HelpSheet', () => {
       expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
     }
   })
+
+  it('shows the app version from package.json', () => {
+    const wrapper = mount(HelpSheet, {
+      props: { modelValue: true },
+      global: {
+        stubs: {
+          Teleport: { template: '<div><slot/></div>' },
+          Transition: { template: '<div><slot/></div>' },
+        },
+      },
+    })
+    const version = wrapper.find('[data-testid="app-version"]').text()
+    expect(version).toBe(`v${__APP_VERSION__}`)
+    expect(version).toMatch(/^v\d+\.\d+\.\d+$/)
+  })
 })

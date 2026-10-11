@@ -62,7 +62,7 @@ The app requires the same plate to be detected continuously for at least 3 secon
 Open **Settings** (gear icon in the header) and lower the **Confidence threshold** from its default of 0.7. Trying a value of 0.6 or 0.5 may allow more marginal detections through.
 
 **Consider regional limitations:**
-The AI models are optimized for European license plates. Plates from other regions may be detected with lower accuracy or not at all. See [how the AI models work](./how-it-works) for more detail.
+The OCR model was trained on plates from 65 countries and regions, but accuracy was measured only on Spanish plates. Plates from other regions, or with characters outside A–Z and 0–9, may be read with lower accuracy or not at all. See [how the AI models work](./how-it-works) for more detail.
 
 **Try uploading a photo instead:**
 If live camera detection isn't working, try using the **Upload file** button to process a still image of the plate. This rules out camera-related issues and gives the model more processing time per frame. See [uploading files](./upload-files) for instructions.

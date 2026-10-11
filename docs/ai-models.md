@@ -1,6 +1,6 @@
 ---
 title: 'AI Models Used for License Plate Recognition'
-description: 'Learn about the YOLOv9 plate detector and MobileViT v2 OCR model that power ALPR Vue — both run locally in your browser with no cloud API required.'
+description: 'Learn about the YOLOv9 plate detector and CCT v2 OCR model that power ALPR Vue — both run locally in your browser with no cloud API required.'
 ---
 
 ALPR Vue relies on two ONNX models that run locally in your browser — no cloud API, no remote inference. The first model detects where license plates are in the image; the second reads the characters on each plate. Both models load directly in your browser tab using ONNX Runtime Web.
@@ -20,7 +20,7 @@ The plate detector scans each frame and draws bounding boxes around any license 
 
 **How it works:** The model resizes each frame to 384 × 384 pixels, then analyzes the entire image in a single forward pass through the neural network. It divides the image into a grid and predicts bounding boxes and confidence scores for each cell. The result is a set of bounding boxes — one for each plate region the model found.
 
-The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It has been specifically trained on European plates under a variety of lighting conditions and camera angles.
+The model is a compact YOLOv9-t variant, designed to run efficiently on resource-limited devices like phones and laptops. It was trained to find license plates under a variety of lighting conditions and camera angles.
 
 </VTDocTab>
 
@@ -28,22 +28,26 @@ The model is a compact YOLOv9-t variant, designed to run efficiently on resource
 
 The plate OCR model reads the characters from each detected plate region and assigns a confidence score to each character.
 
-| Property             | Value                                                               |
-| -------------------- | ------------------------------------------------------------------- |
-| Model file           | `european_mobile_vit_v2_ocr.onnx`                                   |
-| Architecture         | MobileViT v2 (CNN with multiple output heads)                       |
-| Input resolution     | 140 × 70 pixels                                                     |
-| Alphabet             | A–Z, 0–9, hyphen, underscore (used as padding)                      |
-| Maximum plate length | 9 characters                                                        |
-| Source               | [open-image-models](https://github.com/ankandrew/open-image-models) |
+| Property             | Value                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
+| Model file           | `cct_xs_v2_global_ocr.onnx`                                           |
+| Architecture         | CCT v2 (convolutional tokenizer + transformer, multiple output heads) |
+| Input resolution     | 128 × 64 pixels, RGB                                                  |
+| Alphabet             | A–Z, 0–9, underscore (used as padding)                                |
+| Maximum plate length | 10 characters                                                         |
+| Source               | [fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr)         |
 
-**How it works:** The cropped plate region is resized to 140 × 70 pixels and converted to grayscale. The model then processes this image through a series of convolutional layers. It has 9 output heads — one for each possible character position on the plate. Each head produces a probability distribution across the full alphabet, and the character with the highest probability is selected for that position. Padding characters are stripped from the final result, leaving only the actual plate text.
+**How it works:** The cropped plate region is resized to 128 × 64 pixels and fed to the model as a colour image. The model processes it with convolutional layers followed by a transformer. It has 10 character output heads — one for each possible character position on the plate — plus a region head that guesses the plate's country (or `Unknown`). Each head produces a probability distribution across the full alphabet, and the character with the highest probability is selected for that position. Padding characters are stripped from the final result, leaving only the actual plate text.
 
 Because each character has its own output head, the model reports an individual confidence score per character. You can view these scores in the plate detail view by tapping any entry in your history.
 
 </VTDocTab>
 
 </VTDocTabs>
+
+## Model comparison
+
+We compared OCR models, detectors and runtime settings on 1,975 real photos with ground truth. See the [benchmark](./benchmark) for the method, results and recommendations.
 
 ## Model format
 
@@ -55,11 +59,11 @@ ALPR Vue uses **ONNX Runtime Web** to run inference. This library compiles the m
 
 <VTDocWarning>
 
-The models are optimized for European license plates. Detection and OCR accuracy may be lower for plates from other regions, especially those that use different character sets, plate dimensions, or layouts.
+The OCR model was trained on plates from 65 countries and regions, including most of Europe and countries in the Americas, Asia and Oceania. Accuracy was measured only on Spanish plates (see the [benchmark](./benchmark)) and may be lower for plates that use other plate dimensions or layouts.
 
 </VTDocWarning>
 
-- **Regional coverage:** Both models were trained primarily on European plates. Accuracy varies for plates from North America, Asia, and other regions.
+- **Regional coverage:** The OCR model covers plates from 65 countries and regions, but accuracy was only measured on Spanish plates. It only reads the characters A–Z and 0–9.
 - **Device performance:** Inference speed depends on your device's CPU. Older or low-power devices may experience slower frame rates.
 - **Browser requirements:** ONNX Runtime Web requires WebAssembly support. All modern browsers support this, but very old browser versions may not.
 

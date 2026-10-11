@@ -39,6 +39,7 @@ const sections: SidebarSection[] = [
     items: [
       { key: 'how_it_works', baseLink: '/how-it-works' },
       { key: 'ai_models', baseLink: '/ai-models' },
+      { key: 'benchmark', baseLink: '/benchmark' },
       { key: 'privacy', baseLink: '/privacy' },
     ],
   },
@@ -69,6 +70,7 @@ type TranslationKey =
   | 'appearance_language'
   | 'how_it_works'
   | 'ai_models'
+  | 'benchmark'
   | 'privacy'
   | 'troubleshooting'
   | 'faq'
@@ -94,6 +96,7 @@ const i18n: Record<string, Translations> = {
     appearance_language: 'Theme and Language Preferences',
     how_it_works: 'How ALPR Vue Detects and Reads License Plates',
     ai_models: 'AI Models Used for License Plate Recognition',
+    benchmark: 'Benchmark: OCR, Detector and Runtime Choices',
     privacy: 'Privacy and Data: What Stays on Your Device',
     faq: 'Frequently Asked Questions About ALPR Vue',
     troubleshooting: 'Troubleshooting',
@@ -116,6 +119,7 @@ const i18n: Record<string, Translations> = {
     appearance_language: 'Preferencias de Tema e Idioma',
     how_it_works: 'Cómo Detecta y Lee Matrículas ALPR Vue',
     ai_models: 'Modelos de IA para el Reconocimiento de Matrículas',
+    benchmark: 'Benchmark: Elección de OCR, Detector y Runtime',
     privacy: 'Privacidad y Datos: Lo Que Queda en Tu Dispositivo',
     faq: 'Preguntas Frecuentes sobre ALPR Vue',
     troubleshooting: 'Solución de problemas',

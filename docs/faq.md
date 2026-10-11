@@ -20,11 +20,11 @@ No. All processing happens entirely within your browser using WebAssembly. Your 
 
 <VTDocAccordion title="Which license plate formats are supported?">
 
-ALPR Vue is optimized for **European license plates**. The OCR model reads alphanumeric plates with 4 to 10 characters and handles common European formats best. Plates from other regions may be detected and read, but accuracy tends to be lower. The model specifically validates plates matching the pattern of 2–4 alphanumeric characters, an optional separator, and another 2–4 alphanumeric characters.
+ALPR Vue reads plates from many countries: the OCR model was trained on plates from **65 countries and regions** and reads alphanumeric plates with 4 to 10 characters (A–Z and 0–9). Accuracy was measured on Spanish plates (see the [benchmark](./benchmark)) and may be lower for other formats. The model specifically validates plates matching the pattern of 2–4 alphanumeric characters, an optional separator, and another 2–4 alphanumeric characters.
 
 <VTDocNote>
 
-If you regularly work with plates from a specific region outside Europe and accuracy is poor, try lowering the **Confidence threshold** in Settings to allow more detections through, and manually correct any misread characters.
+If you regularly work with plates from a region where accuracy is poor, try lowering the **Confidence threshold** in Settings to allow more detections through, and manually correct any misread characters.
 
 </VTDocNote>
 

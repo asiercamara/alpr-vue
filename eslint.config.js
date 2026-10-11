@@ -18,6 +18,8 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2022,
+        // Inyectada por Vite (define) desde package.json
+        __APP_VERSION__: 'readonly',
       },
     },
     rules: {

@@ -375,6 +375,22 @@ describe('useDetection', () => {
       expect(mockCtx.strokeRect).not.toHaveBeenCalled()
     })
 
+    it('does not store a plate that touches the frame edge', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      detection.drawBoxesAndUpdate(canvas, [makeBox({ x1: 0, x2: 90 })])
+      expect(store.plates).toHaveLength(0)
+
+      detection.drawBoxesAndUpdate(canvas, [makeBox()])
+      expect(store.plates).toHaveLength(1)
+    })
+
     it('notifies detection when feedbackEnabled and shouldStop is true in camera mode', async () => {
       const { useDetection } = await import('@/composables/useDetection')
       const { usePlateStore } = await import('@/stores/plateStore')

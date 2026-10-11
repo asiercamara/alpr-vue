@@ -7,13 +7,22 @@
 import * as ort from 'onnxruntime-web'
 import { ocrModel } from '../../modelsLoader.js'
 import { preprocessImage } from './imageProcessor.js'
-import { postprocessOutput } from './textProcessor.js'
-import ocrConfig from '../../../models/european_mobile_vit_v2_ocr_config.json' with { type: 'json' }
+import { decodeRegion, postprocessOutput } from './textProcessor.js'
+import ocrConfig from '../../../models/cct_xs_v2_global_ocr_config.json' with { type: 'json' }
 
-/** Resultado del reconocimiento OCR con texto y confianza por carácter. */
+/** Resultado del reconocimiento OCR con texto, confianza por carácter y región. */
 interface OcrResult {
   text: string
   confidence: number[]
+  region?: string
+}
+
+/** Salidas en bruto del modelo OCR. */
+interface OcrModelOutput {
+  /** Probabilidades por slot y carácter, en formato plano. */
+  plate: Float32Array
+  /** Probabilidades por región. */
+  region: Float32Array
 }
 
 /**
@@ -32,9 +41,11 @@ export async function recognizePlateText(
     const inputHeight = ocrConfig.img_height
 
     const inputData = preprocessImage(plateImage, inputHeight, inputWidth)
-    const output = await runOcrModel(inputData, inputHeight, inputWidth)
+    const { plate, region } = await runOcrModel(inputData, inputHeight, inputWidth)
 
-    return postprocessOutput(output, ocrConfig, returnConfidence)
+    const result = postprocessOutput(plate, ocrConfig, returnConfidence)
+    if (typeof result === 'string') return result
+    return { ...result, region: decodeRegion(region, ocrConfig.plate_regions) }
   } catch (error) {
     console.error('Error en OCR:', error)
     return returnConfidence ? { text: '', confidence: [] } : ''
@@ -44,22 +55,24 @@ export async function recognizePlateText(
 /**
  * Ejecuta el modelo OCR en los datos de entrada proporcionados.
  *
- * @param input - Datos de imagen preprocesados en escala de grises.
+ * @param input - Datos de imagen RGB preprocesados.
  * @param height - Altura de la imagen en píxeles.
  * @param width - Anchura de la imagen en píxeles.
- * @returns Salida del modelo OCR como Float32Array.
+ * @returns Salidas `plate` y `region` del modelo OCR como Float32Array.
  */
 export async function runOcrModel(
   input: Uint8Array,
   height: number,
   width: number,
-): Promise<Float32Array> {
+): Promise<OcrModelOutput> {
   if (!ocrModel) {
     throw new Error('Modelo OCR no inicializado')
   }
 
-  const tensorInput = new ort.Tensor('uint8', input, [1, height, width, 1])
+  const tensorInput = new ort.Tensor('uint8', input, [1, height, width, 3])
   const outputs = await ocrModel.run({ input: tensorInput })
-  const outputName = Object.keys(outputs)[0]
-  return outputs[outputName].data as Float32Array
+  return {
+    plate: outputs.plate.data as Float32Array,
+    region: outputs.region.data as Float32Array,
+  }
 }

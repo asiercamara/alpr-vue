@@ -63,6 +63,11 @@ function serveDocsPlugin(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), vueDevTools(), tailwindcss(), serveDocsPlugin()],
+  define: {
+    __APP_VERSION__: JSON.stringify(
+      JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8')).version,
+    ),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
