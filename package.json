@@ -36,9 +36,9 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/space-grotesk": "^5.3.0",
     "onnxruntime-web": "^1.30.0",
-    "pinia": "^3.0.4",
-    "vue": "^3.5.43",
-    "vue-i18n": "^11.4.13"
+    "pinia": "^4.1.0",
+    "vue": "^3.5.44",
+    "vue-i18n": "^11.4.14"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
