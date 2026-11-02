@@ -19,3 +19,8 @@ updates:
         dependency-type: 'development'
       production-dependencies:
         dependency-type: 'production'
+    ignore:
+      # vue-tsc does not start with TypeScript 7 and typescript-eslint only
+      # accepts <6.1.0. Remove once both support it.
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
