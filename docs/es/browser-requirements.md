@@ -47,7 +47,7 @@ ALPR Vue funciona en una amplia gama de dispositivos, pero el rendimiento depend
 
 Si estás compilando o alojando ALPR Vue tú mismo, tu entorno necesita:
 
-- **Node.js** `^20.19.0` o `>=22.12.0`
+- **Node.js** `^22.22.2`, `^24.15.0` o `>=26.0.0`
 - **pnpm** como gestor de paquetes
 
 Estos requisitos aplican solo al entorno de compilación, no a los usuarios que acceden a la aplicación ya desplegada.

@@ -6,11 +6,17 @@ import type { PlateRecord } from '@/types/detection'
 /**
  * Escapes a value for safe inclusion in a CSV cell.
  *
+ * Values starting with `=`, `+`, `-`, `@`, tab or carriage return get a leading `'` so
+ * spreadsheet apps treat them as text instead of formulas (CSV injection).
+ *
  * @param value - The raw string to escape.
  * @returns The value wrapped in double quotes when it contains commas, double-quotes, or newlines;
- *   otherwise the original value unchanged.
+ *   otherwise the (possibly prefixed) value unchanged.
  */
 function escapeCSV(value: string): string {
+  if (/^[=+\-@\t\r]/.test(value)) {
+    value = `'${value}`
+  }
   if (value.includes(',') || value.includes('"') || value.includes('\n')) {
     return `"${value.replace(/"/g, '""')}"`
   }

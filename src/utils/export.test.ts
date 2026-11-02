@@ -46,6 +46,22 @@ describe('generateCSV', () => {
     expect(csv).toContain('"AB""12"')
   })
 
+  it.each(['=1+1', '+1+1', '-1+1', '@SUM(A1)', '\t=1', '\r=1'])(
+    'neutralizes formula prefix in %j',
+    (text) => {
+      const plate = makePlate({ text, plateText: { text, confidence: [0.9] } })
+      const row = generateCSV([plate]).split('\n')[1]
+      expect(row.startsWith(`'${text}`)).toBe(true)
+    },
+  )
+
+  it('neutralizes formula prefix and still quotes commas', () => {
+    const text = '=A1,B1'
+    const plate = makePlate({ text, plateText: { text, confidence: [0.9] } })
+    const csv = generateCSV([plate])
+    expect(csv).toContain(`"'=A1,B1"`)
+  })
+
   it('handles empty plates array', () => {
     const csv = generateCSV([])
     expect(csv).toBe('Texto,Confianza,Fecha,ID')
