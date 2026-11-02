@@ -47,7 +47,7 @@ ALPR Vue runs on a wide range of devices, but performance depends on processing 
 
 If you are building or self-hosting ALPR Vue, your environment needs:
 
-- **Node.js** `^20.19.0` or `>=22.12.0`
+- **Node.js** `^22.22.2`, `^24.15.0` or `>=26.0.0`
 - **pnpm** as the package manager
 
 These requirements apply only to the build environment, not to users accessing the deployed app.
