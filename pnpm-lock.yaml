@@ -133,8 +133,8 @@ importers:
         specifier: ^1.6.4
         version: 1.6.4(@algolia/client-search@5.61.0)(@types/node@26.6.6)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.32)(search-insights@2.17.3)(typescript@6.0.3)(yaml@2.9.1)
       vitepress-theme-app-docs:
-        specifier: ^1.2.1
-        version: 1.2.1(mermaid@12.2.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitepress@1.6.4(@algolia/client-search@5.61.0)(@types/node@26.6.6)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.32)(search-insights@2.17.3)(typescript@6.0.3)(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3))
+        specifier: ^1.2.2
+        version: 1.2.2(mermaid@12.2.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitepress@1.6.4(@algolia/client-search@5.61.0)(@types/node@26.6.6)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.32)(search-insights@2.17.3)(typescript@6.0.3)(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3))
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.6)(@vitest/coverage-v8@5.0.5)(jsdom@30.1.3)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -3651,8 +3651,8 @@ packages:
       '@mermaid-js/mermaid-zenuml':
         optional: true
 
-  vitepress-theme-app-docs@1.2.1:
-    resolution: {integrity: sha512-fb4mEXsdU2Xdx/qI/inc9dGyoznnYLmvcMN6LRPV00uJksGSU28j2PPGlAAArK3y5SHXJTHSY+6+BqEx+q+PyA==}
+  vitepress-theme-app-docs@1.2.2:
+    resolution: {integrity: sha512-DrMhN8UUy0omX98ifST+M4f3QqC42SMXXW6ImkC7zA5zjLua8oZ16g2NuctN1e9GF48ToVX08mDGC7xYo/PQbg==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
       mermaid: ^11.14.0 || ^12.0.0
@@ -7190,7 +7190,7 @@ snapshots:
       mermaid: 12.2.0
       vue: 3.5.44(typescript@6.0.3)
 
-  vitepress-theme-app-docs@1.2.1(mermaid@12.2.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitepress@1.6.4(@algolia/client-search@5.61.0)(@types/node@26.6.6)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.32)(search-insights@2.17.3)(typescript@6.0.3)(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3)):
+  vitepress-theme-app-docs@1.2.2(mermaid@12.2.0)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitepress@1.6.4(@algolia/client-search@5.61.0)(@types/node@26.6.6)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.32)(search-insights@2.17.3)(typescript@6.0.3)(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3)):
     dependencies:
       '@babel/parser': 7.29.12
       '@heroicons/vue': 2.2.0(vue@3.5.44(typescript@6.0.3))
