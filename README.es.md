@@ -25,7 +25,7 @@
 
 ## Requisitos
 
-- Node.js `^20.19.0` o `>=22.12.0`
+- Node.js `^22.22.2`, `^24.15.0` o `>=26.0.0`
 - pnpm
 - Navegador moderno con soporte para WebAssembly y OffscreenCanvas
 

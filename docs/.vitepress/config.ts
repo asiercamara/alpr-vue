@@ -58,7 +58,33 @@ export default withAppDocs({
   themeConfig: {
     logo: '/logo.png',
     socialLinks: [{ icon: 'github', link: 'https://github.com/asiercamara/alpr-vue' }],
-    search: { provider: 'local' },
+    search: {
+      provider: 'local',
+      options: {
+        // An empty aria-label makes the button take its name from its visible
+        // text ("Search Ctrl K"). VitePress' default label is just "Search",
+        // which axe flags under WCAG 2.5.3 (label-content-name-mismatch).
+        translations: { button: { buttonText: 'Search', buttonAriaLabel: '' } },
+        locales: {
+          es: {
+            translations: {
+              button: { buttonText: 'Buscar', buttonAriaLabel: '' },
+              modal: {
+                displayDetails: 'Mostrar lista detallada',
+                resetButtonTitle: 'Borrar búsqueda',
+                backButtonTitle: 'Cerrar búsqueda',
+                noResultsText: 'No hay resultados para',
+                footer: {
+                  selectText: 'para seleccionar',
+                  navigateText: 'para navegar',
+                  closeText: 'para cerrar',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     mergeDocs: { enabled: true },
     // Language flags are opt-in since 1.0 (the 0.9 theme always showed them).
     languageFlags: true,

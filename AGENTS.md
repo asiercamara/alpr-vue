@@ -109,7 +109,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Dark/Light Mode
 
-- **FOUC prevention**: `index.html` contains an inline `<script>` that runs synchronously before Vue loads. It reads `localStorage.getItem('alpr-settings')`, parses the `theme` field (`'light'|'dark'|'system'`), and conditionally adds the `dark` class to `<html>`. Never remove or defer this script.
+- **FOUC prevention**: `index.html` contains an inline `<script>` that runs synchronously before Vue loads. It reads `localStorage.getItem('alpr-settings')`, parses the `theme` field (`'light'|'dark'|'system'`), and conditionally adds the `dark` class to `<html>`. Never remove or defer this script. The app CSP in `vercel.json` allows it by its `sha256` hash: if you edit it, update the hash (`src/tests/cspHash.test.ts` fails until you do).
 - **Runtime management**: `useTheme` composable (called once in `App.vue`) watches `settingsStore.theme`, applies/removes `dark` on `<html>`, and listens to `window.matchMedia('(prefers-color-scheme: dark)')` for `'system'` mode.
 - **Store**: `settingsStore.theme` is the single source of truth. Always call `settingsStore.setTheme(value)` — never manipulate `<html>` class directly outside `useTheme`.
 - **CSS pattern**: Always pair `bg-surface-50 dark:bg-surface-900` style classes. The custom Tailwind variant `@custom-variant dark (&:where(.dark, .dark *))` in `main.css` enables this.
