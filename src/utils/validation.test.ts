@@ -220,3 +220,81 @@ describe('evaluatePlateQuality with the box position', () => {
     expect(evaluatePlateQuality({ plateText, confidenceMean: 0.95, frame }).isValid).toBe(true)
   })
 })
+
+describe('evaluatePlateQuality exact limits', () => {
+  const evaluate = (text: string, confidence: number[], confidenceMean = 0.9) =>
+    evaluatePlateQuality({ plateText: { text, confidence }, confidenceMean })
+  const good = Array(6).fill(0.9)
+
+  it.each([
+    ['AB1', true],
+    ['AB12', false],
+    ['ABCDE12345', false],
+    ['ABCDE123456', true],
+  ])('flags the length of %s as inadequate: %s', (text, flagged) => {
+    const { reasons } = evaluate(text, Array(text.length).fill(0.9))
+    expect(reasons.includes('Longitud inadecuada')).toBe(flagged)
+  })
+
+  it('accepts a mean confidence of exactly the threshold and rejects anything below', () => {
+    expect(evaluate('AB1234', good, PLATE_CONF_THRESHOLD).reasons).toEqual([])
+    expect(evaluate('AB1234', good, PLATE_CONF_THRESHOLD - 0.01).reasons).toEqual([
+      'Baja confianza general',
+    ])
+  })
+
+  it('accepts a character confidence of exactly the minimum and rejects anything below', () => {
+    expect(evaluate('AB1234', [0.9, 0.9, 0.9, 0.9, 0.9, PLATE_CHAR_MIN_CONF]).reasons).toEqual([])
+    expect(
+      evaluate('AB1234', [0.9, 0.9, 0.9, 0.9, 0.9, PLATE_CHAR_MIN_CONF - 0.01]).reasons,
+    ).toEqual(['Caracteres de muy baja confianza'])
+  })
+
+  it('judges the weakest character, not the strongest', () => {
+    expect(evaluate('AB1234', [0.99, 0.99, 0.99, 0.99, 0.99, 0.1]).reasons).toEqual([
+      'Caracteres de muy baja confianza',
+    ])
+  })
+
+  it('is valid with a score of exactly 0.7: only the mean confidence fails', () => {
+    const result = evaluate('AB1234', good, 0.6)
+    expect(result.score).toBeCloseTo(0.7)
+    expect(result.isValid).toBe(true)
+    expect(result.reasons).toEqual(['Baja confianza general'])
+  })
+
+  it('checks the format on the trimmed text', () => {
+    expect(evaluate(' AB1234 ', Array(8).fill(0.9)).reasons).toEqual([])
+    expect(evaluate('AB!!34', good).reasons).toEqual(['Formato inconsistente'])
+  })
+})
+
+describe('PLATE_FORMAT_REGEX anchors', () => {
+  it.each(['!!AB12', 'AB12!!', 'AB  1234', 'A1', 'ABCDE1234'])('rejects %j', (text) => {
+    expect(PLATE_FORMAT_REGEX.test(text)).toBe(false)
+  })
+})
+
+describe('isPlateTouchingFrameEdge exact limits', () => {
+  const frame = { width: 640, height: 480 }
+
+  it('treats a gap of exactly the ratio as free, in both axes', () => {
+    // 100 px wide: the limit is 3 px; 100 px tall: the limit is 3 px
+    expect(isPlateTouchingFrameEdge({ x1: 3, y1: 200, x2: 103, y2: 300 }, frame)).toBe(false)
+    expect(isPlateTouchingFrameEdge({ x1: 2.9, y1: 200, x2: 102.9, y2: 300 }, frame)).toBe(true)
+    expect(isPlateTouchingFrameEdge({ x1: 200, y1: 3, x2: 300, y2: 103 }, frame)).toBe(false)
+    expect(isPlateTouchingFrameEdge({ x1: 200, y1: 2.9, x2: 300, y2: 102.9 }, frame)).toBe(true)
+  })
+
+  it('scales the gap by the box size, not by the box position', () => {
+    // Same 2 px gap: touching for a 100 px box (2 %), free for a 40 px box (5 %); 1 px of 50 is 2 %
+    expect(isPlateTouchingFrameEdge({ x1: 2, y1: 200, x2: 102, y2: 300 }, frame)).toBe(true)
+    expect(isPlateTouchingFrameEdge({ x1: 2, y1: 200, x2: 42, y2: 300 }, frame)).toBe(false)
+    expect(isPlateTouchingFrameEdge({ x1: 200, y1: 1, x2: 300, y2: 51 }, frame)).toBe(true)
+  })
+
+  it('ignores a box with a width or height of zero or less', () => {
+    expect(isPlateTouchingFrameEdge({ x1: 50, y1: 0, x2: 50, y2: 30 }, frame)).toBe(false)
+    expect(isPlateTouchingFrameEdge({ x1: 0, y1: 50, x2: 30, y2: 50 }, frame)).toBe(false)
+  })
+})
