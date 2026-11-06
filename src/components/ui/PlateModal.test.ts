@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import PlateModal from '@/components/ui/PlateModal.vue'
 import { i18n } from '@/i18n'
@@ -41,6 +41,10 @@ function makePlate(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PlateModal', () => {
+  afterEach(() => {
+    i18n.global.locale.value = 'es'
+  })
+
   beforeEach(() => {
     mockUpdatePlateText.mockClear()
     mockClipboardWriteText.mockClear()
@@ -116,10 +120,8 @@ describe('PlateModal', () => {
 
     i18n.global.locale.value = 'en'
     await wrapper.vm.$nextTick()
-    const labelEn = wrapper.find('button[aria-label="Close"]').exists()
-    i18n.global.locale.value = 'es'
 
-    expect(labelEn).toBe(true)
+    expect(wrapper.find('button[aria-label="Close"]').exists()).toBe(true)
   })
 
   it('emits update:modelValue null when backdrop is clicked', async () => {
