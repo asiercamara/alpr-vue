@@ -237,6 +237,7 @@ export const usePlateStore = defineStore('plateStore', () => {
           group.variantTexts.push({ text, occurrences: 1 })
         }
 
+        group.confidenceMean = calculateGroupConfidence(group.variants)
         updateMainVariant(mainText)
         foundGroup = true
         break
@@ -294,12 +295,13 @@ export const usePlateStore = defineStore('plateStore', () => {
   }
 
   /**
-   * Edits the display text of a plate record, keeping the `plates` array, group
-   * `variantTexts`, and group `variants` all in sync.
+   * Edits the text of a plate record and regroups it by similarity.
    *
-   * Only the edited plate's occurrence moves from its old text to the new one in the
-   * group's `variantTexts`; the other plates sharing the old text keep counting for it.
-   * The group is found by the plate's id, since its key may differ from the plate's text.
+   * The plate leaves the group it was in (that group is dropped if it ends up empty, and
+   * its key moves to the new most-frequent text if the plate was the one holding it) and is
+   * grouped again under its new text: it joins an existing group when similar enough
+   * (>= `SIMILARITY_THRESHOLD`) or starts a new one. The plate's group is found by its id,
+   * since the group key may differ from the plate's text.
    *
    * @param plateId - ID of the plate to update.
    * @param newText - The corrected plate text.
@@ -309,32 +311,38 @@ export const usePlateStore = defineStore('plateStore', () => {
     const plate = plates.value.find((p) => p.id === plateId)
     if (!plate) return false
 
-    const oldText = plate.text
-    plate.text = newText
-    plate.plateText = { ...plate.plateText, text: newText }
-
     const groupKey = Object.keys(plateGroups.value).find((key) =>
       plateGroups.value[key].variants.some((v) => v.id === plateId),
     )
-    if (!groupKey) return true
+    if (groupKey) removeFromGroup(groupKey, plate)
 
-    const group = plateGroups.value[groupKey]
+    plate.text = newText
+    plate.plateText = { ...plate.plateText, text: newText }
 
-    const oldVariant = group.variantTexts.find((v) => v.text === oldText)
-    if (oldVariant && --oldVariant.occurrences <= 0) {
-      group.variantTexts = group.variantTexts.filter((v) => v !== oldVariant)
-    }
-    const newVariant = group.variantTexts.find((v) => v.text === newText)
-    if (newVariant) {
-      newVariant.occurrences++
-    } else {
-      group.variantTexts.push({ text: newText, occurrences: 1 })
-    }
-
-    group.confidenceMean = calculateGroupConfidence(group.variants)
-    updateMainVariant(groupKey)
+    if (groupKey) groupSimilarDetections(plate)
 
     return true
+  }
+
+  /**
+   * Takes a plate out of its group: drops its text from `variantTexts` (one occurrence),
+   * refreshes the totals and, if no plate is left, deletes the group.
+   */
+  function removeFromGroup(groupKey: string, plate: PlateRecord): void {
+    const group = plateGroups.value[groupKey]
+    group.variants = group.variants.filter((v) => v.id !== plate.id)
+    if (group.variants.length === 0) {
+      delete plateGroups.value[groupKey]
+      return
+    }
+
+    const variant = group.variantTexts.find((v) => v.text === plate.text)
+    if (variant && --variant.occurrences <= 0) {
+      group.variantTexts = group.variantTexts.filter((v) => v !== variant)
+    }
+    group.totalOccurrences--
+    group.confidenceMean = calculateGroupConfidence(group.variants)
+    updateMainVariant(groupKey)
   }
 
   function clearPlates(): void {
