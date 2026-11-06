@@ -759,11 +759,12 @@ describe('plateStore', () => {
       at(now + 6000)
       store.addPlate(makePlate({ id: 'new1', confidence: 0.6, plateText: NORMAL }))
       at(now + 9000)
-      expect(store.addPlate(makePlate({ id: 'new2', confidence: 0.6, plateText: NORMAL }))).toBe(
+      expect(store.addPlate(makePlate({ id: 'new2', confidence: 0.7, plateText: NORMAL }))).toBe(
         true,
       )
 
-      expect(store.plates[0].id).not.toBe('old')
+      // The best of the two detections in the new window, not the stale 0.99 one
+      expect(store.plates[0].id).toBe('new2')
       expect(store.plates[0].occurrences).toBe(2)
     })
 
@@ -775,6 +776,39 @@ describe('plateStore', () => {
       store.addPlate(makePlate({ id: 'b2', text: 'ABC124' }))
 
       expect(Object.keys(store.plateGroups)).toEqual(['ABC123'])
+    })
+
+    it('does not promote an earlier variant that only ties with the group key', () => {
+      store.setMode('upload')
+      store.addPlate(makePlate({ id: 'a1', text: 'ABC123' }))
+      store.addPlate(makePlate({ id: 'b1', text: 'ABC124' }))
+      store.addPlate(makePlate({ id: 'b2', text: 'ABC124' }))
+      expect(Object.keys(store.plateGroups)).toEqual(['ABC124'])
+
+      // ABC123 catches up and is listed first, but 2 is not more than 2
+      store.addPlate(makePlate({ id: 'a2', text: 'ABC123' }))
+
+      expect(Object.keys(store.plateGroups)).toEqual(['ABC124'])
+      expect(store.plateGroups['ABC124'].variantTexts).toEqual([
+        { text: 'ABC123', occurrences: 2 },
+        { text: 'ABC124', occurrences: 2 },
+      ])
+    })
+
+    it('promotes the first of several variants that tie for the most occurrences', () => {
+      store.setMode('upload')
+      for (const id of ['a1', 'a2', 'a3']) store.addPlate(makePlate({ id, text: 'ABC123' }))
+      for (const id of ['b1', 'b2']) store.addPlate(makePlate({ id, text: 'ABC124' }))
+      for (const id of ['c1', 'c2']) store.addPlate(makePlate({ id, text: 'ABC125' }))
+      expect(Object.keys(store.plateGroups)).toEqual(['ABC123'])
+
+      // Editing two ABC123 plates away leaves ABC124 and ABC125 level, both above it
+      store.updatePlateText('a1', 'ZZZ999')
+      expect(Object.keys(store.plateGroups).sort()).toEqual(['ABC123', 'ZZZ999'])
+      store.updatePlateText('a2', 'ZZZ998')
+
+      expect(Object.keys(store.plateGroups).sort()).toEqual(['ABC124', 'ZZZ999'])
+      expect(store.plateGroups['ABC124'].mainText).toBe('ABC124')
     })
 
     it('leaves other groups untouched when a plate is edited', () => {
