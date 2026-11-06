@@ -46,7 +46,8 @@ describe('PlateModal', () => {
   })
 
   beforeEach(() => {
-    mockUpdatePlateText.mockClear()
+    mockUpdatePlateText.mockReset()
+    mockUpdatePlateText.mockReturnValue(true)
     mockClipboardWriteText.mockClear()
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: mockClipboardWriteText },
@@ -216,6 +217,56 @@ describe('PlateModal', () => {
       await saveBtn!.trigger('click')
       expect(mockUpdatePlateText).toHaveBeenCalledWith('plate_test', 'XYZ789')
       expect(wrapper.find('input').exists()).toBe(false)
+    })
+
+    it('shows and copies the saved text without reopening the modal', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Editar')!
+        .trigger('click')
+      await wrapper.find('input').setValue('  XYZ789 ')
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Guardar')!
+        .trigger('click')
+
+      expect(wrapper.find('.plate-text').text()).toBe('XYZ789')
+      expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([
+        expect.objectContaining({
+          id: 'plate_test',
+          text: 'XYZ789',
+          plateText: expect.objectContaining({ text: 'XYZ789' }),
+        }),
+      ])
+
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Copiar')!
+        .trigger('click')
+      expect(mockClipboardWriteText).toHaveBeenCalledWith('XYZ789')
+    })
+
+    it('keeps the old text when the store does not know the plate', async () => {
+      mockUpdatePlateText.mockReturnValue(false)
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Editar')!
+        .trigger('click')
+      await wrapper.find('input').setValue('XYZ789')
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Guardar')!
+        .trigger('click')
+
+      expect(wrapper.find('.plate-text').text()).toBe('ABC123')
     })
 
     it('cancels edit when cancel button is clicked', async () => {

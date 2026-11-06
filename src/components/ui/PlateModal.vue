@@ -239,7 +239,15 @@ function saveEdit() {
   const trimmed = editText.value.trim()
   if (!trimmed) return
 
-  plateStore.updatePlateText(plate.value.id, trimmed)
+  // The modal holds the record it was opened with (a copy made by the store), not the
+  // stored one the edit changes: refresh it so the modal shows the saved text
+  if (plateStore.updatePlateText(plate.value.id, trimmed)) {
+    plate.value = {
+      ...plate.value,
+      text: trimmed,
+      plateText: { ...plate.value.plateText, text: trimmed },
+    }
+  }
   isEditing.value = false
 }
 
