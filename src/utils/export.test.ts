@@ -51,9 +51,19 @@ describe('generateCSV', () => {
     (text) => {
       const plate = makePlate({ text, plateText: { text, confidence: [0.9] } })
       const row = generateCSV([plate]).split('\n')[1]
-      expect(row.startsWith(`'${text}`)).toBe(true)
+      expect(row).toContain(`'${text}`)
     },
   )
+
+  it.each([
+    ['AB\rCD', '"AB\rCD"'],
+    ['\r=1+1', `"'\r=1+1"`],
+  ])('quotes a value with a carriage return: %j', (text, cell) => {
+    const plate = makePlate({ text, plateText: { text, confidence: [0.9] } })
+
+    // A lone CR ends a record for many CSV parsers, so the cell must be quoted
+    expect(generateCSV([plate])).toContain(cell)
+  })
 
   it('neutralizes formula prefix and still quotes commas', () => {
     const text = '=A1,B1'
