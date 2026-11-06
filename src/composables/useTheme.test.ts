@@ -217,9 +217,10 @@ describe('useTheme', () => {
 
     vi.stubGlobal('matchMedia', undefined)
 
-    mountWithTheme()
+    const wrapper = mountWithTheme()
 
     expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(() => wrapper.unmount()).not.toThrow()
 
     vi.restoreAllMocks()
   })
