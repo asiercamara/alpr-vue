@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import HelpSheet from '@/components/ui/HelpSheet.vue'
+import { i18n } from '@/i18n'
 
 describe('HelpSheet', () => {
   it('does not render when modelValue is false', () => {
@@ -60,12 +61,8 @@ describe('HelpSheet', () => {
         },
       },
     })
-    const backdrop = wrapper.find('.sheet-backdrop')
-    if (backdrop.exists()) {
-      await backdrop.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
-    }
+    await wrapper.get('.sheet-backdrop').trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
   })
 
   it('emits update:modelValue false when outer overlay is clicked directly', async () => {
@@ -78,12 +75,8 @@ describe('HelpSheet', () => {
         },
       },
     })
-    const overlay = wrapper.find('.fixed')
-    if (overlay.exists()) {
-      await overlay.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
-    }
+    await wrapper.get('.fixed').trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
   })
 
   it('emits update:modelValue false when Entendido button is clicked', async () => {
@@ -97,11 +90,9 @@ describe('HelpSheet', () => {
       },
     })
     const btn = wrapper.findAll('button').find((b) => b.text().includes('Entendido'))
-    if (btn) {
-      await btn.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
-    }
+    expect(btn).toBeDefined()
+    await btn!.trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
   })
 
   it('shows the app version from package.json', () => {
@@ -117,5 +108,32 @@ describe('HelpSheet', () => {
     const version = wrapper.find('[data-testid="app-version"]').text()
     expect(version).toBe(`v${__APP_VERSION__}`)
     expect(version).toMatch(/^v\d+\.\d+\.\d+$/)
+  })
+})
+
+describe('HelpSheet docs link', () => {
+  const mountOpen = () =>
+    mount(HelpSheet, {
+      props: { modelValue: true },
+      global: {
+        stubs: {
+          Teleport: { template: '<div><slot/></div>' },
+          Transition: { template: '<div><slot/></div>' },
+        },
+      },
+    })
+
+  afterEach(() => {
+    i18n.global.locale.value = 'es'
+  })
+
+  it('links to the Spanish docs when the locale is es', () => {
+    i18n.global.locale.value = 'es'
+    expect(mountOpen().get('a[target="_blank"]').attributes('href')).toBe('/docs/es/')
+  })
+
+  it('links to the English docs when the locale is en', () => {
+    i18n.global.locale.value = 'en'
+    expect(mountOpen().get('a[target="_blank"]').attributes('href')).toBe('/docs/')
   })
 })

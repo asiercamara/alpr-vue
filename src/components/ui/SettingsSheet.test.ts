@@ -180,8 +180,41 @@ describe('SettingsSheet', () => {
     const closeBtn = buttons.find((b) => b.text().includes('Cerrar'))
     await closeBtn!.trigger('click')
 
-    expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-    expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+  })
+
+  it('emits update:modelValue false when the backdrop is clicked', async () => {
+    const wrapper = mountSheet()
+    await wrapper.get('.sheet-backdrop').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+  })
+
+  it('emits update:modelValue false when clicking the overlay outside the sheet', async () => {
+    const wrapper = mountSheet()
+    await wrapper.get('.fixed.inset-0').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+  })
+
+  it('does not close when clicking inside the sheet content', async () => {
+    const wrapper = mountSheet()
+    await wrapper.get('.sheet-content').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('resets sound and vibration when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setFeedbackEnabled(false)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns).toHaveLength(1)
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.feedbackEnabled).toBe(true)
+    expect(wrapper.findAll('.reset-btn')).toHaveLength(0)
   })
 
   it('updates confidence threshold via slider', async () => {
@@ -264,8 +297,7 @@ describe('SettingsSheet', () => {
     settingsStore.setLanguage('en')
 
     const wrapper = mountSheet()
-    const resetBtns = wrapper.findAll('.reset-btn')
-    expect(resetBtns.length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.reset-btn')).toHaveLength(1)
   })
 
   it('resets language when its reset button is clicked', async () => {
@@ -274,8 +306,8 @@ describe('SettingsSheet', () => {
 
     const wrapper = mountSheet()
     const resetBtns = wrapper.findAll('.reset-btn')
-    // Last reset button corresponds to language section
-    await resetBtns[resetBtns.length - 1].trigger('click')
+    expect(resetBtns).toHaveLength(1)
+    await resetBtns[0].trigger('click')
 
     expect(settingsStore.language).toBe('auto')
   })
@@ -286,7 +318,7 @@ describe('SettingsSheet', () => {
 
     const wrapper = mountSheet()
     const resetBtns = wrapper.findAll('.reset-btn')
-    expect(resetBtns.length).toBeGreaterThan(0)
+    expect(resetBtns).toHaveLength(1)
     await resetBtns[0].trigger('click')
 
     expect(settingsStore.theme).toBe('system')
@@ -297,11 +329,10 @@ describe('SettingsSheet', () => {
     settingsStore.setConfidenceThreshold(0.9)
 
     const wrapper = mountSheet()
+    // Only the confidence differs from its default, so it is the only reset button
     const resetBtns = wrapper.findAll('.reset-btn')
-    expect(resetBtns.length).toBeGreaterThan(0)
-    // Find the reset button next to the confidence display
-    const confidenceReset = resetBtns.find((_b, i) => i === 0)
-    await confidenceReset!.trigger('click')
+    expect(resetBtns).toHaveLength(1)
+    await resetBtns[0].trigger('click')
 
     expect(settingsStore.confidenceThreshold).toBe(0.7)
   })
@@ -312,7 +343,7 @@ describe('SettingsSheet', () => {
 
     const wrapper = mountSheet()
     const resetBtns = wrapper.findAll('.reset-btn')
-    // Click any reset btn — all should reset their own setting
+    expect(resetBtns).toHaveLength(1)
     await resetBtns[0].trigger('click')
 
     expect(settingsStore.confirmationTime).toBe(3)
@@ -324,6 +355,7 @@ describe('SettingsSheet', () => {
 
     const wrapper = mountSheet()
     const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns).toHaveLength(1)
     await resetBtns[0].trigger('click')
 
     expect(settingsStore.fastConfirmationTime).toBe(1)
@@ -335,7 +367,7 @@ describe('SettingsSheet', () => {
 
     const wrapper = mountSheet()
     const resetBtns = wrapper.findAll('.reset-btn')
-    expect(resetBtns.length).toBeGreaterThan(0)
+    expect(resetBtns).toHaveLength(1)
     await resetBtns[0].trigger('click')
 
     expect(settingsStore.continuousMode).toBe(true)
@@ -347,7 +379,7 @@ describe('SettingsSheet', () => {
 
     const wrapper = mountSheet()
     const resetBtns = wrapper.findAll('.reset-btn')
-    expect(resetBtns.length).toBeGreaterThan(0)
+    expect(resetBtns).toHaveLength(1)
     await resetBtns[0].trigger('click')
 
     expect(settingsStore.skipDuplicates).toBe(true)

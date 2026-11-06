@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { generateCSV, downloadCSV } from '@/utils/export'
 import type { PlateRecord } from '@/types/detection'
 
@@ -15,6 +15,37 @@ function makePlate(overrides: Partial<PlateRecord> = {}): PlateRecord {
     ...overrides,
   }
 }
+
+describe('generateCSV exact output', () => {
+  beforeEach(() => {
+    vi.spyOn(Date.prototype, 'toLocaleString').mockReturnValue('15/01/2025 10:30:00')
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('writes the header and one unquoted row per plate, separated by newlines', () => {
+    const csv = generateCSV([
+      makePlate({ id: 'p1' }),
+      makePlate({ id: 'p2', confidence: 0.5, plateText: { text: 'XYZ789', confidence: [0.5] } }),
+    ])
+
+    expect(csv).toBe(
+      [
+        'Texto,Confianza,Fecha,ID',
+        'ABC123,95.0%,15/01/2025 10:30:00,p1',
+        'XYZ789,50.0%,15/01/2025 10:30:00,p2',
+      ].join('\n'),
+    )
+  })
+
+  it('quotes a cell with a line feed', () => {
+    const text = 'AB\nCD'
+    const csv = generateCSV([makePlate({ plateText: { text, confidence: [0.9] } })])
+
+    expect(csv).toContain('"AB\nCD"')
+  })
+})
 
 describe('generateCSV', () => {
   it('generates CSV with correct headers', () => {
@@ -51,9 +82,19 @@ describe('generateCSV', () => {
     (text) => {
       const plate = makePlate({ text, plateText: { text, confidence: [0.9] } })
       const row = generateCSV([plate]).split('\n')[1]
-      expect(row.startsWith(`'${text}`)).toBe(true)
+      expect(row).toContain(`'${text}`)
     },
   )
+
+  it.each([
+    ['AB\rCD', '"AB\rCD"'],
+    ['\r=1+1', `"'\r=1+1"`],
+  ])('quotes a value with a carriage return: %j', (text, cell) => {
+    const plate = makePlate({ text, plateText: { text, confidence: [0.9] } })
+
+    // A lone CR ends a record for many CSV parsers, so the cell must be quoted
+    expect(generateCSV([plate])).toContain(cell)
+  })
 
   it('neutralizes formula prefix and still quotes commas', () => {
     const text = '=A1,B1'
@@ -85,33 +126,42 @@ describe('generateCSV', () => {
 })
 
 describe('downloadCSV', () => {
-  it('creates a blob URL and triggers download', () => {
-    const createElementSpy = vi.spyOn(document, 'createElement')
-    const appendChildSpy = vi
-      .spyOn(document.body, 'appendChild')
-      .mockImplementation(() => document.createElement('a'))
-    const removeChildSpy = vi
-      .spyOn(document.body, 'removeChild')
-      .mockImplementation(() => document.createElement('a'))
+  let click: ReturnType<typeof vi.spyOn>
 
-    const mockClick = vi.fn()
-    createElementSpy.mockImplementation(
-      () =>
-        ({
-          click: mockClick,
-          style: { display: '' },
-          href: '',
-          download: '',
-          setAttribute: vi.fn(),
-        }) as any,
-    )
+  beforeEach(() => {
+    click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    vi.mocked(URL.createObjectURL).mockClear()
+    vi.mocked(URL.revokeObjectURL).mockClear()
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
 
-    downloadCSV([makePlate()], 'test.csv')
+  it('downloads the CSV as a hidden link that is removed afterwards', async () => {
+    const append = vi.spyOn(document.body, 'appendChild')
+    const plates = [makePlate()]
 
-    expect(createElementSpy).toHaveBeenCalledWith('a')
+    downloadCSV(plates, 'test.csv')
 
-    createElementSpy.mockRestore()
-    appendChildSpy.mockRestore()
-    removeChildSpy.mockRestore()
+    const blob = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob
+    expect(blob.type).toBe('text/csv;charset=utf-8;')
+    expect(await blob.text()).toBe(generateCSV(plates))
+
+    const link = append.mock.calls[0][0] as HTMLAnchorElement
+    expect(link.tagName).toBe('A')
+    expect(link.href).toBe('blob:test')
+    expect(link.download).toBe('test.csv')
+    expect(link.style.display).toBe('none')
+    expect(click).toHaveBeenCalledTimes(1)
+    expect(document.body.contains(link)).toBe(false)
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test')
+  })
+
+  it('names the file matriculas.csv by default', () => {
+    const append = vi.spyOn(document.body, 'appendChild')
+
+    downloadCSV([makePlate()])
+
+    expect((append.mock.calls[0][0] as HTMLAnchorElement).download).toBe('matriculas.csv')
   })
 })

@@ -201,10 +201,8 @@ describe('useTheme', () => {
 
     mountWithTheme()
 
-    if (matchMediaHandler.addEventListener.mock.calls.length > 0) {
-      const changeHandler = matchMediaHandler.addEventListener.mock.calls[0][1]
-      changeHandler({ matches: true })
-    }
+    const changeHandler = matchMediaHandler.addEventListener.mock.calls[0][1]
+    changeHandler({ matches: true })
 
     expect(document.documentElement.classList.contains('dark')).toBe(false)
 
@@ -217,9 +215,10 @@ describe('useTheme', () => {
 
     vi.stubGlobal('matchMedia', undefined)
 
-    mountWithTheme()
+    const wrapper = mountWithTheme()
 
     expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(() => wrapper.unmount()).not.toThrow()
 
     vi.restoreAllMocks()
   })

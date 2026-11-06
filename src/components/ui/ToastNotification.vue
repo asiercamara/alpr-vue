@@ -31,10 +31,13 @@ const visible = ref(false)
 const currentPlate = ref('')
 let dismissTimer: ReturnType<typeof setTimeout> | null = null
 
+// A plate is announced when a detection was added (`plates` grew) and it started a new
+// entry in the list (`bestDetections` grew). Editing a plate regroups it and can change the
+// number of entries too, but it adds no detection, and repeats of a listed plate add none.
 watch(
-  () => plateStore.bestDetections.length,
-  (newLen, oldLen) => {
-    if (newLen > oldLen && plateStore.bestDetections.length > 0) {
+  () => [plateStore.plates.length, plateStore.bestDetections.length] as const,
+  ([platesLen, bestLen], [oldPlatesLen, oldBestLen]) => {
+    if (platesLen > oldPlatesLen && bestLen > oldBestLen) {
       const latest = plateStore.bestDetections[0]
       currentPlate.value = latest.text
 

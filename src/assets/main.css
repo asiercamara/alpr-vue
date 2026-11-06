@@ -88,3 +88,16 @@
     font-family: var(--font-display);
   }
 }
+
+/* Respect the OS "reduce motion" setting. Unlayered and !important so it also wins over
+   Tailwind utilities and the inline transitions set by components (e.g. the bottom drawer). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

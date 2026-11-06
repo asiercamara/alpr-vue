@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref } from 'vue'
 
@@ -147,22 +147,35 @@ describe('MediaUploader', () => {
     input.element.click = clickSpy
 
     const uploadBtn = wrapper.findAll('button').find((b) => b.text().includes('Subir archivo'))
-    if (uploadBtn) {
-      await uploadBtn.trigger('click')
-      expect(clickSpy).toHaveBeenCalled()
-    }
+    expect(uploadBtn).toBeDefined()
+    await uploadBtn!.trigger('click')
+    expect(clickSpy).toHaveBeenCalled()
   })
 
   it('toggles gallery when sample button is clicked', async () => {
     const wrapper = mountComponent()
     const sampleBtn = wrapper.findAll('button').find((b) => b.text().includes('muestra'))
-    if (!sampleBtn) return
+    expect(sampleBtn).toBeDefined()
 
     expect(wrapper.vm.showGallery).toBe(false)
-    await sampleBtn.trigger('click')
+    await sampleBtn!.trigger('click')
     expect(wrapper.vm.showGallery).toBe(true)
-    await sampleBtn.trigger('click')
+    await sampleBtn!.trigger('click')
     expect(wrapper.vm.showGallery).toBe(false)
+  })
+
+  it('closes the gallery when it asks to via v-model', async () => {
+    const wrapper = mountComponent()
+    wrapper.vm.showGallery = true
+    await wrapper.vm.$nextTick()
+    const gallery = wrapper.getComponent('[data-test="gallery"]')
+    expect(gallery.props('modelValue')).toBe(true)
+
+    gallery.vm.$emit('update:modelValue', false)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.vm.showGallery).toBe(false)
+    expect(gallery.props('modelValue')).toBe(false)
   })
 
   it('closes gallery when upload button is clicked', async () => {
@@ -171,10 +184,9 @@ describe('MediaUploader', () => {
     await wrapper.vm.$nextTick()
 
     const uploadBtn = wrapper.findAll('button').find((b) => b.text().includes('Subir archivo'))
-    if (uploadBtn) {
-      await uploadBtn.trigger('click')
-      expect(wrapper.vm.showGallery).toBe(false)
-    }
+    expect(uploadBtn).toBeDefined()
+    await uploadBtn!.trigger('click')
+    expect(wrapper.vm.showGallery).toBe(false)
   })
 
   it('fetches and loads sample image when handleSampleSelect is called', async () => {
@@ -198,6 +210,26 @@ describe('MediaUploader', () => {
 
     expect(mockFetch).toHaveBeenCalledWith('/test/600.jpg')
     expect(mockSetUploadMedia).toHaveBeenCalledWith('image', 'blob:sample-url', expect.any(File))
+
+    vi.unstubAllGlobals()
+  })
+
+  it('loads the sample the gallery emits through its select event', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(new Blob(['x'])) }),
+    )
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:from-gallery'),
+      revokeObjectURL: vi.fn(),
+    })
+
+    const wrapper = mountComponent()
+    const gallery = wrapper.getComponent('[data-test="gallery"]')
+    gallery.vm.$emit('select', { file: '/test/600.jpg', label: 'SEAT 600', type: 'image' })
+    await flushPromises()
+
+    expect(mockSetUploadMedia).toHaveBeenCalledWith('image', 'blob:from-gallery', expect.any(File))
 
     vi.unstubAllGlobals()
   })

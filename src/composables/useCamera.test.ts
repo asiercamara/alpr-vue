@@ -6,10 +6,11 @@ const mockProcessFrame = vi.fn()
 const mockOnBoxes = vi.fn(() => vi.fn())
 const mockResetProcessing = vi.fn()
 const mockSetCameraActive = vi.fn()
+const mockModelReady = { value: true }
 
 vi.mock('@/composables/useDetection', () => ({
   useDetection: () => ({
-    modelReady: { value: true },
+    modelReady: mockModelReady,
     isProcessing: { value: false },
     processFrame: mockProcessFrame,
     onBoxes: mockOnBoxes,
@@ -26,7 +27,6 @@ vi.mock('@/stores/plateStore', () => ({
     setMode: mockSetMode,
     plates: [],
     addPlate: vi.fn(),
-    removePlate: vi.fn(),
     clearPlates: vi.fn(),
     clearConsecutiveDetections: mockClearConsecutiveDetections,
     currentMode: null,
@@ -83,6 +83,7 @@ vi.mock('@/stores/appStore', () => ({
 import { defineComponent } from 'vue'
 import { mount } from '@vue/test-utils'
 import { useCamera } from '@/composables/useCamera'
+import { createMockCanvas2DContext } from '@/__test-utils__/factories'
 
 describe('useCamera', () => {
   beforeEach(() => {
@@ -95,6 +96,7 @@ describe('useCamera', () => {
     mockResetProcessing.mockClear()
     mockClearConsecutiveDetections.mockClear()
     mockSetCameraActive.mockClear()
+    mockModelReady.value = true
 
     vi.stubGlobal('navigator', {
       mediaDevices: {
@@ -160,6 +162,16 @@ describe('useCamera', () => {
     await camera.startCamera()
 
     expect(appStoreMock.setCameraError).toHaveBeenCalledWith('unknown')
+  })
+
+  it('stringifies a rejection that is not an Error', async () => {
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockRejectedValue('boom')
+
+    const camera = useCamera()
+    await camera.startCamera()
+
+    expect(appStoreMock.setCameraError).toHaveBeenCalledWith('boom')
+    expect(mockSetCameraActive).toHaveBeenCalledWith(false)
   })
 
   it('starts camera successfully and calls plateStore.setMode', async () => {
@@ -434,6 +446,27 @@ describe('useCamera', () => {
       expect(camera.isZoomSupported.value).toBe(true)
       expect(camera.isDigitalZoom.value).toBe(false)
       expect(camera.maxZoom.value).toBe(10)
+    })
+
+    it('caps native zoom at the digital maximum when the track reports no max', async () => {
+      const mockTrack = {
+        stop: vi.fn(),
+        getCapabilities: vi.fn().mockReturnValue({ zoom: {} }),
+        applyConstraints: vi.fn().mockResolvedValue(undefined),
+      }
+      const mockStream = { getTracks: () => [mockTrack], getVideoTracks: () => [mockTrack] }
+      vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
+
+      const camera = useCamera()
+      const mockVideo = document.createElement('video')
+      mockVideo.play = vi.fn().mockResolvedValue(undefined)
+      Object.defineProperty(camera.videoRef, 'value', { value: mockVideo, writable: true })
+
+      await camera.startCamera()
+
+      expect(camera.isZoomSupported.value).toBe(true)
+      expect(camera.isDigitalZoom.value).toBe(false)
+      expect(camera.maxZoom.value).toBe(5)
     })
 
     it('uses digital zoom when track has no zoom capability', async () => {
@@ -715,6 +748,74 @@ describe('useCamera', () => {
       await vi.advanceTimersByTimeAsync(20)
 
       expect(camera.isCameraActive.value).toBe(true)
+      camera.stopCamera()
+    })
+  })
+
+  describe('frame loop', () => {
+    function startCameraWithCanvas(camera: ReturnType<typeof useCamera>, ctx?: unknown) {
+      const mockVideo = document.createElement('video')
+      mockVideo.play = vi.fn().mockResolvedValue(undefined)
+      Object.defineProperty(mockVideo, 'readyState', { value: 2, configurable: true })
+      Object.defineProperty(mockVideo, 'videoWidth', { value: 300, configurable: true })
+      Object.defineProperty(mockVideo, 'videoHeight', { value: 150, configurable: true })
+      const canvas = document.createElement('canvas')
+      if (ctx) canvas.getContext = vi.fn().mockReturnValue(ctx) as never
+      Object.defineProperty(camera.videoRef, 'value', { value: mockVideo, writable: true })
+      Object.defineProperty(camera.canvasRef, 'value', { value: canvas, writable: true })
+      return { mockVideo, canvas }
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+      const mockTrack = { stop: vi.fn() }
+      const mockStream = { getTracks: () => [mockTrack], getVideoTracks: () => [mockTrack] }
+      vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(mockStream as any)
+      mockProcessFrame.mockReset()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('sizes and clears the canvas, skips drawing without boxes and feeds the frame to the detector', async () => {
+      const ctx = createMockCanvas2DContext({ clearRect: vi.fn() })
+      const camera = useCamera()
+      const { canvas } = startCameraWithCanvas(camera, ctx)
+      await camera.startCamera()
+
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(canvas.width).toBe(300)
+      expect(canvas.height).toBe(150)
+      expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 300, 150)
+      expect(mockDrawBoxesAndUpdate).not.toHaveBeenCalled()
+      expect(mockProcessFrame).toHaveBeenCalledTimes(1)
+      camera.stopCamera()
+    })
+
+    it('does not send frames to the detector while the model is not ready', async () => {
+      mockModelReady.value = false
+      const camera = useCamera()
+      startCameraWithCanvas(camera)
+      await camera.startCamera()
+
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(mockProcessFrame).not.toHaveBeenCalled()
+      expect(camera.isCameraActive.value).toBe(true)
+      camera.stopCamera()
+    })
+
+    it('skips ticks while the video has no data yet', async () => {
+      const camera = useCamera()
+      const { mockVideo } = startCameraWithCanvas(camera)
+      Object.defineProperty(mockVideo, 'readyState', { value: 1, configurable: true })
+      await camera.startCamera()
+
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(mockProcessFrame).not.toHaveBeenCalled()
       camera.stopCamera()
     })
   })

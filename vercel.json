@@ -14,7 +14,7 @@
       ]
     },
     {
-      "source": "/((?!docs/).*)",
+      "source": "/((?!docs).*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
@@ -23,7 +23,7 @@
       ]
     },
     {
-      "source": "/docs/(.*)",
+      "source": "/docs(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",

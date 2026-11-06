@@ -1,11 +1,14 @@
+import { seriousViolations } from './axe'
 import { expect, test } from './fixtures'
 
 /**
  * Full pipeline with the real ONNX models: pick a bundled sample image, wait
- * for the YOLO + OCR worker to detect a plate, open its details and export CSV.
+ * for the YOLO + OCR worker to detect a plate, open its details (accessibility
+ * scan, edit the text) and export CSV.
  */
-test('detects a plate in a sample image, shows its details and exports CSV', async ({ page }) => {
+test('detects a plate in a sample image, edits it and exports CSV', async ({ page }) => {
   test.slow()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   // Picked right after load, while the worker is still loading the models: the image
   // must be processed once they are ready, not dropped.
   await page.goto('/')
@@ -22,8 +25,23 @@ test('detects a plate in a sample image, shows its details and exports CSV', asy
   // Details modal
   await page.locator('.card', { has: plate }).first().click()
   await expect(page.getByText('Confidence per character')).toBeVisible()
-  await page.locator('.modal-content button').first().click()
+  // The modal fades in: axe would measure contrast on half-transparent colours
+  const modal = page.locator('.modal-content')
+  await expect(modal).toHaveCSS('opacity', '1')
+  await expect(modal.locator('xpath=..')).toHaveCSS('opacity', '1')
+  // The page behind the modal is dimmed by its overlay: scan the modal (teleported to <body>) only
+  const serious = await seriousViolations(page, ['#app'])
+  expect(serious, JSON.stringify(serious, null, 2)).toEqual([])
+
+  // Correct the text: the list shows the new text once the modal is closed
+  await page.getByTitle('Edit').click()
+  await page.locator('.modal-content input').fill('TEST123')
+  await page.getByTitle('Save').click()
+  // The open modal shows the saved text right away, not only after reopening it
+  await expect(modal.locator('.plate-text').first()).toHaveText('TEST123')
+  await modal.getByLabel('Close').click()
   await expect(page.getByText('Confidence per character')).toBeHidden()
+  await expect(plate).toHaveText('TEST123')
 
   // CSV export
   const [download] = await Promise.all([
@@ -37,4 +55,32 @@ test('detects a plate in a sample image, shows its details and exports CSV', asy
   const csv = Buffer.concat(chunks).toString('utf8')
   expect(csv.split('\n').length).toBeGreaterThan(1)
   expect(csv).toContain((await plate.innerText()).trim())
+})
+
+test('an unsaved edit is dropped when the plate modal is closed and opened again', async ({
+  page,
+}) => {
+  test.slow()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Or try a sample' }).click()
+  await page.getByRole('button', { name: /Kia Stinger/ }).click()
+
+  const plate = page.locator('.plate-text').first()
+  await expect(plate).toBeVisible({ timeout: 90_000 })
+  const detected = (await plate.innerText()).trim()
+  const card = page.locator('.card', { has: plate }).first()
+  const modal = page.locator('.modal-content')
+
+  await card.click()
+  await page.getByTitle('Edit').click()
+  await modal.locator('input').fill('UNSAVED1')
+  await modal.getByLabel('Close').click()
+  await expect(modal).toBeHidden()
+
+  await card.click()
+
+  await expect(modal.locator('input')).toHaveCount(0)
+  await expect(modal.locator('.plate-text').first()).toHaveText(detected)
+  await expect(page.getByTitle('Save')).toHaveCount(0)
 })

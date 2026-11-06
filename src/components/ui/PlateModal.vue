@@ -17,6 +17,7 @@
           <!-- Close button -->
           <button
             class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-surface-400 dark:text-surface-200 hover:text-surface-700 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors z-10"
+            :aria-label="t('modal.close')"
             @click="plate = null"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +127,7 @@
                       class="absolute bottom-0 left-0 right-0 rounded-md transition-all duration-700"
                       :style="{
                         height: `${Math.max(8, conf * 100)}%`,
-                        backgroundColor: charColor(conf),
+                        backgroundColor: confidenceColor(conf),
                       }"
                     />
                   </div>
@@ -174,10 +175,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watchEffect } from 'vue'
+import { ref, nextTick, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateRecord } from '@/types/detection'
+import { confidenceColor } from '@/utils/confidence'
 import ConfidenceRing from './ConfidenceRing.vue'
 import IconCopy from '@/components/icons/IconCopy.vue'
 import IconEdit from '@/components/icons/IconEdit.vue'
@@ -190,6 +192,15 @@ const cropCanvas = ref<HTMLCanvasElement | null>(null)
 const isEditing = ref(false)
 const editText = ref('')
 const editInputRef = ref<HTMLInputElement | null>(null)
+
+// An unsaved edit belongs to the plate it was started on: drop it when the modal closes
+// or shows another plate, or its text could be saved over the wrong one
+watch(
+  () => plate.value?.id,
+  () => {
+    isEditing.value = false
+  },
+)
 
 watchEffect(() => {
   if (plate.value?.croppedImage && cropCanvas.value) {
@@ -206,14 +217,6 @@ watchEffect(() => {
     ctx.drawImage(plate.value.croppedImage, 0, 0)
   }
 })
-
-function charColor(conf: number): string {
-  if (conf >= 0.9) return 'var(--color-conf-high)'
-  if (conf >= 0.75) return 'var(--color-conf-good)'
-  if (conf >= 0.6) return 'var(--color-conf-mid)'
-  if (conf >= 0.45) return 'var(--color-conf-low)'
-  return 'var(--color-conf-poor)'
-}
 
 function copyToClipboard() {
   if (plate.value) {
@@ -236,7 +239,15 @@ function saveEdit() {
   const trimmed = editText.value.trim()
   if (!trimmed) return
 
-  plateStore.updatePlateText(plate.value.id, trimmed)
+  // The modal holds the record it was opened with (a copy made by the store), not the
+  // stored one the edit changes: refresh it so the modal shows the saved text
+  if (plateStore.updatePlateText(plate.value.id, trimmed)) {
+    plate.value = {
+      ...plate.value,
+      text: trimmed,
+      plateText: { ...plate.value.plateText, text: trimmed },
+    }
+  }
   isEditing.value = false
 }
 

@@ -90,6 +90,30 @@ describe('ToastNotification', () => {
     expect(wrapper.text()).toBe('')
   })
 
+  it('does not announce a plate when an edit splits it off its group', async () => {
+    plateStore.addPlate(makePlate('1', 'ABC123'))
+    plateStore.addPlate(makePlate('2', 'ABC123'))
+    const wrapper = mountToast()
+
+    plateStore.updatePlateText('1', 'XYZ789')
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    expect(plateStore.bestDetections).toHaveLength(2)
+    expect(wrapper.text()).toBe('')
+  })
+
+  it('does not announce a repeated detection of a plate already in the list', async () => {
+    plateStore.addPlate(makePlate('1', 'ABC123'))
+    const wrapper = mountToast()
+
+    plateStore.addPlate(makePlate('2', 'ABC123'))
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toBe('')
+  })
+
   it('does not show when plates are cleared (count decreases)', async () => {
     const wrapper = mountToast()
     plateStore.addPlate(makePlate('1', 'AAA111'))

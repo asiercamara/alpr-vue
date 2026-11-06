@@ -113,9 +113,9 @@ describe('postprocessOutput', () => {
     const output = makeModelOutput(MAX_SLOTS, ALPHABET.length, winnerIndices)
     const result = postprocessOutput(output, config, true) as { text: string; confidence: number[] }
 
+    expect(result.confidence.length).toBeGreaterThan(0)
     for (const conf of result.confidence) {
-      expect(conf).toBeGreaterThanOrEqual(0)
-      expect(conf).toBeLessThanOrEqual(1)
+      expect(conf).toBeCloseTo(0.9, 5)
     }
   })
 
@@ -235,5 +235,37 @@ describe('fixSpanishPlateDigits', () => {
     ]) {
       expect(fixSpanishPlateDigits(plate), plate).toBe(plate)
     }
+  })
+})
+
+describe('textProcessor edge cases', () => {
+  const config = { max_plate_slots: 2, alphabet: 'AB-', img_width: 140, img_height: 70 }
+
+  it('picks the first character of a slot when probabilities tie', () => {
+    // Slot 0: A and B tie; slot 1: the padding wins
+    const output = new Float32Array([0.5, 0.5, 0, 0.2, 0.2, 0.6])
+
+    expect(postprocessOutput(output, config, true)).toEqual({ text: 'A', confidence: [0.5] })
+  })
+
+  it('names the expected and received sizes when the output does not fit', () => {
+    expect(() => postprocessOutput(new Float32Array(5), config)).toThrow(
+      'Tamaño de salida incorrecto. Esperado: 6, Recibido: 5',
+    )
+  })
+
+  it('picks the first region when probabilities tie, and names the sizes on a mismatch', () => {
+    expect(decodeRegion(new Float32Array([0.4, 0.4, 0.2]), ['ES', 'FR', 'DE'])).toBe('ES')
+    expect(() => decodeRegion(new Float32Array(2), ['ES', 'FR', 'DE'])).toThrow(
+      'Tamaño de región incorrecto. Esperado: 3, Recibido: 2',
+    )
+  })
+
+  it('strips the default padding character', () => {
+    expect(cleanPlateText('AB12--')).toBe('AB12')
+  })
+
+  it('leaves a longer text alone even when it starts like a Spanish plate', () => {
+    expect(fixSpanishPlateDigits('OOOOBCDF')).toBe('OOOOBCDF')
   })
 })

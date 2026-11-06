@@ -104,6 +104,8 @@ export default [
     ignores: [
       'dist/**',
       'coverage/**',
+      'reports/**',
+      '.stryker-tmp/**',
       'node_modules/**',
       'public/**',
       'docs/.vitepress/dist/**',

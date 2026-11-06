@@ -10,14 +10,14 @@ import type { PlateRecord } from '@/types/detection'
  * spreadsheet apps treat them as text instead of formulas (CSV injection).
  *
  * @param value - The raw string to escape.
- * @returns The value wrapped in double quotes when it contains commas, double-quotes, or newlines;
- *   otherwise the (possibly prefixed) value unchanged.
+ * @returns The value wrapped in double quotes when it contains commas, double-quotes or
+ *   line breaks (CR or LF); otherwise the (possibly prefixed) value unchanged.
  */
 function escapeCSV(value: string): string {
   if (/^[=+\-@\t\r]/.test(value)) {
     value = `'${value}`
   }
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+  if (/[,"\r\n]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`
   }
   return value

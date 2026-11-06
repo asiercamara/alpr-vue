@@ -8,6 +8,7 @@ import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { i18n } from '@/i18n'
 import { logger } from '@/utils/logger'
+import { meanConfidence } from '@/utils/confidence'
 import { evaluatePlateQuality } from '@/utils/validation'
 import { calculateTextSimilarity } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
@@ -89,36 +90,28 @@ function getWorker(): Worker {
  * Filters and deduplicates detection boxes by confidence threshold and text.
  *
  * Filtering: boxes whose mean character confidence is below `threshold` are discarded.
- * Deduplication: for boxes sharing the same `plateText.text`, keeps the one with the
- * longer text (more characters recognized). On equal length, keeps the higher mean confidence.
+ * Deduplication: boxes sharing the same `plateText.text` collapse into the one with the
+ * highest mean confidence (the first one wins a tie). Boxes with different texts are all
+ * kept, since they can be different plates in the same frame.
  *
  * @param boxes - Raw detection results from the Worker.
  * @param threshold - Minimum mean character confidence in `[0, 1]`.
  * @returns Deduplicated array of best-quality boxes.
  */
 function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox[] {
+  const boxMean = (box: DetectionBox): number => meanConfidence(box.plateText.confidence)
+
   const validBoxes = boxes.filter((box) => {
     if (!box.plateText?.confidence?.length) return false
-    const conf = box.plateText.confidence
-    const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
-    return confMean >= threshold
+    return boxMean(box) >= threshold
   })
 
   const grouped = new Map<string, DetectionBox>()
   for (const box of validBoxes) {
     const key = box.plateText.text
     const existing = grouped.get(key)
-    if (!existing || box.plateText.text.length > existing.plateText.text.length) {
+    if (!existing || boxMean(box) > boxMean(existing)) {
       grouped.set(key, box)
-    } else if (box.plateText.text.length === existing.plateText.text.length) {
-      const existingConf =
-        existing.plateText.confidence.reduce((a, b) => a + b, 0) /
-        existing.plateText.confidence.length
-      const boxConf =
-        box.plateText.confidence.reduce((a, b) => a + b, 0) / box.plateText.confidence.length
-      if (boxConf > existingConf) {
-        grouped.set(key, box)
-      }
     }
   }
 
@@ -209,8 +202,7 @@ export function useDetection(options?: UseDetectionOptions) {
     if (!bestBoxes.length) return false
 
     for (const box of bestBoxes) {
-      const conf = box.plateText.confidence
-      const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+      const confMean = meanConfidence(box.plateText.confidence)
 
       const { x1, y1, x2, y2 } = box
       ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
@@ -224,8 +216,7 @@ export function useDetection(options?: UseDetectionOptions) {
     }
 
     for (const box of bestBoxes) {
-      const conf = box.plateText.confidence
-      const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+      const confMean = meanConfidence(box.plateText.confidence)
       const quality = evaluatePlateQuality({
         plateText: box.plateText,
         confidenceMean: confMean,

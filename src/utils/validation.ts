@@ -43,6 +43,8 @@ export function calculateTextSimilarity(text1: string, text2: string): number {
 
   const distance = levenshteinDistance(normText1, normText2)
   const maxLength = Math.max(normText1.length, normText2.length)
+  // Both are blank once normalized: identical, and 0 / 0 would be NaN
+  if (maxLength === 0) return 1.0
 
   return 1 - distance / maxLength
 }

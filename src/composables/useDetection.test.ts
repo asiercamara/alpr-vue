@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { isReactive } from 'vue'
 
 let capturedWorkerInstance: {
   onmessage: ((event: MessageEvent) => void) | null
@@ -61,9 +62,8 @@ vi.mock('@/utils/feedback', () => ({
 }))
 
 function simulateWorkerMessage(data: unknown) {
-  if (capturedWorkerInstance?.onmessage) {
-    capturedWorkerInstance.onmessage({ data } as MessageEvent)
-  }
+  if (!capturedWorkerInstance?.onmessage) throw new Error('The worker was never created')
+  capturedWorkerInstance.onmessage({ data } as MessageEvent)
 }
 
 describe('useDetection', () => {
@@ -143,6 +143,31 @@ describe('useDetection', () => {
       consoleSpy.mockRestore()
 
       expect(detection.isProcessing.value).toBe(false)
+    })
+
+    it('ignores messages that match no known shape', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const detection = useDetection()
+      const callback = vi.fn()
+      detection.onBoxes(callback)
+      detection.isProcessing.value = true
+
+      simulateWorkerMessage(null)
+      simulateWorkerMessage({ unexpected: true })
+
+      expect(detection.isProcessing.value).toBe(true)
+      expect(detection.modelReady.value).toBe(false)
+      expect(callback).not.toHaveBeenCalled()
+    })
+
+    it('reuses a single worker across useDetection calls', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      useDetection()
+      const firstWorker = capturedWorkerInstance
+
+      useDetection()
+
+      expect(capturedWorkerInstance).toBe(firstWorker)
     })
 
     it('array message sets isProcessing false and invokes onBoxes callbacks', async () => {
@@ -297,7 +322,7 @@ describe('useDetection', () => {
 
       detection.drawBoxesAndUpdate(canvas, [makeBox()])
 
-      expect(store.plates.length).toBeGreaterThan(0)
+      expect(store.plates).toHaveLength(1)
       expect(mockCtx.strokeRect).toHaveBeenCalled()
     })
 
@@ -505,6 +530,47 @@ describe('useDetection', () => {
       expect(store.plates.length).toBe(1)
       expect(store.plates[0].text).toBe('AB1234')
       expect(store.plates[0].confidence).toBeCloseTo(0.95, 1)
+    })
+
+    it('keeps the higher-confidence box when it arrives first', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const highConfBox = makeBox({
+        plateText: { text: 'AB1234', confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.95] },
+        x1: 10,
+      })
+      const lowConfBox = makeBox({
+        plateText: { text: 'AB1234', confidence: [0.7, 0.7, 0.7, 0.7, 0.7, 0.7] },
+        x1: 200,
+      })
+
+      detection.drawBoxesAndUpdate(canvas, [highConfBox, lowConfBox])
+
+      expect(store.plates).toHaveLength(1)
+      expect(store.plates[0].confidence).toBeCloseTo(0.95, 2)
+    })
+
+    it('stores the cropped image without making it reactive', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+      const croppedImage = { width: 10, height: 5, close: vi.fn() }
+
+      detection.drawBoxesAndUpdate(canvas, [makeBox({ croppedImage })])
+
+      expect(store.plates).toHaveLength(1)
+      expect(isReactive(store.plates[0].croppedImage)).toBe(false)
+      expect(store.plates[0].croppedImage).toBe(croppedImage)
     })
 
     it('does nothing when canvas has no context', async () => {
@@ -845,8 +911,28 @@ describe('useDetection', () => {
       vi.restoreAllMocks()
     })
 
-    it('selects longer text over shorter text in selectBestBoxes', async () => {
+    it('keeps the first box when two boxes with the same text tie on confidence', async () => {
       const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const first = makeBox({ x1: 10 })
+      const second = makeBox({ x1: 200 })
+
+      detection.drawBoxesAndUpdate(canvas, [first, second])
+
+      expect(store.plates).toHaveLength(1)
+      expect(store.plates[0].boundingBox?.x1).toBe(10)
+    })
+
+    it('does not store a too-short text next to a valid plate in the same frame', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
       const detection = useDetection()
       const canvas = document.createElement('canvas')
       canvas.width = 300
@@ -863,9 +949,8 @@ describe('useDetection', () => {
 
       detection.drawBoxesAndUpdate(canvas, [shortBox, longBox])
 
-      const { usePlateStore } = await import('@/stores/plateStore')
-      const store = usePlateStore()
-      expect(store.plates.length).toBe(1)
+      // Both survive selectBestBoxes (different texts); quality validation drops the short one
+      expect(store.plates.map((p) => p.text)).toEqual(['AB1234'])
     })
   })
 })

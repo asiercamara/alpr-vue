@@ -1,16 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { flushPromises } from '@vue/test-utils'
 
 const mockProcessFrame = vi.fn()
 const mockOnBoxes = vi.fn(() => vi.fn())
 const mockDrawBoxesAndUpdate = vi.fn()
 const mockResetProcessing = vi.fn()
 const mockSetMode = vi.fn()
+const mockModelReady = { value: true }
+const mockIsProcessing = { value: false }
 
 vi.mock('@/composables/useDetection', () => ({
   useDetection: () => ({
-    modelReady: { value: true },
-    isProcessing: { value: false },
+    modelReady: mockModelReady,
+    isProcessing: mockIsProcessing,
     processFrame: mockProcessFrame,
     onBoxes: mockOnBoxes,
     drawBoxesAndUpdate: mockDrawBoxesAndUpdate,
@@ -38,6 +41,8 @@ describe('useStaticMedia', () => {
     mockDrawBoxesAndUpdate.mockClear()
     mockResetProcessing.mockClear()
     mockSetMode.mockClear()
+    mockModelReady.value = true
+    mockIsProcessing.value = false
     rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => {
       return 1
     })
@@ -312,6 +317,91 @@ describe('useStaticMedia', () => {
       rafSpyReal.mockRestore()
       vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 1)
       vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
+    })
+
+    describe('frame gating', () => {
+      let rafCallback: FrameRequestCallback | null
+
+      async function startLoop(ctx: unknown) {
+        rafCallback = null
+        rafSpy.mockImplementation((cb) => {
+          rafCallback = cb
+          return 1
+        })
+        vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue({ close: vi.fn() }))
+
+        const media = useStaticMedia()
+        const video = document.createElement('video')
+        const canvas = document.createElement('canvas')
+        Object.defineProperty(video, 'readyState', { value: 2, configurable: true })
+        Object.defineProperty(video, 'ended', { value: false, configurable: true })
+        Object.defineProperty(video, 'videoWidth', { value: 100, configurable: true })
+        Object.defineProperty(video, 'videoHeight', { value: 100, configurable: true })
+        vi.spyOn(video, 'play').mockResolvedValue(undefined)
+        canvas.getContext = vi.fn().mockReturnValue(ctx) as never
+
+        media.processVideoStream(video, canvas)
+        await flushPromises()
+        expect(rafCallback).not.toBeNull()
+        return { video }
+      }
+
+      async function runTick() {
+        rafCallback!(0)
+        await flushPromises()
+      }
+
+      afterEach(() => {
+        vi.unstubAllGlobals()
+      })
+
+      it('sends the frame to the detector and draws it on the canvas', async () => {
+        const ctx = { drawImage: vi.fn() }
+        await startLoop(ctx)
+
+        await runTick()
+
+        expect(ctx.drawImage).toHaveBeenCalledTimes(1)
+        expect(mockProcessFrame).toHaveBeenCalledTimes(1)
+      })
+
+      it('neither draws nor sends a frame while the video has no data', async () => {
+        const ctx = { drawImage: vi.fn() }
+        const { video } = await startLoop(ctx)
+        Object.defineProperty(video, 'readyState', { value: 1, configurable: true })
+
+        await runTick()
+
+        expect(ctx.drawImage).not.toHaveBeenCalled()
+        expect(mockProcessFrame).not.toHaveBeenCalled()
+      })
+
+      it('still feeds the detector when the canvas has no context', async () => {
+        await startLoop(null)
+
+        await runTick()
+
+        expect(mockDrawBoxesAndUpdate).not.toHaveBeenCalled()
+        expect(mockProcessFrame).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not send a frame while the detector is busy', async () => {
+        await startLoop({ drawImage: vi.fn() })
+        mockIsProcessing.value = true
+
+        await runTick()
+
+        expect(mockProcessFrame).not.toHaveBeenCalled()
+      })
+
+      it('stops sending frames if the model stops being ready mid-loop', async () => {
+        await startLoop({ drawImage: vi.fn() })
+        mockModelReady.value = false
+
+        await runTick()
+
+        expect(mockProcessFrame).not.toHaveBeenCalled()
+      })
     })
 
     it('registers loadeddata listener when video not ready', () => {

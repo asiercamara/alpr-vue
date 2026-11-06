@@ -22,6 +22,8 @@ docs/.vitepress/cache
 
 # Testing
 coverage/
+reports/
+.stryker-tmp/
 __screenshots__/
 /cypress/videos/
 /cypress/screenshots/

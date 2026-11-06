@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import PlateModal from '@/components/ui/PlateModal.vue'
+import { i18n } from '@/i18n'
 
 const mockUpdatePlateText = vi.fn()
 const mockClipboardWriteText = vi.fn()
@@ -40,8 +41,13 @@ function makePlate(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PlateModal', () => {
+  afterEach(() => {
+    i18n.global.locale.value = 'es'
+  })
+
   beforeEach(() => {
-    mockUpdatePlateText.mockClear()
+    mockUpdatePlateText.mockReset()
+    mockUpdatePlateText.mockReturnValue(true)
     mockClipboardWriteText.mockClear()
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: mockClipboardWriteText },
@@ -101,12 +107,22 @@ describe('PlateModal', () => {
       props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
-    const closeBtn = wrapper.findAll('button').find((b) => b.text().includes('Cerrar'))
-    if (closeBtn) {
-      await closeBtn.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([null])
-    }
+    await wrapper.get('button[aria-label="Cerrar"]').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
+  })
+
+  it('labels the close button in the active locale', async () => {
+    const wrapper = mount(PlateModal, {
+      props: { modelValue: makePlate() },
+      global: { stubs: globalStubs },
+    })
+    expect(wrapper.find('button[aria-label="Cerrar"]').exists()).toBe(true)
+
+    i18n.global.locale.value = 'en'
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('button[aria-label="Close"]').exists()).toBe(true)
   })
 
   it('emits update:modelValue null when backdrop is clicked', async () => {
@@ -114,12 +130,9 @@ describe('PlateModal', () => {
       props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
-    const backdrop = wrapper.find('.absolute.inset-0')
-    if (backdrop.exists()) {
-      await backdrop.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([null])
-    }
+    await wrapper.get('.absolute.inset-0').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
   })
 
   it('draws croppedImage on canvas when available', async () => {
@@ -139,6 +152,21 @@ describe('PlateModal', () => {
     await wrapper.vm.$nextTick()
 
     expect(mockDrawImage).toHaveBeenCalledWith(mockBitmap, 0, 0)
+  })
+
+  it('leaves the canvas untouched when no 2d context is available', async () => {
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as any
+
+    const wrapper = mount(PlateModal, {
+      props: { modelValue: makePlate({ croppedImage: { width: 200, height: 100 } }) },
+      global: { stubs: globalStubs },
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    // jsdom default canvas size: it would be 200x100 had the image been drawn
+    const canvas = wrapper.get('canvas').element as HTMLCanvasElement
+    expect([canvas.width, canvas.height]).toEqual([300, 150])
   })
 
   it('does not draw on canvas when croppedImage is null', async () => {
@@ -165,11 +193,10 @@ describe('PlateModal', () => {
       expect(wrapper.find('input').exists()).toBe(false)
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-        expect(wrapper.find('input').exists()).toBe(true)
-        expect((wrapper.find('input').element as HTMLInputElement).value).toBe('ABC123')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
+      expect(wrapper.find('input').exists()).toBe(true)
+      expect((wrapper.find('input').element as HTMLInputElement).value).toBe('ABC123')
     })
 
     it('saves edit when save button is clicked', async () => {
@@ -179,19 +206,67 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
 
       const input = wrapper.find('input')
       await input.setValue('XYZ789')
 
       const saveBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Guardar')
-      if (saveBtn) {
-        await saveBtn.trigger('click')
-        expect(mockUpdatePlateText).toHaveBeenCalledWith('plate_test', 'XYZ789')
-        expect(wrapper.find('input').exists()).toBe(false)
-      }
+      expect(saveBtn).toBeDefined()
+      await saveBtn!.trigger('click')
+      expect(mockUpdatePlateText).toHaveBeenCalledWith('plate_test', 'XYZ789')
+      expect(wrapper.find('input').exists()).toBe(false)
+    })
+
+    it('shows and copies the saved text without reopening the modal', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Editar')!
+        .trigger('click')
+      await wrapper.find('input').setValue('  XYZ789 ')
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Guardar')!
+        .trigger('click')
+
+      expect(wrapper.find('.plate-text').text()).toBe('XYZ789')
+      expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([
+        expect.objectContaining({
+          id: 'plate_test',
+          text: 'XYZ789',
+          plateText: expect.objectContaining({ text: 'XYZ789' }),
+        }),
+      ])
+
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Copiar')!
+        .trigger('click')
+      expect(mockClipboardWriteText).toHaveBeenCalledWith('XYZ789')
+    })
+
+    it('keeps the old text when the store does not know the plate', async () => {
+      mockUpdatePlateText.mockReturnValue(false)
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Editar')!
+        .trigger('click')
+      await wrapper.find('input').setValue('XYZ789')
+      await wrapper
+        .findAll('button')
+        .find((b) => b.attributes('title') === 'Guardar')!
+        .trigger('click')
+
+      expect(wrapper.find('.plate-text').text()).toBe('ABC123')
     })
 
     it('cancels edit when cancel button is clicked', async () => {
@@ -201,17 +276,15 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
       expect(wrapper.find('input').exists()).toBe(true)
 
       const cancelBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Cancelar')
-      if (cancelBtn) {
-        await cancelBtn.trigger('click')
-        expect(wrapper.find('input').exists()).toBe(false)
-        expect(mockUpdatePlateText).not.toHaveBeenCalled()
-      }
+      expect(cancelBtn).toBeDefined()
+      await cancelBtn!.trigger('click')
+      expect(wrapper.find('input').exists()).toBe(false)
+      expect(mockUpdatePlateText).not.toHaveBeenCalled()
     })
 
     it('saves edit on Enter key', async () => {
@@ -221,9 +294,8 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
 
       const input = wrapper.find('input')
       await input.setValue('NEW123')
@@ -239,9 +311,8 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
       expect(wrapper.find('input').exists()).toBe(true)
 
       await wrapper.find('input').trigger('keydown.escape')
@@ -255,15 +326,82 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
 
       const input = wrapper.find('input')
       await input.setValue('   ')
       await input.trigger('keydown.enter')
 
       expect(mockUpdatePlateText).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('edit mode when the plate changes', () => {
+    const plateB = () =>
+      makePlate({
+        id: 'plate_other',
+        text: 'XYZ789',
+        plateText: { text: 'XYZ789', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+      })
+
+    const startEditing = async (wrapper: ReturnType<typeof mount>) => {
+      const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
+      await editBtn!.trigger('click')
+      await wrapper.find('input').setValue('UNSAVED1')
+    }
+
+    it('leaves edit mode and shows the new plate when another one is selected', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+
+      await wrapper.setProps({ modelValue: plateB() })
+
+      expect(wrapper.find('input').exists()).toBe(false)
+      expect(wrapper.find('.plate-text').text()).toBe('XYZ789')
+    })
+
+    it('offers no way to save the unsaved text over the newly selected plate', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+
+      await wrapper.setProps({ modelValue: plateB() })
+
+      expect(wrapper.findAll('button').some((b) => b.attributes('title') === 'Guardar')).toBe(false)
+      expect(mockUpdatePlateText).not.toHaveBeenCalled()
+    })
+
+    it('does not resume the edit when the modal is closed and opened again', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+
+      await wrapper.setProps({ modelValue: null })
+      await wrapper.setProps({ modelValue: makePlate() })
+
+      expect(wrapper.find('input').exists()).toBe(false)
+    })
+
+    it('starts the next edit from the text of the plate that is open', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+      await wrapper.setProps({ modelValue: plateB() })
+
+      const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
+      await editBtn!.trigger('click')
+
+      expect((wrapper.find('input').element as HTMLInputElement).value).toBe('XYZ789')
     })
   })
 
@@ -275,10 +413,9 @@ describe('PlateModal', () => {
       })
 
       const copyBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Copiar')
-      if (copyBtn) {
-        await copyBtn.trigger('click')
-        expect(mockClipboardWriteText).toHaveBeenCalledWith('ABC123')
-      }
+      expect(copyBtn).toBeDefined()
+      await copyBtn!.trigger('click')
+      expect(mockClipboardWriteText).toHaveBeenCalledWith('ABC123')
     })
   })
 
