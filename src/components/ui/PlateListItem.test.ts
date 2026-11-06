@@ -87,7 +87,7 @@ describe('PlateListItem', () => {
       },
     })
     await wrapper.trigger('click')
-    expect(wrapper.emitted('view-details')).toBeTruthy()
+    expect(wrapper.emitted('view-details')).toHaveLength(1)
   })
 
   it('renders ConfidenceRing with correct value', () => {
