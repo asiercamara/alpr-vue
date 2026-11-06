@@ -70,11 +70,9 @@ describe('SampleGallery', () => {
     const imageItems = TEST_MEDIA.filter((m) => m.type === 'image')
     const buttons = wrapper.findAll('button').filter((b) => b.text().includes('IMG'))
 
-    if (buttons.length > 0) {
-      await buttons[0].trigger('click')
-      expect(wrapper.emitted('select')).toBeTruthy()
-      expect(wrapper.emitted('select')![0]).toEqual([imageItems[0]])
-    }
+    expect(buttons.length).toBeGreaterThan(0)
+    await buttons[0].trigger('click')
+    expect(wrapper.emitted('select')).toEqual([[imageItems[0]]])
   })
 
   it('emits select event with correct item when video is clicked', async () => {
@@ -82,10 +80,8 @@ describe('SampleGallery', () => {
     const videoItems = TEST_MEDIA.filter((m) => m.type === 'video')
     const buttons = wrapper.findAll('button').filter((b) => b.text().includes('VÍD'))
 
-    if (buttons.length > 0) {
-      await buttons[0].trigger('click')
-      expect(wrapper.emitted('select')).toBeTruthy()
-      expect(wrapper.emitted('select')![0]).toEqual([videoItems[0]])
-    }
+    expect(buttons.length).toBeGreaterThan(0)
+    await buttons[0].trigger('click')
+    expect(wrapper.emitted('select')).toEqual([[videoItems[0]]])
   })
 })
