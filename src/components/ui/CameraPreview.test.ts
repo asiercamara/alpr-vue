@@ -439,7 +439,21 @@ describe('CameraPreview', () => {
     mockZoomLevel.value = 1
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
     const zoomOutBtn = wrapper.find('button[title="Alejar"]')
-    expect(zoomOutBtn.attributes('disabled')).toBeDefined()
+    expect((zoomOutBtn.element as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('keeps both zoom buttons enabled between the limits', () => {
+    mockIsCameraActive.value = true
+    mockAppState.isCameraActive = true
+    mockZoomLevel.value = 2
+    const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
+
+    expect((wrapper.get('button[title="Alejar"]').element as HTMLButtonElement).disabled).toBe(
+      false,
+    )
+    expect((wrapper.get('button[title="Acercar"]').element as HTMLButtonElement).disabled).toBe(
+      false,
+    )
   })
 
   it('disables zoom in button when zoom is at maximum', () => {
@@ -448,7 +462,7 @@ describe('CameraPreview', () => {
     mockZoomLevel.value = 5
     const wrapper = mount(CameraPreview, { global: { stubs: globalStubs } })
     const zoomInBtn = wrapper.find('button[title="Acercar"]')
-    expect(zoomInBtn.attributes('disabled')).toBeDefined()
+    expect((zoomInBtn.element as HTMLButtonElement).disabled).toBe(true)
   })
 
   it('shows zoom level indicator when zoomed in', () => {
