@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateTextResult } from '@/types/detection'
@@ -51,7 +51,7 @@ describe('plateStore', () => {
 
     it('rejects duplicate ids', () => {
       store.addPlate(makePlate({ id: 'p1' }))
-      store.addPlate(makePlate({ id: 'p1' }))
+      expect(store.addPlate(makePlate({ id: 'p1' }))).toBe(false)
       expect(store.plates).toHaveLength(1)
     })
 
@@ -587,6 +587,135 @@ describe('plateStore', () => {
       const groupKey = Object.keys(store.plateGroups)[0]
       const group = store.plateGroups[groupKey]
       expect(group.confidenceMean).toBe(0.85)
+    })
+  })
+
+  describe('rule boundaries', () => {
+    const NORMAL = { text: 'ABC123', confidence: [0.6, 0.6, 0.6, 0.6, 0.6, 0.6] }
+    const at = (now: number) => vi.spyOn(Date, 'now').mockReturnValue(now)
+
+    beforeEach(() => {
+      store.setMode('camera')
+    })
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('records how many frames confirmed the plate', () => {
+      const now = Date.now()
+      at(now)
+      store.addPlate(makePlate({ id: 'a', confidence: 0.6, plateText: NORMAL }))
+      at(now + 1000)
+      store.addPlate(makePlate({ id: 'b', confidence: 0.6, plateText: NORMAL }))
+      at(now + 3000)
+      expect(store.addPlate(makePlate({ id: 'c', confidence: 0.6, plateText: NORMAL }))).toBe(true)
+
+      expect(store.plates[0].occurrences).toBe(3)
+      expect(store.plates[0].confirmed).toBe(true)
+    })
+
+    it('keeps the window open for a gap of exactly 5 s and resets it after that', () => {
+      const now = Date.now()
+      at(now)
+      store.addPlate(makePlate({ id: 'a', confidence: 0.6, plateText: NORMAL }))
+      at(now + 5000)
+      expect(store.addPlate(makePlate({ id: 'b', confidence: 0.6, plateText: NORMAL }))).toBe(true)
+
+      store.clearPlates()
+      store.clearConsecutiveDetections()
+      at(now + 10_000)
+      store.addPlate(makePlate({ id: 'c', text: 'XYZ789', confidence: 0.6, plateText: NORMAL }))
+      at(now + 15_001)
+      expect(
+        store.addPlate(makePlate({ id: 'd', text: 'XYZ789', confidence: 0.6, plateText: NORMAL })),
+      ).toBe(false)
+    })
+
+    it('fast-tracks a plate whose mean confidence is exactly 0.8', () => {
+      const now = Date.now()
+      const chars = { text: 'ABC123', confidence: [0.8, 0.8, 0.8, 0.8, 0.8, 0.8] }
+      at(now)
+      store.addPlate(makePlate({ id: 'a', confidence: 0.8, plateText: chars }))
+      at(now + 1000)
+
+      expect(store.addPlate(makePlate({ id: 'b', confidence: 0.8, plateText: chars }))).toBe(true)
+    })
+
+    it('fast-tracks a plate whose weakest character is exactly 0.5', () => {
+      const now = Date.now()
+      const chars = { text: 'ABC123', confidence: [0.5, 1, 1, 1, 1, 1] }
+      at(now)
+      store.addPlate(makePlate({ id: 'a', confidence: 0.9, plateText: chars }))
+      at(now + 1000)
+
+      expect(store.addPlate(makePlate({ id: 'b', confidence: 0.9, plateText: chars }))).toBe(true)
+    })
+
+    it('groups texts that are exactly 80 % similar and splits those below', () => {
+      store.setMode('upload')
+      store.addPlate(makePlate({ id: 'a', text: 'ABCDE' }))
+      store.addPlate(makePlate({ id: 'b', text: 'ABCDF' }))
+      expect(Object.keys(store.plateGroups)).toHaveLength(1)
+
+      store.addPlate(makePlate({ id: 'c', text: 'ABCFF' }))
+      expect(Object.keys(store.plateGroups)).toHaveLength(2)
+    })
+
+    it('orders groups by their most recent variant, not their oldest', () => {
+      store.setMode('upload')
+      store.addPlate(makePlate({ id: 'a1', text: 'AAA111', timestamp: new Date('2025-01-01') }))
+      store.addPlate(makePlate({ id: 'a2', text: 'AAA111', timestamp: new Date('2025-01-05') }))
+      store.addPlate(makePlate({ id: 'b1', text: 'ZZZ999', timestamp: new Date('2025-01-03') }))
+
+      expect(store.bestDetections.map((p) => p.text)).toEqual(['AAA111', 'ZZZ999'])
+    })
+
+    it('orders groups by recency whichever group was added first', () => {
+      store.setMode('upload')
+      store.addPlate(makePlate({ id: 'b1', text: 'ZZZ999', timestamp: new Date('2025-01-03') }))
+      store.addPlate(makePlate({ id: 'a1', text: 'AAA111', timestamp: new Date('2025-01-01') }))
+      store.addPlate(makePlate({ id: 'a2', text: 'AAA111', timestamp: new Date('2025-01-05') }))
+
+      expect(store.bestDetections.map((p) => p.text)).toEqual(['AAA111', 'ZZZ999'])
+    })
+
+    it('discards detections from an expired window when confirming', () => {
+      const now = Date.now()
+      at(now)
+      store.addPlate(makePlate({ id: 'old', confidence: 0.99, plateText: NORMAL }))
+      // More than 5 s later: the window restarts and the old detection no longer counts
+      at(now + 6000)
+      store.addPlate(makePlate({ id: 'new1', confidence: 0.6, plateText: NORMAL }))
+      at(now + 9000)
+      expect(store.addPlate(makePlate({ id: 'new2', confidence: 0.6, plateText: NORMAL }))).toBe(
+        true,
+      )
+
+      expect(store.plates[0].id).not.toBe('old')
+      expect(store.plates[0].occurrences).toBe(2)
+    })
+
+    it('keeps the group key on a tie between variants', () => {
+      store.setMode('upload')
+      store.addPlate(makePlate({ id: 'a1', text: 'ABC123' }))
+      store.addPlate(makePlate({ id: 'a2', text: 'ABC123' }))
+      store.addPlate(makePlate({ id: 'b1', text: 'ABC124' }))
+      store.addPlate(makePlate({ id: 'b2', text: 'ABC124' }))
+
+      expect(Object.keys(store.plateGroups)).toEqual(['ABC123'])
+    })
+
+    it('leaves other groups untouched when a plate is edited', () => {
+      store.setMode('upload')
+      store.addPlate(makePlate({ id: 'a', text: 'AAA111', confidence: 0.9 }))
+      store.addPlate(makePlate({ id: 'b', text: 'ZZZ999', confidence: 0.5 }))
+
+      store.updatePlateText('b', 'ZZZ998')
+
+      const first = store.plateGroups['AAA111']
+      expect(first.variantTexts).toEqual([{ text: 'AAA111', occurrences: 1 }])
+      expect(first.variants.map((v) => v.text)).toEqual(['AAA111'])
+      expect(first.confidenceMean).toBeCloseTo(0.9)
     })
   })
 })
