@@ -27,7 +27,6 @@ vi.mock('@/stores/plateStore', () => ({
     setMode: mockSetMode,
     plates: [],
     addPlate: vi.fn(),
-    removePlate: vi.fn(),
     clearPlates: vi.fn(),
     clearConsecutiveDetections: mockClearConsecutiveDetections,
     currentMode: null,

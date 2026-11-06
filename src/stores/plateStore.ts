@@ -337,10 +337,6 @@ export const usePlateStore = defineStore('plateStore', () => {
     return true
   }
 
-  function removePlate(plateId: string): void {
-    plates.value = plates.value.filter((p) => p.id !== plateId)
-  }
-
   function clearPlates(): void {
     plates.value = []
     plateGroups.value = {}
@@ -363,7 +359,6 @@ export const usePlateStore = defineStore('plateStore', () => {
     bestDetections,
     addPlate,
     updatePlateText,
-    removePlate,
     clearPlates,
     clearConsecutiveDetections,
     setMode,

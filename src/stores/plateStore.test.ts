@@ -447,20 +447,6 @@ describe('plateStore', () => {
     })
   })
 
-  describe('removePlate', () => {
-    it('removes plate by id', () => {
-      store.addPlate(makePlate({ id: 'p1' }))
-      store.removePlate('p1')
-      expect(store.plates).toHaveLength(0)
-    })
-
-    it('does nothing for non-existent id', () => {
-      store.addPlate(makePlate({ id: 'p1' }))
-      store.removePlate('p_nonexistent')
-      expect(store.plates).toHaveLength(1)
-    })
-  })
-
   describe('clearPlates', () => {
     it('clears all plates and groups', () => {
       store.addPlate(makePlate({ id: 'p1' }))
