@@ -62,9 +62,8 @@ vi.mock('@/utils/feedback', () => ({
 }))
 
 function simulateWorkerMessage(data: unknown) {
-  if (capturedWorkerInstance?.onmessage) {
-    capturedWorkerInstance.onmessage({ data } as MessageEvent)
-  }
+  if (!capturedWorkerInstance?.onmessage) throw new Error('The worker was never created')
+  capturedWorkerInstance.onmessage({ data } as MessageEvent)
 }
 
 describe('useDetection', () => {
@@ -323,7 +322,7 @@ describe('useDetection', () => {
 
       detection.drawBoxesAndUpdate(canvas, [makeBox()])
 
-      expect(store.plates.length).toBeGreaterThan(0)
+      expect(store.plates).toHaveLength(1)
       expect(mockCtx.strokeRect).toHaveBeenCalled()
     })
 
