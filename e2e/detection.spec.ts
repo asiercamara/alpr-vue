@@ -37,6 +37,8 @@ test('detects a plate in a sample image, edits it and exports CSV', async ({ pag
   await page.getByTitle('Edit').click()
   await page.locator('.modal-content input').fill('TEST123')
   await page.getByTitle('Save').click()
+  // The open modal shows the saved text right away, not only after reopening it
+  await expect(modal.locator('.plate-text').first()).toHaveText('TEST123')
   await modal.getByLabel('Close').click()
   await expect(page.getByText('Confidence per character')).toBeHidden()
   await expect(plate).toHaveText('TEST123')
