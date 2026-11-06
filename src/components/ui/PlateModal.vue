@@ -175,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watchEffect } from 'vue'
+import { ref, nextTick, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateRecord } from '@/types/detection'
@@ -192,6 +192,15 @@ const cropCanvas = ref<HTMLCanvasElement | null>(null)
 const isEditing = ref(false)
 const editText = ref('')
 const editInputRef = ref<HTMLInputElement | null>(null)
+
+// An unsaved edit belongs to the plate it was started on: drop it when the modal closes
+// or shows another plate, or its text could be saved over the wrong one
+watch(
+  () => plate.value?.id,
+  () => {
+    isEditing.value = false
+  },
+)
 
 watchEffect(() => {
   if (plate.value?.croppedImage && cropCanvas.value) {

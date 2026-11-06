@@ -286,6 +286,74 @@ describe('PlateModal', () => {
     })
   })
 
+  describe('edit mode when the plate changes', () => {
+    const plateB = () =>
+      makePlate({
+        id: 'plate_other',
+        text: 'XYZ789',
+        plateText: { text: 'XYZ789', confidence: [0.9, 0.9, 0.9, 0.9, 0.9, 0.9] },
+      })
+
+    const startEditing = async (wrapper: ReturnType<typeof mount>) => {
+      const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
+      await editBtn!.trigger('click')
+      await wrapper.find('input').setValue('UNSAVED1')
+    }
+
+    it('leaves edit mode and shows the new plate when another one is selected', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+
+      await wrapper.setProps({ modelValue: plateB() })
+
+      expect(wrapper.find('input').exists()).toBe(false)
+      expect(wrapper.find('.plate-text').text()).toBe('XYZ789')
+    })
+
+    it('offers no way to save the unsaved text over the newly selected plate', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+
+      await wrapper.setProps({ modelValue: plateB() })
+
+      expect(wrapper.findAll('button').some((b) => b.attributes('title') === 'Guardar')).toBe(false)
+      expect(mockUpdatePlateText).not.toHaveBeenCalled()
+    })
+
+    it('does not resume the edit when the modal is closed and opened again', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+
+      await wrapper.setProps({ modelValue: null })
+      await wrapper.setProps({ modelValue: makePlate() })
+
+      expect(wrapper.find('input').exists()).toBe(false)
+    })
+
+    it('starts the next edit from the text of the plate that is open', async () => {
+      const wrapper = mount(PlateModal, {
+        props: { modelValue: makePlate() },
+        global: { stubs: globalStubs },
+      })
+      await startEditing(wrapper)
+      await wrapper.setProps({ modelValue: plateB() })
+
+      const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
+      await editBtn!.trigger('click')
+
+      expect((wrapper.find('input').element as HTMLInputElement).value).toBe('XYZ789')
+    })
+  })
+
   describe('copy to clipboard', () => {
     it('calls clipboard API when copy button is clicked', async () => {
       const wrapper = mount(PlateModal, {
