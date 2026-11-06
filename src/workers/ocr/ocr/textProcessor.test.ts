@@ -113,9 +113,9 @@ describe('postprocessOutput', () => {
     const output = makeModelOutput(MAX_SLOTS, ALPHABET.length, winnerIndices)
     const result = postprocessOutput(output, config, true) as { text: string; confidence: number[] }
 
+    expect(result.confidence.length).toBeGreaterThan(0)
     for (const conf of result.confidence) {
-      expect(conf).toBeGreaterThanOrEqual(0)
-      expect(conf).toBeLessThanOrEqual(1)
+      expect(conf).toBeCloseTo(0.9, 5)
     }
   })
 
