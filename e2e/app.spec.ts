@@ -121,3 +121,37 @@ test.describe('layout', () => {
     expect(columns).toBe(1)
   })
 })
+
+test.describe('reduced motion', () => {
+  test('keeps transitions when the user has no preference', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    await expect(page.getByText('No detections')).toBeVisible()
+
+    const duration = await page.evaluate(() => {
+      const el = document.querySelector('.btn-primary, .btn-ghost, [class*="transition"]')!
+      return parseFloat(getComputedStyle(el).transitionDuration) * 1000
+    })
+    expect(duration).toBeGreaterThan(1)
+  })
+
+  test('disables transitions and animations when the user asks to reduce motion', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.goto('/')
+    await expect(page.getByText('No detections')).toBeVisible()
+
+    const longest = await page.evaluate(() => {
+      let max = 0
+      for (const el of document.querySelectorAll('*')) {
+        const style = getComputedStyle(el)
+        for (const value of [style.transitionDuration, style.animationDuration]) {
+          for (const part of value.split(',')) max = Math.max(max, parseFloat(part) * 1000)
+        }
+      }
+      return max
+    })
+    expect(longest).toBeLessThan(1)
+  })
+})
