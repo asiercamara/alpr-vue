@@ -12,3 +12,5 @@ docs/vtdoc-merged
 playwright-report
 test-results
 skills-lock.json
+reports
+.stryker-tmp

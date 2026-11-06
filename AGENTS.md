@@ -82,7 +82,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Type check: `pnpm typecheck` (app, workers and e2e)
 - Unused code and dependencies: `pnpm knip`
 - End-to-end tests (Playwright, app + docs): `pnpm test:e2e` (needs `pnpm build:all` first)
-- Quality gates: `pnpm check` (typecheck, lint, format, tests, knip, build) and `pnpm check:all` (adds coverage thresholds, e2e and the audit of every dependency)
+- Mutation tests (Stryker): `pnpm test:mutation`. It runs the unit and property tests once per mutant over the plate store and the pure logic listed in `stryker.config.mjs`, so it takes minutes and is **not** part of `pnpm check:all`. Run it after strengthening tests; the HTML report lands in `reports/mutation/`
+- Quality gates: `pnpm check` (typecheck, lint, format, tests, knip, build) and `pnpm check:all` (adds coverage thresholds, e2e and the audit of every dependency). The property tests (`*.property.test.ts`, fast-check) are plain vitest files, so both gates already run them
 
 **CI is light on purpose**: it runs audit (prod), lint, typecheck, knip, format check, coverage and the app + docs build (about 30 s). e2e runs locally with `pnpm check:all` before a release.
 
