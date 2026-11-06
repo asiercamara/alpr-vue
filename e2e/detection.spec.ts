@@ -54,3 +54,31 @@ test('detects a plate in a sample image, edits it and exports CSV', async ({ pag
   expect(csv.split('\n').length).toBeGreaterThan(1)
   expect(csv).toContain((await plate.innerText()).trim())
 })
+
+test('an unsaved edit is dropped when the plate modal is closed and opened again', async ({
+  page,
+}) => {
+  test.slow()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Or try a sample' }).click()
+  await page.getByRole('button', { name: /Kia Stinger/ }).click()
+
+  const plate = page.locator('.plate-text').first()
+  await expect(plate).toBeVisible({ timeout: 90_000 })
+  const detected = (await plate.innerText()).trim()
+  const card = page.locator('.card', { has: plate }).first()
+  const modal = page.locator('.modal-content')
+
+  await card.click()
+  await page.getByTitle('Edit').click()
+  await modal.locator('input').fill('UNSAVED1')
+  await modal.getByLabel('Close').click()
+  await expect(modal).toBeHidden()
+
+  await card.click()
+
+  await expect(modal.locator('input')).toHaveCount(0)
+  await expect(modal.locator('.plate-text').first()).toHaveText(detected)
+  await expect(page.getByTitle('Save')).toHaveCount(0)
+})
