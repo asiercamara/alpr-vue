@@ -101,12 +101,10 @@ describe('PlateModal', () => {
       props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
-    const closeBtn = wrapper.findAll('button').find((b) => b.text().includes('Cerrar'))
-    if (closeBtn) {
-      await closeBtn.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([null])
-    }
+    // The close button only has an icon, so it is found by its position in the card
+    await wrapper.get('button.top-4.right-4').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
   })
 
   it('emits update:modelValue null when backdrop is clicked', async () => {
@@ -114,12 +112,9 @@ describe('PlateModal', () => {
       props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
-    const backdrop = wrapper.find('.absolute.inset-0')
-    if (backdrop.exists()) {
-      await backdrop.trigger('click')
-      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-      expect(wrapper.emitted('update:modelValue')![0]).toEqual([null])
-    }
+    await wrapper.get('.absolute.inset-0').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
   })
 
   it('draws croppedImage on canvas when available', async () => {
@@ -139,6 +134,21 @@ describe('PlateModal', () => {
     await wrapper.vm.$nextTick()
 
     expect(mockDrawImage).toHaveBeenCalledWith(mockBitmap, 0, 0)
+  })
+
+  it('leaves the canvas untouched when no 2d context is available', async () => {
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as any
+
+    const wrapper = mount(PlateModal, {
+      props: { modelValue: makePlate({ croppedImage: { width: 200, height: 100 } }) },
+      global: { stubs: globalStubs },
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+
+    // jsdom default canvas size: it would be 200x100 had the image been drawn
+    const canvas = wrapper.get('canvas').element as HTMLCanvasElement
+    expect([canvas.width, canvas.height]).toEqual([300, 150])
   })
 
   it('does not draw on canvas when croppedImage is null', async () => {
@@ -165,11 +175,10 @@ describe('PlateModal', () => {
       expect(wrapper.find('input').exists()).toBe(false)
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-        expect(wrapper.find('input').exists()).toBe(true)
-        expect((wrapper.find('input').element as HTMLInputElement).value).toBe('ABC123')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
+      expect(wrapper.find('input').exists()).toBe(true)
+      expect((wrapper.find('input').element as HTMLInputElement).value).toBe('ABC123')
     })
 
     it('saves edit when save button is clicked', async () => {
@@ -179,19 +188,17 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
 
       const input = wrapper.find('input')
       await input.setValue('XYZ789')
 
       const saveBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Guardar')
-      if (saveBtn) {
-        await saveBtn.trigger('click')
-        expect(mockUpdatePlateText).toHaveBeenCalledWith('plate_test', 'XYZ789')
-        expect(wrapper.find('input').exists()).toBe(false)
-      }
+      expect(saveBtn).toBeDefined()
+      await saveBtn!.trigger('click')
+      expect(mockUpdatePlateText).toHaveBeenCalledWith('plate_test', 'XYZ789')
+      expect(wrapper.find('input').exists()).toBe(false)
     })
 
     it('cancels edit when cancel button is clicked', async () => {
@@ -201,17 +208,15 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
       expect(wrapper.find('input').exists()).toBe(true)
 
       const cancelBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Cancelar')
-      if (cancelBtn) {
-        await cancelBtn.trigger('click')
-        expect(wrapper.find('input').exists()).toBe(false)
-        expect(mockUpdatePlateText).not.toHaveBeenCalled()
-      }
+      expect(cancelBtn).toBeDefined()
+      await cancelBtn!.trigger('click')
+      expect(wrapper.find('input').exists()).toBe(false)
+      expect(mockUpdatePlateText).not.toHaveBeenCalled()
     })
 
     it('saves edit on Enter key', async () => {
@@ -221,9 +226,8 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
 
       const input = wrapper.find('input')
       await input.setValue('NEW123')
@@ -239,9 +243,8 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
       expect(wrapper.find('input').exists()).toBe(true)
 
       await wrapper.find('input').trigger('keydown.escape')
@@ -255,9 +258,8 @@ describe('PlateModal', () => {
       })
 
       const editBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Editar')
-      if (editBtn) {
-        await editBtn.trigger('click')
-      }
+      expect(editBtn).toBeDefined()
+      await editBtn!.trigger('click')
 
       const input = wrapper.find('input')
       await input.setValue('   ')
@@ -275,10 +277,9 @@ describe('PlateModal', () => {
       })
 
       const copyBtn = wrapper.findAll('button').find((b) => b.attributes('title') === 'Copiar')
-      if (copyBtn) {
-        await copyBtn.trigger('click')
-        expect(mockClipboardWriteText).toHaveBeenCalledWith('ABC123')
-      }
+      expect(copyBtn).toBeDefined()
+      await copyBtn!.trigger('click')
+      expect(mockClipboardWriteText).toHaveBeenCalledWith('ABC123')
     })
   })
 
