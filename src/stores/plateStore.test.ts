@@ -571,6 +571,26 @@ describe('plateStore', () => {
       expect(store.plateGroups['ABC123'].variantTexts).toEqual([{ text: 'ABC123', occurrences: 2 }])
     })
 
+    it('keeps the plates list and the group variants in sync after an edit', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+
+      store.updatePlateText('p1', 'ABC124')
+
+      const variant = store.plateGroups['ABC124'].variants[0]
+      expect(variant).toBe(store.plates[0])
+      expect(variant.text).toBe('ABC124')
+      expect(variant.plateText.text).toBe('ABC124')
+    })
+
+    it('still updates the plate when it does not belong to any group', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+      store.plateGroups = {}
+
+      expect(store.updatePlateText('p1', 'XYZ789')).toBe(true)
+      expect(store.plates[0].text).toBe('XYZ789')
+      expect(store.plateGroups).toEqual({})
+    })
+
     it('returns false when plate id does not exist', () => {
       const result = store.updatePlateText('nonexistent', 'XYZ')
       expect(result).toBe(false)
