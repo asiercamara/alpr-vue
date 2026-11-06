@@ -302,6 +302,10 @@ export const usePlateStore = defineStore('plateStore', () => {
    * Edits the display text of a plate record, keeping the `plates` array, group
    * `variantTexts`, and group `variants` all in sync.
    *
+   * Only the edited plate's occurrence moves from its old text to the new one in the
+   * group's `variantTexts`; the other plates sharing the old text keep counting for it.
+   * The group is found by the plate's id, since its key may differ from the plate's text.
+   *
    * @param plateId - ID of the plate to update.
    * @param newText - The corrected plate text.
    * @returns `true` if the plate was found and updated, `false` if not found.
@@ -314,33 +318,29 @@ export const usePlateStore = defineStore('plateStore', () => {
     plate.text = newText
     plate.plateText = { ...plate.plateText, text: newText }
 
-    const oldGroupKey = oldText
-    const group = plateGroups.value[oldGroupKey]
-    if (group) {
-      const variantIndex = group.variantTexts.findIndex((v) => v.text === oldText)
-      if (variantIndex >= 0) {
-        group.variantTexts[variantIndex].text = newText
-      }
-      const variantPlateIndex = group.variants.findIndex((v) => v.id === plateId)
-      if (variantPlateIndex >= 0) {
-        group.variants[variantPlateIndex] = {
-          ...group.variants[variantPlateIndex],
-          text: newText,
-          plateText: { ...group.variants[variantPlateIndex].plateText, text: newText },
-        }
-      }
-      group.confidenceMean = calculateGroupConfidence(group.variants)
-      updateMainVariant(oldGroupKey)
+    const groupKey = Object.keys(plateGroups.value).find((key) =>
+      plateGroups.value[key].variants.some((v) => v.id === plateId),
+    )
+    if (!groupKey) return true
+
+    const group = plateGroups.value[groupKey]
+
+    const oldVariant = group.variantTexts.find((v) => v.text === oldText)
+    if (oldVariant && --oldVariant.occurrences <= 0) {
+      group.variantTexts = group.variantTexts.filter((v) => v !== oldVariant)
+    }
+    const newVariant = group.variantTexts.find((v) => v.text === newText)
+    if (newVariant) {
+      newVariant.occurrences++
+    } else {
+      group.variantTexts.push({ text: newText, occurrences: 1 })
     }
 
-    const newGroupKey = Object.keys(plateGroups.value).find((key) => {
-      const existingGroup = plateGroups.value[key]
-      return existingGroup.variants.some((v) => v.id === plateId)
-    })
-    if (newGroupKey) {
-      const newGroup = plateGroups.value[newGroupKey]
-      newGroup.confidenceMean = calculateGroupConfidence(newGroup.variants)
-    }
+    group.variants = group.variants.map((v) =>
+      v.id === plateId ? { ...v, text: newText, plateText: { ...v.plateText, text: newText } } : v,
+    )
+    group.confidenceMean = calculateGroupConfidence(group.variants)
+    updateMainVariant(groupKey)
 
     return true
   }
