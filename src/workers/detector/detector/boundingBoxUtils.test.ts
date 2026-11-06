@@ -98,3 +98,13 @@ describe('nonMaxSuppression', () => {
     expect(result).toEqual([best, far])
   })
 })
+
+describe('nonMaxSuppression threshold', () => {
+  it('suppresses a box that overlaps by exactly 0.7 and keeps one that overlaps by less', () => {
+    // The small box lies inside the big one: IoU = small area / big area
+    const big = box(0, 0, 10, 10, 0.9)
+
+    expect(nonMaxSuppression([big, box(0, 0, 7, 10, 0.8)])).toEqual([big])
+    expect(nonMaxSuppression([big, box(0, 0, 6.9, 10, 0.8)])).toHaveLength(2)
+  })
+})
