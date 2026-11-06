@@ -16,6 +16,10 @@ window.HTMLMediaElement.prototype.load = vi.fn()
 window.HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined)
 window.HTMLMediaElement.prototype.pause = vi.fn()
 
+// jsdom logs "Not implemented" and returns null from getContext without the
+// canvas package — return null silently; tests that need a context override it
+HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null) as never
+
 globalThis.createImageBitmap = vi.fn().mockResolvedValue({
   width: 100,
   height: 100,
