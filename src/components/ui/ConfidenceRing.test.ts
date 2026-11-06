@@ -23,30 +23,24 @@ describe('ConfidenceRing', () => {
     expect(wrapper.text()).toContain('0')
   })
 
-  it('shows high confidence color for value >= 0.9', () => {
-    const wrapper = mount(ConfidenceRing, { props: { value: 0.95 } })
-    const fillCircle = wrapper.findAll('circle').find((c) => c.attributes('stroke-dasharray'))
-    expect(fillCircle).toBeDefined()
-  })
+  it.each([
+    [1, 'high'],
+    [0.9, 'high'],
+    [0.89, 'good'],
+    [0.75, 'good'],
+    [0.74, 'mid'],
+    [0.6, 'mid'],
+    [0.59, 'low'],
+    [0.45, 'low'],
+    [0.44, 'poor'],
+    [0, 'poor'],
+  ])('colours a value of %s as %s confidence', (value, level) => {
+    const wrapper = mount(ConfidenceRing, { props: { value } })
+    const arc = wrapper.findAll('circle').find((c) => c.attributes('stroke-dasharray'))
 
-  it('shows good confidence color for value >= 0.75', () => {
-    const wrapper = mount(ConfidenceRing, { props: { value: 0.8 } })
-    expect(wrapper.text()).toContain('80')
-  })
-
-  it('shows mid confidence color for value >= 0.6', () => {
-    const wrapper = mount(ConfidenceRing, { props: { value: 0.65 } })
-    expect(wrapper.text()).toContain('65')
-  })
-
-  it('shows low confidence color for value >= 0.45', () => {
-    const wrapper = mount(ConfidenceRing, { props: { value: 0.5 } })
-    expect(wrapper.text()).toContain('50')
-  })
-
-  it('shows poor confidence color for value < 0.45', () => {
-    const wrapper = mount(ConfidenceRing, { props: { value: 0.3 } })
-    expect(wrapper.text()).toContain('30')
+    expect(arc!.attributes('stroke')).toBe(`var(--color-conf-${level})`)
+    expect(wrapper.get('span').attributes('style')).toContain(`var(--color-conf-${level})`)
+    expect(wrapper.text()).toBe(String(Math.round(value * 100)))
   })
 
   it('updates when value prop changes', async () => {
