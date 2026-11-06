@@ -17,6 +17,7 @@
           <!-- Close button -->
           <button
             class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-surface-400 dark:text-surface-200 hover:text-surface-700 dark:hover:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors z-10"
+            :aria-label="t('modal.close')"
             @click="plate = null"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

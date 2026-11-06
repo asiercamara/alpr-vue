@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import PlateModal from '@/components/ui/PlateModal.vue'
+import { i18n } from '@/i18n'
 
 const mockUpdatePlateText = vi.fn()
 const mockClipboardWriteText = vi.fn()
@@ -101,10 +102,24 @@ describe('PlateModal', () => {
       props: { modelValue: makePlate() },
       global: { stubs: globalStubs },
     })
-    // The close button only has an icon, so it is found by its position in the card
-    await wrapper.get('button.top-4.right-4').trigger('click')
+    await wrapper.get('button[aria-label="Cerrar"]').trigger('click')
 
     expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
+  })
+
+  it('labels the close button in the active locale', async () => {
+    const wrapper = mount(PlateModal, {
+      props: { modelValue: makePlate() },
+      global: { stubs: globalStubs },
+    })
+    expect(wrapper.find('button[aria-label="Cerrar"]').exists()).toBe(true)
+
+    i18n.global.locale.value = 'en'
+    await wrapper.vm.$nextTick()
+    const labelEn = wrapper.find('button[aria-label="Close"]').exists()
+    i18n.global.locale.value = 'es'
+
+    expect(labelEn).toBe(true)
   })
 
   it('emits update:modelValue null when backdrop is clicked', async () => {
