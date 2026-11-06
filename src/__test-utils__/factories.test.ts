@@ -43,7 +43,7 @@ describe('test factories', () => {
     expect(box.confidence).toBe(0.9)
     expect(box.area).toBe(5000)
     expect(box.plateText.text).toBe('AB1234')
-    expect(box.croppedImage).toBeDefined()
+    expect(box.croppedImage).toMatchObject({ width: 100, height: 50 })
   })
 
   it('createMockDetectionBox respects overrides', () => {
@@ -55,11 +55,11 @@ describe('test factories', () => {
 
   it('createMockPlateRecord returns valid PlateRecord', () => {
     const record = createMockPlateRecord()
-    expect(record.id).toBeTruthy()
+    expect(record.id).toMatch(/^plate_test_/)
     expect(record.text).toBe('AB1234')
     expect(record.confidence).toBe(0.9)
     expect(record.croppedImage).toBeNull()
-    expect(record.boundingBox).toBeDefined()
+    expect(record.boundingBox).toEqual({ x1: 10, y1: 20, x2: 110, y2: 70 })
     expect(record.timestamp).toBeInstanceOf(Date)
   })
 
