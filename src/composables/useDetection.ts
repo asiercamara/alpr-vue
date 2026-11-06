@@ -8,6 +8,7 @@ import { useAppStore } from '@/stores/appStore'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { i18n } from '@/i18n'
 import { logger } from '@/utils/logger'
+import { meanConfidence } from '@/utils/confidence'
 import { evaluatePlateQuality } from '@/utils/validation'
 import { calculateTextSimilarity } from '@/utils/validation'
 import { notifyDetection } from '@/utils/feedback'
@@ -98,21 +99,18 @@ function getWorker(): Worker {
  * @returns Deduplicated array of best-quality boxes.
  */
 function selectBestBoxes(boxes: DetectionBox[], threshold: number): DetectionBox[] {
-  const meanConfidence = (box: DetectionBox): number => {
-    const conf = box.plateText.confidence
-    return conf.reduce((a, b) => a + b, 0) / conf.length
-  }
+  const boxMean = (box: DetectionBox): number => meanConfidence(box.plateText.confidence)
 
   const validBoxes = boxes.filter((box) => {
     if (!box.plateText?.confidence?.length) return false
-    return meanConfidence(box) >= threshold
+    return boxMean(box) >= threshold
   })
 
   const grouped = new Map<string, DetectionBox>()
   for (const box of validBoxes) {
     const key = box.plateText.text
     const existing = grouped.get(key)
-    if (!existing || meanConfidence(box) > meanConfidence(existing)) {
+    if (!existing || boxMean(box) > boxMean(existing)) {
       grouped.set(key, box)
     }
   }
@@ -204,8 +202,7 @@ export function useDetection(options?: UseDetectionOptions) {
     if (!bestBoxes.length) return false
 
     for (const box of bestBoxes) {
-      const conf = box.plateText.confidence
-      const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+      const confMean = meanConfidence(box.plateText.confidence)
 
       const { x1, y1, x2, y2 } = box
       ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
@@ -219,8 +216,7 @@ export function useDetection(options?: UseDetectionOptions) {
     }
 
     for (const box of bestBoxes) {
-      const conf = box.plateText.confidence
-      const confMean = conf.reduce((a, b) => a + b, 0) / conf.length
+      const confMean = meanConfidence(box.plateText.confidence)
       const quality = evaluatePlateQuality({
         plateText: box.plateText,
         confidenceMean: confMean,
