@@ -41,9 +41,10 @@ export default defineConfig({
       thresholds: { lines: 90, statements: 90, functions: 90, branches: 85 },
       exclude: [
         'src/tests/**',
+        'src/__test-utils__/**',
         'src/types/**',
         'src/vite-env.d.ts',
-        'src/main.js',
+        'src/main.ts',
         'src/App.vue',
         'src/components/icons/*.vue',
       ],
