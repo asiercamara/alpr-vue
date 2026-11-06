@@ -912,8 +912,28 @@ describe('useDetection', () => {
       vi.restoreAllMocks()
     })
 
-    it('selects longer text over shorter text in selectBestBoxes', async () => {
+    it('keeps the first box when two boxes with the same text tie on confidence', async () => {
       const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
+      const detection = useDetection()
+      const canvas = document.createElement('canvas')
+      canvas.width = 300
+      canvas.height = 150
+
+      const first = makeBox({ x1: 10 })
+      const second = makeBox({ x1: 200 })
+
+      detection.drawBoxesAndUpdate(canvas, [first, second])
+
+      expect(store.plates).toHaveLength(1)
+      expect(store.plates[0].boundingBox?.x1).toBe(10)
+    })
+
+    it('does not store a too-short text next to a valid plate in the same frame', async () => {
+      const { useDetection } = await import('@/composables/useDetection')
+      const { usePlateStore } = await import('@/stores/plateStore')
+      const store = usePlateStore()
       const detection = useDetection()
       const canvas = document.createElement('canvas')
       canvas.width = 300
@@ -930,9 +950,8 @@ describe('useDetection', () => {
 
       detection.drawBoxesAndUpdate(canvas, [shortBox, longBox])
 
-      const { usePlateStore } = await import('@/stores/plateStore')
-      const store = usePlateStore()
-      expect(store.plates.length).toBe(1)
+      // Both survive selectBestBoxes (different texts); quality validation drops the short one
+      expect(store.plates.map((p) => p.text)).toEqual(['AB1234'])
     })
   })
 })
