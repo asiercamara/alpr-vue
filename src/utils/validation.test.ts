@@ -80,8 +80,8 @@ describe('calculateTextSimilarity', () => {
 
   it('returns partial similarity for partially matching texts', () => {
     const result = calculateTextSimilarity('1234ABC', '1234XYZ')
-    expect(result).toBeGreaterThan(0)
-    expect(result).toBeLessThan(1.0)
+    // 3 of 7 characters differ
+    expect(result).toBeCloseTo(4 / 7, 10)
   })
 
   it('handles empty strings', () => {
