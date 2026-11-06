@@ -184,6 +184,40 @@ describe('SettingsSheet', () => {
     expect(wrapper.emitted('update:modelValue')![0]).toEqual([false])
   })
 
+  it('emits update:modelValue false when the backdrop is clicked', async () => {
+    const wrapper = mountSheet()
+    await wrapper.get('.sheet-backdrop').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+  })
+
+  it('emits update:modelValue false when clicking the overlay outside the sheet', async () => {
+    const wrapper = mountSheet()
+    await wrapper.get('.fixed.inset-0').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+  })
+
+  it('does not close when clicking inside the sheet content', async () => {
+    const wrapper = mountSheet()
+    await wrapper.get('.sheet-content').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('resets sound and vibration when its reset button is clicked', async () => {
+    const settingsStore = useSettingsStore()
+    settingsStore.setFeedbackEnabled(false)
+
+    const wrapper = mountSheet()
+    const resetBtns = wrapper.findAll('.reset-btn')
+    expect(resetBtns).toHaveLength(1)
+    await resetBtns[0].trigger('click')
+
+    expect(settingsStore.feedbackEnabled).toBe(true)
+    expect(wrapper.findAll('.reset-btn')).toHaveLength(0)
+  })
+
   it('updates confidence threshold via slider', async () => {
     const wrapper = mountSheet()
     const settingsStore = useSettingsStore()
