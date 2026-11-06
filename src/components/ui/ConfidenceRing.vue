@@ -34,6 +34,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { confidenceColor } from '@/utils/confidence'
 
 interface Props {
   value?: number
@@ -47,11 +48,5 @@ const circumference = 2 * Math.PI * 15.9
 
 const pct = computed(() => Math.round(props.value * 100))
 
-const ringColor = computed(() => {
-  if (props.value >= 0.9) return 'var(--color-conf-high)'
-  if (props.value >= 0.75) return 'var(--color-conf-good)'
-  if (props.value >= 0.6) return 'var(--color-conf-mid)'
-  if (props.value >= 0.45) return 'var(--color-conf-low)'
-  return 'var(--color-conf-poor)'
-})
+const ringColor = computed(() => confidenceColor(props.value))
 </script>

@@ -127,7 +127,7 @@
                       class="absolute bottom-0 left-0 right-0 rounded-md transition-all duration-700"
                       :style="{
                         height: `${Math.max(8, conf * 100)}%`,
-                        backgroundColor: charColor(conf),
+                        backgroundColor: confidenceColor(conf),
                       }"
                     />
                   </div>
@@ -179,6 +179,7 @@ import { ref, nextTick, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePlateStore } from '@/stores/plateStore'
 import type { PlateRecord } from '@/types/detection'
+import { confidenceColor } from '@/utils/confidence'
 import ConfidenceRing from './ConfidenceRing.vue'
 import IconCopy from '@/components/icons/IconCopy.vue'
 import IconEdit from '@/components/icons/IconEdit.vue'
@@ -207,14 +208,6 @@ watchEffect(() => {
     ctx.drawImage(plate.value.croppedImage, 0, 0)
   }
 })
-
-function charColor(conf: number): string {
-  if (conf >= 0.9) return 'var(--color-conf-high)'
-  if (conf >= 0.75) return 'var(--color-conf-good)'
-  if (conf >= 0.6) return 'var(--color-conf-mid)'
-  if (conf >= 0.45) return 'var(--color-conf-low)'
-  return 'var(--color-conf-poor)'
-}
 
 function copyToClipboard() {
   if (plate.value) {
