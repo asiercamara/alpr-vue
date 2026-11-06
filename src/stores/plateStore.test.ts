@@ -61,7 +61,7 @@ describe('plateStore', () => {
         confidence: 0.8,
         plateText: { text: 'XYZ', confidence: [0.8] },
       })
-      expect(store.plates[0].id).toBeTruthy()
+      expect(store.plates[0].id).toMatch(/^plate_\d+_[a-z0-9]+$/)
     })
 
     it('returns false when not in camera mode', () => {
@@ -225,11 +225,8 @@ describe('plateStore', () => {
       const result = store.addPlate(makePlate({ id: 'p_late', text: 'ABC123' }))
       expect(result).toBe(false)
 
-      const consecutive = store.consecutiveDetections as any
-      const entry = consecutive['ABC123']
-      if (entry) {
-        expect(entry.count).toBeLessThan(10)
-      }
+      // The late detection opens a new window instead of adding to the old five
+      expect(store.consecutiveDetections['ABC123'].count).toBe(1)
 
       vi.restoreAllMocks()
     })
