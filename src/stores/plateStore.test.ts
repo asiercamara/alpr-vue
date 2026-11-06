@@ -527,7 +527,9 @@ describe('plateStore', () => {
         { text: 'ABC123', occurrences: 1 },
         { text: 'ABC124', occurrences: 1 },
       ])
-      expect(group.variants.map((v) => [v.id, v.text])).toEqual([
+      expect(
+        group.variants.map((v) => [v.id, v.text]).sort(([a], [b]) => a.localeCompare(b)),
+      ).toEqual([
         ['p1', 'ABC124'],
         ['p2', 'ABC123'],
       ])
@@ -555,6 +557,73 @@ describe('plateStore', () => {
       store.updatePlateText('p1', 'ABC123')
 
       expect(store.plateGroups['ABC123'].variantTexts).toEqual([{ text: 'ABC123', occurrences: 2 }])
+    })
+
+    describe('regrouping', () => {
+      it('moves a plate out of its group when the new text no longer resembles it', () => {
+        store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+        store.addPlate(makePlate({ id: 'p2', text: 'ABC123' }))
+
+        store.updatePlateText('p1', 'XYZ789')
+
+        expect(Object.keys(store.plateGroups).sort()).toEqual(['ABC123', 'XYZ789'])
+        const old = store.plateGroups['ABC123']
+        expect(old.totalOccurrences).toBe(1)
+        expect(old.variants.map((v) => v.id)).toEqual(['p2'])
+        expect(old.variantTexts).toEqual([{ text: 'ABC123', occurrences: 1 }])
+        const created = store.plateGroups['XYZ789']
+        expect(created.totalOccurrences).toBe(1)
+        expect(created.variants.map((v) => v.id)).toEqual(['p1'])
+        expect(created.variantTexts).toEqual([{ text: 'XYZ789', occurrences: 1 }])
+      })
+
+      it('joins another group when the new text resembles it, instead of duplicating the plate', () => {
+        store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+        store.addPlate(makePlate({ id: 'p2', text: 'XYZ789' }))
+
+        store.updatePlateText('p2', 'ABC124')
+
+        expect(Object.keys(store.plateGroups)).toEqual(['ABC123'])
+        const group = store.plateGroups['ABC123']
+        expect(group.totalOccurrences).toBe(2)
+        expect(group.variantTexts).toEqual([
+          { text: 'ABC123', occurrences: 1 },
+          { text: 'ABC124', occurrences: 1 },
+        ])
+        expect(store.bestDetections).toHaveLength(1)
+      })
+
+      it('replaces the group of a lone plate edited to an unrelated text', () => {
+        store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+
+        store.updatePlateText('p1', 'XYZ789')
+
+        expect(Object.keys(store.plateGroups)).toEqual(['XYZ789'])
+        expect(store.bestDetections.map((p) => p.text)).toEqual(['XYZ789'])
+      })
+
+      it('passes the group key on when the plate that held it leaves', () => {
+        store.addPlate(makePlate({ id: 'p1', text: 'ABC123' }))
+        store.addPlate(makePlate({ id: 'p2', text: 'ABC124' }))
+
+        store.updatePlateText('p1', 'XYZ789')
+
+        expect(Object.keys(store.plateGroups).sort()).toEqual(['ABC124', 'XYZ789'])
+        expect(store.plateGroups['ABC124'].mainText).toBe('ABC124')
+        expect(store.plateGroups['ABC124'].variantTexts).toEqual([
+          { text: 'ABC124', occurrences: 1 },
+        ])
+      })
+
+      it('recomputes the mean confidence of both groups', () => {
+        store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9 }))
+        store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.5 }))
+
+        store.updatePlateText('p1', 'XYZ789')
+
+        expect(store.plateGroups['ABC123'].confidenceMean).toBeCloseTo(0.5)
+        expect(store.plateGroups['XYZ789'].confidenceMean).toBeCloseTo(0.9)
+      })
     })
 
     it('keeps the plates list and the group variants in sync after an edit', () => {
