@@ -811,6 +811,21 @@ describe('plateStore', () => {
       expect(store.plateGroups['ABC124'].mainText).toBe('ABC124')
     })
 
+    it('merges two groups when a variant takes a key another group already uses', () => {
+      store.setMode('upload')
+      // AAAAAB and ABAAAA are two edits apart, so they start two groups. AAAAAA is one edit
+      // from both: it joins the first and, once it leads, takes the key the second one uses.
+      const texts = ['AAAAAB', 'ABAAAA', 'AAAAAA', 'AAAAAA', 'AAAAAA', 'AAAAAA']
+      texts.forEach((text, i) => store.addPlate(makePlate({ id: `p${i}`, text })))
+
+      const grouped = Object.values(store.plateGroups).flatMap((g) => g.variants.map((v) => v.id))
+      expect(grouped.sort()).toEqual(store.plates.map((p) => p.id).sort())
+      for (const [key, group] of Object.entries(store.plateGroups)) {
+        expect(group.mainText).toBe(key)
+        expect(group.totalOccurrences).toBe(group.variants.length)
+      }
+    })
+
     it('leaves other groups untouched when a plate is edited', () => {
       store.setMode('upload')
       store.addPlate(makePlate({ id: 'a', text: 'AAA111', confidence: 0.9 }))

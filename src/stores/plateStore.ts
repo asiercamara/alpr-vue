@@ -260,7 +260,8 @@ export const usePlateStore = defineStore('plateStore', () => {
    * the current key's occurrence count.
    *
    * When promotion happens: the old key is deleted and replaced with the new key,
-   * preserving all variants and variant texts.
+   * preserving all variants and variant texts. If another group already uses the new key,
+   * the two groups are merged into it, and the result is evaluated again.
    *
    * @param groupKey - The current key of the group to evaluate.
    */
@@ -278,6 +279,32 @@ export const usePlateStore = defineStore('plateStore', () => {
         (group.variantTexts.find((v) => v.text === groupKey)?.occurrences || 0)
     ) {
       const oldGroup = { ...plateGroups.value[groupKey] }
+      const taken = plateGroups.value[mainVariant.text]
+      delete plateGroups.value[groupKey]
+
+      if (taken) {
+        // Grouping compares a text with group keys only, so two groups can end up holding
+        // the same text. Assigning over the key would drop `taken` and its plates: fold the
+        // group into it instead.
+        const variants = [...taken.variants, ...oldGroup.variants]
+        const variantTexts = taken.variantTexts.map((v) => ({ ...v }))
+        for (const v of oldGroup.variantTexts) {
+          const same = variantTexts.find((t) => t.text === v.text)
+          if (same) same.occurrences += v.occurrences
+          else variantTexts.push({ ...v })
+        }
+        plateGroups.value[mainVariant.text] = {
+          mainText: mainVariant.text,
+          totalOccurrences: taken.totalOccurrences + oldGroup.totalOccurrences,
+          variants,
+          variantTexts,
+          confidenceMean: calculateGroupConfidence(variants),
+        }
+        // The merged counts can favour another text than the one that triggered the merge.
+        updateMainVariant(mainVariant.text)
+        return
+      }
+
       plateGroups.value[mainVariant.text] = {
         mainText: mainVariant.text,
         totalOccurrences: oldGroup.totalOccurrences,
@@ -285,7 +312,6 @@ export const usePlateStore = defineStore('plateStore', () => {
         variantTexts: oldGroup.variantTexts,
         confidenceMean: calculateGroupConfidence(oldGroup.variants),
       }
-      delete plateGroups.value[groupKey]
     }
   }
 
