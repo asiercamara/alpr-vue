@@ -189,6 +189,29 @@ describe('plateStore', () => {
       vi.restoreAllMocks()
     })
 
+    it('does not fast-track a high-mean plate when one character is below 0.5', () => {
+      store.setMode('camera')
+      const now = Date.now()
+      const weakChar = {
+        text: 'ABC123',
+        confidence: [0.95, 0.95, 0.95, 0.95, 0.95, 0.3],
+      }
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      store.addPlate(makePlate({ id: 'p1', confidence: 0.9, plateText: weakChar }))
+
+      // Fast confirmation time (1000 ms) has passed, but the weak char forces the normal one
+      vi.spyOn(Date, 'now').mockReturnValue(now + 1000)
+      expect(store.addPlate(makePlate({ id: 'p2', confidence: 0.9, plateText: weakChar }))).toBe(
+        false,
+      )
+
+      vi.spyOn(Date, 'now').mockReturnValue(now + 3000)
+      expect(store.addPlate(makePlate({ id: 'p3', confidence: 0.9, plateText: weakChar }))).toBe(
+        true,
+      )
+      vi.restoreAllMocks()
+    })
+
     it('resets consecutive counter after timeout in camera mode', () => {
       store.setMode('camera')
       const now = Date.now()
@@ -371,6 +394,26 @@ describe('plateStore', () => {
       expect(best).toHaveLength(1)
       expect(best[0].confidence).toBe(0.95)
     })
+
+    it('prefers a confirmed variant over a more confident unconfirmed one', () => {
+      // Upload mode: stored without being confirmed
+      store.addPlate(makePlate({ id: 'u1', text: 'AAA111', confidence: 0.95 }))
+
+      // Camera mode: confirmed after the normal confirmation time
+      store.setMode('camera')
+      const now = Date.now()
+      const lowChars = { text: 'AAA111', confidence: [0.6, 0.6, 0.6, 0.6, 0.6, 0.6] }
+      vi.spyOn(Date, 'now').mockReturnValue(now)
+      store.addPlate(makePlate({ id: 'c1', text: 'AAA111', confidence: 0.6, plateText: lowChars }))
+      vi.spyOn(Date, 'now').mockReturnValue(now + 3000)
+      store.addPlate(makePlate({ id: 'c2', text: 'AAA111', confidence: 0.6, plateText: lowChars }))
+      vi.restoreAllMocks()
+
+      const best = store.bestDetections
+      expect(best).toHaveLength(1)
+      expect(best[0].confirmed).toBe(true)
+      expect(best[0].confidence).toBe(0.6)
+    })
   })
 
   describe('updatePlateText', () => {
@@ -466,6 +509,22 @@ describe('plateStore', () => {
   })
 
   describe('updatePlateText edge cases', () => {
+    it('edits a variant whose group is keyed by a different text', () => {
+      store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9 }))
+      store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.8 }))
+      // Similar text: joins the ABC123 group as a variant instead of opening its own
+      store.addPlate(makePlate({ id: 'p3', text: 'ABC124', confidence: 0.7 }))
+      expect(Object.keys(store.plateGroups)).toEqual(['ABC123'])
+
+      expect(store.updatePlateText('p3', 'ABC125')).toBe(true)
+
+      expect(store.plates.find((p) => p.id === 'p3')?.text).toBe('ABC125')
+      expect(Object.keys(store.plateGroups)).toEqual(['ABC123'])
+      const group = store.plateGroups['ABC123']
+      expect(group.variants.find((v) => v.id === 'p3')?.text).toBe('ABC125')
+      expect(group.confidenceMean).toBeCloseTo((0.9 + 0.8 + 0.7) / 3)
+    })
+
     it('updates group variantTexts and confidenceMean when plate text changes', () => {
       store.addPlate(makePlate({ id: 'p1', text: 'ABC123', confidence: 0.9 }))
       store.addPlate(makePlate({ id: 'p2', text: 'ABC123', confidence: 0.8 }))
