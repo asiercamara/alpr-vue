@@ -99,10 +99,9 @@ describe('PlateList', () => {
     const wrapper = mountList()
 
     const clearBtn = wrapper.findAll('button').find((b) => b.text().includes('Limpiar'))
-    if (clearBtn) {
-      await clearBtn.trigger('click')
-      expect(plateStore.plates).toHaveLength(0)
-    }
+    expect(clearBtn).toBeDefined()
+    await clearBtn!.trigger('click')
+    expect(plateStore.plates).toHaveLength(0)
   })
 
   it('calls downloadCSV when export button is clicked', async () => {
@@ -111,10 +110,9 @@ describe('PlateList', () => {
 
     const { downloadCSV } = await import('@/utils/export')
     const exportBtn = wrapper.findAll('button').find((b) => b.text().includes('Exportar CSV'))
-    if (exportBtn) {
-      await exportBtn.trigger('click')
-      expect(downloadCSV).toHaveBeenCalled()
-    }
+    expect(exportBtn).toBeDefined()
+    await exportBtn!.trigger('click')
+    expect(downloadCSV).toHaveBeenCalled()
   })
 
   it('renders plates in most-recent-first order', () => {
@@ -162,9 +160,8 @@ describe('PlateList', () => {
 
     const { downloadCSV } = await import('@/utils/export')
     const exportBtn = wrapper.findAll('button').find((b) => b.text().includes('Exportar CSV'))
-    if (exportBtn) {
-      await exportBtn.trigger('click')
-      expect(downloadCSV).toHaveBeenCalledWith(plateStore.bestDetections)
-    }
+    expect(exportBtn).toBeDefined()
+    await exportBtn!.trigger('click')
+    expect(downloadCSV).toHaveBeenCalledWith(plateStore.bestDetections)
   })
 })
