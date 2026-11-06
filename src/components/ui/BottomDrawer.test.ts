@@ -118,12 +118,58 @@ describe('BottomDrawer', () => {
     expect(style).toContain('height: 80px')
   })
 
-  it('updates height on window resize', async () => {
+  it('snaps to full when dragged up past the half point', async () => {
     const wrapper = mountDrawer()
+    const root = wrapper.get('[style]')
+
+    await root.trigger('touchstart', { touches: [{ clientY: 700 }] })
+    await root.trigger('touchmove', { touches: [{ clientY: 100 }] }) // drag up 600px
+    await root.trigger('touchend')
+
+    // 80 + 600 = 680 → closest to full (812 * 0.88 = 714.56)
+    expect(root.attributes('style')).toContain(`height: ${Math.round(812 * 0.88)}px`)
+  })
+
+  it('follows the finger while dragging, without transition', async () => {
+    const wrapper = mountDrawer()
+    const root = wrapper.get('[style]')
+    await wrapper.get('.cursor-grab').trigger('click') // half = 406px
+
+    await root.trigger('touchstart', { touches: [{ clientY: 500 }] })
+    await root.trigger('touchmove', { touches: [{ clientY: 400 }] }) // drag up 100px
+
+    expect(root.attributes('style')).toContain('height: 506px')
+    expect(root.attributes('style')).toContain('transition: none')
+  })
+
+  it('ignores touchmove when no drag has started', async () => {
+    const wrapper = mountDrawer()
+    const root = wrapper.get('[style]')
+
+    await root.trigger('touchmove', { touches: [{ clientY: 100 }] })
+
+    expect(root.attributes('style')).toContain('height: 80px')
+  })
+
+  it('recomputes the snap height when the window is resized', async () => {
+    const wrapper = mountDrawer()
+    await wrapper.get('.cursor-grab').trigger('click') // half
+    expect(wrapper.get('[style]').attributes('style')).toContain('height: 406px')
+
     vi.stubGlobal('innerHeight', 900)
     window.dispatchEvent(new Event('resize'))
     await wrapper.vm.$nextTick()
-    expect(wrapper.text()).toBeTruthy()
-    vi.unstubAllGlobals()
+
+    expect(wrapper.get('[style]').attributes('style')).toContain('height: 450px')
+  })
+
+  it('stops listening to window resize once unmounted', () => {
+    const removeSpy = vi.spyOn(window, 'removeEventListener')
+    const wrapper = mountDrawer()
+
+    wrapper.unmount()
+
+    expect(removeSpy).toHaveBeenCalledWith('resize', expect.any(Function))
+    removeSpy.mockRestore()
   })
 })
